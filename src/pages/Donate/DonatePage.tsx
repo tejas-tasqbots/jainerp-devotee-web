@@ -1,0 +1,269 @@
+import { useState, useEffect } from 'react'
+import { Bell, Building2, Check, Heart, Search } from 'lucide-react'
+import { api, apiError, parsePaise } from '../../lib/api'
+import type { Temple } from '../../types'
+
+type Step = 'search' | 'form' | 'result'
+
+const CATEGORIES = [
+  { value: 'general', label: 'General' },
+  { value: 'annadaan', label: 'Annadaan' },
+  { value: 'nirman', label: 'Nirman' },
+  { value: 'gaushala', label: 'Gaushala' },
+  { value: 'event', label: 'Event' },
+  { value: 'other', label: 'Other' },
+]
+
+export function DonatePage() {
+  const [step, setStep] = useState<Step>('search')
+  const [query, setQuery] = useState('')
+  const [temples, setTemples] = useState<Temple[]>([])
+  const [searching, setSearching] = useState(false)
+  const [selectedTemple, setSelectedTemple] = useState<Temple | null>(null)
+
+  const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState('general')
+  const [is80g, setIs80g] = useState(false)
+  const [pan, setPan] = useState('')
+  const [remarks, setRemarks] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [result, setResult] = useState<any>(null)
+
+  useEffect(() => {
+    const t = setTimeout(() => { if (query.length >= 2) searchTemples() }, 400)
+    return () => clearTimeout(t)
+  }, [query])
+
+  async function searchTemples() {
+    setSearching(true)
+    try {
+      const { data } = await api.get('/temples/directory', { params: { q: query, limit: 10 } })
+      setTemples(data.data ?? [])
+    } catch {
+      setTemples([])
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  function selectTemple(temple: Temple) {
+    setSelectedTemple(temple)
+    setStep('form')
+  }
+
+  async function submit() {
+    const paise = parsePaise(amount)
+    if (paise < 100) { setError('Minimum donation is ₹1'); return }
+    if (is80g && !pan.trim()) { setError('PAN is required for 80G donation'); return }
+    setSubmitting(true); setError('')
+    try {
+      const { data } = await api.post('/me/donate', {
+        tenant_id: selectedTemple!.id,
+        category,
+        amount_paise: paise,
+        is_80g: is80g,
+        pan: is80g ? pan.toUpperCase() : undefined,
+        remarks,
+      })
+      setResult(data.data)
+      setStep('result')
+    } catch (e) {
+      setError(apiError(e))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <div className="page-header">
+        <h1 className="page-title">
+          {step === 'search' ? 'Donate to Temple' : step === 'form' ? selectedTemple?.name : 'Donation Created'}
+        </h1>
+        {step !== 'search' && (
+          <button
+            onClick={() => { setStep('search'); setSelectedTemple(null); setResult(null); setError('') }}
+            className="text-xs text-slate-500 hover:text-slate-700 underline"
+          >
+            Change
+          </button>
+        )}
+      </div>
+
+      <div className="p-4">
+        {/* Step 1: Search temple */}
+        {step === 'search' && (
+          <div className="space-y-4">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search temple by name or city..."
+                className="form-input pl-9"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {searching && (
+              <div className="text-center py-4 text-slate-400 text-sm">Searching...</div>
+            )}
+            {!searching && temples.length > 0 && (
+              <div className="space-y-2">
+                {temples.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => selectTemple(t)}
+                    className="w-full card p-4 text-left hover:border-brand-red transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <Building2 size={18} className="text-brand-red" />
+                      </span>
+                      <div>
+                        <p className="font-semibold text-slate-800 text-sm">{t.name}</p>
+                        <p className="text-xs text-slate-400">{t.city}, {t.state}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {!searching && query.length >= 2 && temples.length === 0 && (
+              <p className="text-center text-slate-400 text-sm py-4">No temples found</p>
+            )}
+          </div>
+        )}
+
+        {/* Step 2: Donation form */}
+        {step === 'form' && selectedTemple && (
+          <div className="space-y-4">
+            <div className="card p-3 bg-red-50 border-red-200">
+              <div className="flex items-center gap-2">
+                <Building2 size={16} className="text-brand-red" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{selectedTemple.name}</p>
+                  <p className="text-xs text-slate-500">{selectedTemple.city}, {selectedTemple.state}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="form-label">Amount (₹) *</label>
+              <input
+                type="number"
+                className="form-input"
+                placeholder="0"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                min={1}
+              />
+              <div className="flex gap-2 mt-2">
+                {[51, 101, 251, 501, 1001].map(a => (
+                  <button
+                    key={a}
+                    onClick={() => setAmount(String(a))}
+                    className={`px-2 py-1 rounded-md text-xs font-medium border transition-colors ${
+                      amount === String(a)
+                        ? 'bg-brand-red text-white border-brand-red'
+                        : 'border-slate-200 text-slate-600 hover:border-brand-red'
+                    }`}
+                  >
+                    ₹{a}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="form-label">Category</label>
+              <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
+                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3 card p-3">
+              <input
+                type="checkbox"
+                id="is80g"
+                checked={is80g}
+                onChange={e => setIs80g(e.target.checked)}
+                className="w-4 h-4 rounded accent-brand-red"
+              />
+              <label htmlFor="is80g" className="text-sm text-slate-700 cursor-pointer">
+                Claim 80G tax exemption
+              </label>
+            </div>
+
+            {is80g && (
+              <div>
+                <label className="form-label">PAN Number *</label>
+                <input
+                  type="text"
+                  className="form-input uppercase"
+                  placeholder="ABCDE1234F"
+                  maxLength={10}
+                  value={pan}
+                  onChange={e => setPan(e.target.value.toUpperCase())}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="form-label">Remarks (optional)</label>
+              <textarea
+                className="form-textarea"
+                rows={2}
+                placeholder="In memory of... / For the occasion of..."
+                value={remarks}
+                onChange={e => setRemarks(e.target.value)}
+              />
+            </div>
+
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+
+            <button
+              onClick={submit}
+              disabled={submitting || !amount}
+              className="btn-primary w-full justify-center py-3 text-base"
+            >
+              <Heart size={16} />
+              {submitting ? 'Processing...' : `Donate ₹${amount || 0}`}
+            </button>
+          </div>
+        )}
+
+        {/* Step 3: Result */}
+        {step === 'result' && result && (
+          <div className="text-center py-8 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+              <Check size={32} className="text-green-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800">Donation Order Created!</h2>
+            <p className="text-sm text-slate-500">Complete the payment to finalize your donation</p>
+            <div className="card p-4 text-left space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Order ID</span>
+                <span className="font-mono text-slate-700">{result.razorpay_order_id}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Temple</span>
+                <span className="font-medium">{selectedTemple?.name}</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400">
+              In dev mode the payment is simulated. In production, Razorpay checkout will open here.
+            </p>
+            <button
+              onClick={() => { setStep('search'); setSelectedTemple(null); setResult(null); setAmount('') }}
+              className="btn-primary mx-auto"
+            >
+              Donate Again
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
