@@ -8,8 +8,11 @@ export interface Transaction {
   fy: string
   is_80g_eligible: boolean
   status: string
-  receipt_url: string | null
-  source: 'global_ledger' | 'live_fetch'
+  receipt_url?: string | null
+  source_table?: string | null
+  source_row_id?: string | null
+  receipt_available?: boolean
+  unsynced?: boolean
 }
 
 export interface TransactionSummary {

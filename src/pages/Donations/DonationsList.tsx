@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Download, IndianRupee } from 'lucide-react'
+import { Bell, FileText, IndianRupee, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, apiError, currentFY, fmtPaise } from '../../lib/api'
 import type { Transaction, TransactionSummary } from '../../types'
 
 const TYPE_LABELS: Record<string, string> = {
-  donation: 'Donation', seva: 'Seva', room: 'Room', boli: 'Boli'
+  donation: 'Donation', seva: 'Seva', room: 'Room', boli: 'Boli',
 }
 
 export function DonationsList() {
@@ -19,6 +19,7 @@ export function DonationsList() {
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [receiptLoading, setReceiptLoading] = useState<string | null>(null)
 
   useEffect(() => { load() }, [fy, type, page])
 
@@ -29,13 +30,41 @@ export function DonationsList() {
         api.get('/me/transactions', { params: { fy, type: type || undefined, page, limit: 20, include_unsynced: true } }),
         api.get('/me/transactions/summary', { params: { fy } }),
       ])
-      setTransactions(txnRes.data.data ?? [])
+      setTransactions(txnRes.data.data?.rows ?? txnRes.data.data ?? [])
       setTotal(txnRes.data.meta?.total ?? 0)
       setSummary(sumRes.data.data)
     } catch (e) {
       setError(apiError(e))
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function openReceipt(txn: Transaction) {
+    if (txn.txn_type !== 'donation') return
+    const key = txn.id
+    setReceiptLoading(key)
+    try {
+      let url: string
+      if (txn.source_row_id && txn.tenant?.id) {
+        // New endpoint: render HTML directly from tenant schema
+        url = `/api/v1/me/receipts/${txn.tenant.id}/${txn.source_row_id}`
+      } else {
+        // Legacy: global_transactions id
+        url = `/api/v1/me/receipts/${txn.id}`
+      }
+
+      // Fetch HTML with auth header
+      const { data: html } = await api.get<string>(url, { responseType: 'text' })
+      const win = window.open('', '_blank', 'width=820,height=980')
+      if (!win) { alert('Popup blocked. Please allow popups for this site.'); return }
+      // Strip auto-print script so user can read before printing
+      win.document.write(html)
+      win.document.close()
+    } catch (e) {
+      alert(apiError(e) || 'Could not load receipt')
+    } finally {
+      setReceiptLoading(null)
     }
   }
 
@@ -110,32 +139,40 @@ export function DonationsList() {
               <div key={txn.id} className="card p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs text-slate-400 truncate">{txn.tenant.name}</span>
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="text-xs text-slate-400 truncate font-medium">{txn.tenant.name}</span>
                       <span className="badge badge-slate">{TYPE_LABELS[txn.txn_type] || txn.txn_type}</span>
                       {txn.is_80g_eligible && <span className="badge badge-green">80G</span>}
+                      {txn.unsynced && (
+                        <span className="badge" style={{ background: '#fef3c7', color: '#92400e', fontSize: '10px' }}>
+                          Pre-sync
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm font-medium text-slate-700 capitalize">{txn.category_or_service}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
                       {format(new Date(txn.txn_date), 'dd MMM yyyy')}
                     </p>
                   </div>
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                     <p className="text-base font-bold text-green-700">₹{fmtPaise(txn.amount_paise)}</p>
-                    {txn.receipt_url && (
-                      <a
-                        href={txn.receipt_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-blue-600 mt-1 hover:underline"
+                    {txn.txn_type === 'donation' && (
+                      <button
+                        onClick={() => openReceipt(txn)}
+                        disabled={receiptLoading === txn.id}
+                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
                       >
-                        <Download size={11} /> Receipt
-                      </a>
+                        {receiptLoading === txn.id
+                          ? <Loader2 size={11} className="animate-spin" />
+                          : <FileText size={11} />}
+                        Receipt
+                      </button>
                     )}
                   </div>
                 </div>
               </div>
             ))}
+
             {/* Pagination */}
             {total > 20 && (
               <div className="flex justify-between items-center pt-2">
