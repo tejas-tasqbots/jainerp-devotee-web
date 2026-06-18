@@ -1,9 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, ChevronRight, Link, LogOut, Save, User } from 'lucide-react'
+import { Bell, Building2, CheckCircle, Link, LogOut, Save, User, XCircle } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import type { DevoteeUser, Temple } from '../../types'
+
+interface TempleInvite {
+  id: string
+  temple_name: string
+  temple_city?: string
+  temple_state?: string
+  created_at: string
+}
 
 export function ProfilePage() {
   const navigate = useNavigate()
@@ -11,8 +19,10 @@ export function ProfilePage() {
 
   const [profile, setProfile] = useState<DevoteeUser | null>(null)
   const [temples, setTemples] = useState<Temple[]>([])
+  const [invites, setInvites] = useState<TempleInvite[]>([])
   const [notifPrefs, setNotifPrefs] = useState({ push: true, sms: true, whatsapp: true })
   const [loading, setLoading] = useState(true)
+  const [inviteActionId, setInviteActionId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
 
@@ -28,10 +38,11 @@ export function ProfilePage() {
   async function loadAll() {
     setLoading(true)
     try {
-      const [pRes, tRes, nRes] = await Promise.all([
+      const [pRes, tRes, nRes, iRes] = await Promise.all([
         api.get('/me'),
         api.get('/me/temples'),
         api.get('/me/notification-preferences'),
+        api.get('/me/invites'),
       ])
       const p = pRes.data.data
       setProfile(p)
@@ -40,6 +51,7 @@ export function ProfilePage() {
       setCity(p.city ?? '')
       setTemples(tRes.data.data ?? [])
       setNotifPrefs(nRes.data.data ?? { push: true, sms: true, whatsapp: true })
+      setInvites(iRes.data.data ?? [])
     } catch { /* ignore */ }
     finally { setLoading(false) }
   }
@@ -75,6 +87,19 @@ export function ProfilePage() {
     } finally {
       setLinking(false)
     }
+  }
+
+  async function respondToInvite(inviteId: string, accept: boolean) {
+    setInviteActionId(inviteId)
+    try {
+      await api.post(`/me/invites/${inviteId}/${accept ? 'accept' : 'reject'}`)
+      setInvites(prev => prev.filter(i => i.id !== inviteId))
+      if (accept) {
+        const { data } = await api.get('/me/temples')
+        setTemples(data.data ?? [])
+      }
+    } catch { /* ignore */ }
+    finally { setInviteActionId(null) }
   }
 
   function doLogout() {
@@ -132,6 +157,45 @@ export function ProfilePage() {
               </button>
             </div>
           </div>
+
+          {/* Temple Invitations */}
+          {invites.length > 0 && (
+            <div className="card p-4 border-amber-200 bg-amber-50">
+              <div className="flex items-center gap-2 mb-3">
+                <Building2 size={15} className="text-amber-600" />
+                <h3 className="text-sm font-semibold text-amber-800">Temple Invitations</h3>
+                <span className="ml-auto text-xs bg-amber-600 text-white px-2 py-0.5 rounded-full font-bold">{invites.length}</span>
+              </div>
+              <div className="space-y-3">
+                {invites.map(invite => (
+                  <div key={invite.id} className="bg-white rounded-lg p-3 flex items-center justify-between gap-3 border border-amber-200">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{invite.temple_name}</p>
+                      {invite.temple_city && (
+                        <p className="text-xs text-slate-500">{invite.temple_city}{invite.temple_state ? `, ${invite.temple_state}` : ''}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => respondToInvite(invite.id, true)}
+                        disabled={inviteActionId === invite.id}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg disabled:opacity-50"
+                      >
+                        <CheckCircle size={12} /> Accept
+                      </button>
+                      <button
+                        onClick={() => respondToInvite(invite.id, false)}
+                        disabled={inviteActionId === invite.id}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-200 text-slate-700 text-xs font-medium rounded-lg disabled:opacity-50"
+                      >
+                        <XCircle size={12} /> Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Linked temples */}
           <div className="card p-4">
