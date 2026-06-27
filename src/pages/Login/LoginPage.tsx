@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Flame, Phone, ShieldCheck } from 'lucide-react'
+import { ChevronLeft, Flame, Phone, ShieldCheck, User } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { api, apiError } from '../../lib/api'
 
-type Step = 'mobile' | 'otp'
+type Step = 'mobile' | 'otp' | 'profile'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -15,7 +15,17 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const { setTokens, setUser, deviceId } = useAuthStore()
+  // Profile setup for new users
+  const [profileName, setProfileName] = useState('')
+  const [profileEmail, setProfileEmail] = useState('')
+  const [profileGotra, setProfileGotra] = useState('')
+  const [profilePan, setProfilePan] = useState('')
+  const [profileCity, setProfileCity] = useState('')
+  const [profileState, setProfileState] = useState('')
+  const [profileAddress, setProfileAddress] = useState('')
+  const [profilePincode, setProfilePincode] = useState('')
+
+  const { setTokens, setUser, deviceId, user: authUser } = useAuthStore()
 
   async function sendOtp() {
     if (!/^[6-9]\d{9}$/.test(mobile)) {
@@ -48,6 +58,35 @@ export function LoginPage() {
       const result = data.data
       setTokens(result.access_token, result.refresh_token)
       setUser({ id: result.user.id, mobile: result.user.mobile, name: result.user.name })
+      if (!result.profile_complete) {
+        // New user — collect their details before going home
+        setProfileName(result.user.name ?? '')
+        setStep('profile')
+      } else {
+        navigate('/home', { replace: true })
+      }
+    } catch (e) {
+      setError(apiError(e))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function saveProfile() {
+    if (!profileName.trim()) { setError('Please enter your name'); return }
+    setLoading(true); setError('')
+    try {
+      const { data } = await api.patch('/me', {
+        name: profileName.trim(),
+        email: profileEmail.trim() || undefined,
+        gotra: profileGotra.trim() || undefined,
+        pan: profilePan.trim() || undefined,
+        city: profileCity.trim() || undefined,
+        state: profileState.trim() || undefined,
+        address: profileAddress.trim() || undefined,
+        pincode: profilePincode.trim() || undefined,
+      })
+      if (authUser) setUser({ ...authUser, name: data.data?.name ?? profileName.trim() })
       navigate('/home', { replace: true })
     } catch (e) {
       setError(apiError(e))
@@ -79,22 +118,26 @@ export function LoginPage() {
           <div className="space-y-4">
             <div>
               <label className="form-label">Mobile Number</label>
-              <div className="flex gap-0">
-                <span className="flex items-center px-3 bg-slate-50 border border-slate-300 border-r-0 rounded-l-md text-sm text-slate-500">
-                  +91
-                </span>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  placeholder="9876543210"
-                  className="form-input rounded-l-none flex-1"
-                  value={mobile}
-                  onChange={e => { setMobile(e.target.value.replace(/\D/g, '')); setError('') }}
-                  onKeyDown={e => e.key === 'Enter' && sendOtp()}
-                  autoFocus
-                />
-              </div>
+              <input
+                type="tel"
+                inputMode="numeric"
+                maxLength={13}
+                placeholder="9876543210"
+                className="form-input"
+                value={mobile}
+                onChange={e => {
+                  // Accept with or without +91 / 91 prefix — normalise to 10 digits
+                  const digits = e.target.value.replace(/\D/g, '')
+                  const ten = digits.startsWith('91') && digits.length > 10
+                    ? digits.slice(2)
+                    : digits.slice(0, 10)
+                  setMobile(ten)
+                  setError('')
+                }}
+                onKeyDown={e => e.key === 'Enter' && sendOtp()}
+                autoFocus
+              />
+              <p className="text-xs text-slate-400 mt-1">India mobile — +91 is added automatically</p>
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button
@@ -106,7 +149,7 @@ export function LoginPage() {
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
             <p className="text-center text-xs text-slate-400 mt-4">
-              New to JainERP? You'll be auto-registered on first login.
+              New user? Enter your mobile — you'll set up your profile after OTP.
             </p>
           </div>
         )}
@@ -171,6 +214,93 @@ export function LoginPage() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Step 3: Profile setup (new users only) */}
+        {step === 'profile' && (
+          <div className="space-y-3">
+            <div className="text-center mb-2">
+              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-3">
+                <User size={22} className="text-orange-600" />
+              </div>
+              <h2 className="text-lg font-bold text-navy-900">Welcome! Set up your profile</h2>
+              <p className="text-xs text-slate-400 mt-1">Mobile: <strong>+91 {mobile}</strong></p>
+            </div>
+
+            <div>
+              <label className="form-label">Full Name *</label>
+              <input
+                className="form-input"
+                placeholder="Ayush Kasliwal"
+                value={profileName}
+                onChange={e => { setProfileName(e.target.value); setError('') }}
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Email <span className="text-slate-400 font-normal">(optional)</span></label>
+              <input type="email" className="form-input" placeholder="you@example.com"
+                value={profileEmail} onChange={e => setProfileEmail(e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="form-label">Gotra <span className="text-slate-400 font-normal">(optional)</span></label>
+                <input className="form-input" placeholder="e.g. Kashyap"
+                  value={profileGotra} onChange={e => setProfileGotra(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">PAN <span className="text-slate-400 font-normal">(optional)</span></label>
+                <input className="form-input uppercase" placeholder="ABCDE1234F" maxLength={10}
+                  value={profilePan} onChange={e => setProfilePan(e.target.value.toUpperCase())} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="form-label">City <span className="text-slate-400 font-normal">(optional)</span></label>
+                <input className="form-input" placeholder="Mumbai"
+                  value={profileCity} onChange={e => setProfileCity(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">State <span className="text-slate-400 font-normal">(optional)</span></label>
+                <input className="form-input" placeholder="Maharashtra"
+                  value={profileState} onChange={e => setProfileState(e.target.value)} />
+              </div>
+            </div>
+
+            <div>
+              <label className="form-label">Address <span className="text-slate-400 font-normal">(optional)</span></label>
+              <input className="form-input" placeholder="House / Street / Locality"
+                value={profileAddress} onChange={e => setProfileAddress(e.target.value)} />
+            </div>
+
+            <div>
+              <label className="form-label">Pincode <span className="text-slate-400 font-normal">(optional)</span></label>
+              <input className="form-input" placeholder="400001" inputMode="numeric" maxLength={6}
+                value={profilePincode} onChange={e => setProfilePincode(e.target.value.replace(/\D/g, ''))} />
+            </div>
+
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+
+            <button
+              type="button"
+              onClick={saveProfile}
+              disabled={loading || !profileName.trim()}
+              className="btn-primary w-full justify-center py-3 mt-2"
+            >
+              <ShieldCheck size={16} />
+              {loading ? 'Saving...' : 'Save & Continue'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/home', { replace: true })}
+              className="w-full text-center text-xs text-slate-400 hover:text-slate-600"
+            >
+              Skip for now
+            </button>
           </div>
         )}
       </div>
