@@ -100,15 +100,12 @@ export function LoginPage() {
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-8">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: 'var(--color-brand-red)' }}
-          >
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[var(--color-brand-red)]">
             <Flame size={32} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">
             <span className="text-navy-900">Jain</span>
-            <span style={{ color: 'var(--color-brand-red)' }}>ERP</span>
+            <span className="text-[var(--color-brand-red)]">ERP</span>
           </h1>
           <p className="text-slate-500 text-sm mt-1">Devotee / Bhakt Portal</p>
         </div>
