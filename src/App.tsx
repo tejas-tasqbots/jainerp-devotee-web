@@ -9,13 +9,17 @@ import { MaharajDetails } from './pages/Maharaj/MaharajDetails'
 import { MaharajDirectory } from './pages/Maharaj/MaharajDirectory'
 import { NotificationsPage } from './pages/Notifications/NotificationsPage'
 import { ProfilePage } from './pages/Profile/ProfilePage'
+import { RegisterPage } from './pages/Register/RegisterPage'
 import { TempleDetails } from './pages/Temples/TempleDetails'
 import { TempleDirectory } from './pages/Temples/TempleDirectory'
 import { useAuthStore } from './store/authStore'
 
 function RequireAuth() {
-  const isLoggedIn = useAuthStore(s => s.isLoggedIn)
-  return isLoggedIn ? <Outlet /> : <Navigate to="/login" replace />
+  const { isLoggedIn, user } = useAuthStore()
+  if (!isLoggedIn) return <Navigate to="/login" replace />
+  // New user with no name — send to registration
+  if (!user?.name) return <Navigate to="/register" replace />
+  return <Outlet />
 }
 
 function GuestOnly() {
@@ -42,6 +46,9 @@ export default function App() {
         <Route element={<GuestOnly />}>
           <Route path="/login" element={<LoginPage />} />
         </Route>
+
+        {/* Registration — logged in but profile incomplete */}
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Authenticated — with bottom nav */}
         <Route element={<RequireAuth />}>

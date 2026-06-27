@@ -28,7 +28,12 @@ export function ProfilePage() {
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [gotra, setGotra] = useState('')
+  const [pan, setPan] = useState('')
   const [city, setCity] = useState('')
+  const [state, setState] = useState('')
+  const [address, setAddress] = useState('')
+  const [pincode, setPincode] = useState('')
   const [linkSlug, setLinkSlug] = useState('')
   const [linking, setLinking] = useState(false)
   const [linkMsg, setLinkMsg] = useState('')
@@ -48,7 +53,12 @@ export function ProfilePage() {
       setProfile(p)
       setName(p.name ?? '')
       setEmail(p.email ?? '')
+      setGotra(p.gotra ?? '')
+      setPan(p.pan_masked ?? '')
       setCity(p.city ?? '')
+      setState(p.state ?? '')
+      setAddress(p.address ?? '')
+      setPincode(p.pincode ?? '')
       setTemples(tRes.data.data ?? [])
       setNotifPrefs(nRes.data.data ?? { push: true, sms: true, whatsapp: true })
       setInvites(iRes.data.data ?? [])
@@ -59,7 +69,10 @@ export function ProfilePage() {
   async function saveProfile() {
     setSaving(true); setSaveMsg('')
     try {
-      await api.patch('/me', { name, email, city })
+      await api.patch('/me', {
+        name, email, gotra, city, state, address, pincode,
+        pan: pan.replace(/X/g, '') ? pan : undefined,
+      })
       setSaveMsg('Profile saved!')
       setTimeout(() => setSaveMsg(''), 3000)
     } catch (e) {
@@ -136,16 +149,42 @@ export function ProfilePage() {
             </div>
             <div className="space-y-3">
               <div>
-                <label className="form-label">Full Name</label>
+                <label className="form-label">Full Name *</label>
                 <input className="form-input" value={name} onChange={e => setName(e.target.value)} />
               </div>
               <div>
                 <label className="form-label">Email</label>
                 <input type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="form-label">Gotra</label>
+                  <input className="form-input" placeholder="e.g. Kashyap" value={gotra} onChange={e => setGotra(e.target.value)} />
+                </div>
+                <div>
+                  <label className="form-label">PAN</label>
+                  <input className="form-input uppercase" placeholder="ABCDE1234F" maxLength={10}
+                    value={pan} onChange={e => setPan(e.target.value.toUpperCase())} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="profile-city" className="form-label">City</label>
+                  <input id="profile-city" className="form-input" placeholder="Mumbai" value={city} onChange={e => setCity(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="profile-state" className="form-label">State</label>
+                  <input id="profile-state" className="form-input" placeholder="Maharashtra" value={state} onChange={e => setState(e.target.value)} />
+                </div>
+              </div>
               <div>
-                <label className="form-label">City</label>
-                <input className="form-input" value={city} onChange={e => setCity(e.target.value)} />
+                <label className="form-label">Address</label>
+                <input className="form-input" placeholder="House / Street / Locality" value={address} onChange={e => setAddress(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">Pincode</label>
+                <input className="form-input" placeholder="400001" inputMode="numeric" maxLength={6}
+                  value={pincode} onChange={e => setPincode(e.target.value.replace(/\D/g, ''))} />
               </div>
               {saveMsg && (
                 <p className={`text-sm ${saveMsg.includes('saved') ? 'text-green-600' : 'text-red-600'}`}>
