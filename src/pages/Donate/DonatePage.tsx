@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Bell, Building2, Check, Heart, Search } from 'lucide-react'
+import { Building2, Check, Heart, Search } from 'lucide-react'
 import { api, apiError, parsePaise } from '../../lib/api'
+import { openRazorpayCheckout } from '../../lib/razorpay'
+import { useAuthStore } from '../../store/authStore'
 import type { Temple } from '../../types'
 
 type Step = 'search' | 'form' | 'result'
@@ -28,7 +30,9 @@ export function DonatePage() {
   const [remarks, setRemarks] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [result, setResult] = useState<any>(null)
+  const user = useAuthStore(s => s.user)
 
   useEffect(() => {
     const t = setTimeout(() => { if (query.length >= 2) searchTemples() }, 400)
@@ -56,8 +60,9 @@ export function DonatePage() {
     const paise = parsePaise(amount)
     if (paise < 100) { setError('Minimum donation is ₹1'); return }
     if (is80g && !pan.trim()) { setError('PAN is required for 80G donation'); return }
-    setSubmitting(true); setError('')
+    setSubmitting(true); setError(''); setNotice('')
     try {
+      // 1. Create the order on the backend.
       const { data } = await api.post('/me/donate', {
         tenant_id: selectedTemple!.id,
         category,
@@ -66,11 +71,35 @@ export function DonatePage() {
         pan: is80g ? pan.toUpperCase() : undefined,
         remarks,
       })
-      setResult(data.data)
-      setStep('result')
+      const order = data.data
+
+      // 2. Open the Razorpay Standard Checkout modal.
+      await openRazorpayCheckout({
+        order,
+        name: selectedTemple!.name,
+        description: `Donation — ${category}`,
+        prefill: {
+          name: user?.name ?? undefined,
+          email: user?.email,
+          contact: user?.mobile,
+        },
+        onSuccess: async (callback) => {
+          try {
+            // 3. Verify the signature server-side; the donation is recorded there.
+            const { data: v } = await api.post('/me/donate/verify', callback)
+            setResult({ ...order, ...v, paid: true })
+            setStep('result')
+          } catch (e) {
+            setError(apiError(e))
+          } finally {
+            setSubmitting(false)
+          }
+        },
+        onFailure: (msg) => { setError(msg); setSubmitting(false) },
+        onDismiss: () => { setNotice('Payment cancelled. You can try again.'); setSubmitting(false) },
+      })
     } catch (e) {
       setError(apiError(e))
-    } finally {
       setSubmitting(false)
     }
   }
@@ -222,6 +251,7 @@ export function DonatePage() {
             </div>
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
+            {notice && <p className="text-amber-600 text-sm">{notice}</p>}
 
             <button
               onClick={submit}
@@ -240,23 +270,20 @@ export function DonatePage() {
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
               <Check size={32} className="text-green-600" />
             </div>
-            <h2 className="text-lg font-bold text-slate-800">Donation Order Created!</h2>
-            <p className="text-sm text-slate-500">Complete the payment to finalize your donation</p>
+            <h2 className="text-lg font-bold text-slate-800">Payment Successful!</h2>
+            <p className="text-sm text-slate-500">Thank you for your donation. Your receipt will be available shortly.</p>
             <div className="card p-4 text-left space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Order ID</span>
-                <span className="font-mono text-slate-700">{result.razorpay_order_id}</span>
-              </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Temple</span>
                 <span className="font-medium">{selectedTemple?.name}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Order ID</span>
+                <span className="font-mono text-slate-700 text-xs">{result.razorpay_order_id}</span>
+              </div>
             </div>
-            <p className="text-xs text-slate-400">
-              In dev mode the payment is simulated. In production, Razorpay checkout will open here.
-            </p>
             <button
-              onClick={() => { setStep('search'); setSelectedTemple(null); setResult(null); setAmount('') }}
+              onClick={() => { setStep('search'); setSelectedTemple(null); setResult(null); setAmount(''); setNotice('') }}
               className="btn-primary mx-auto"
             >
               Donate Again
