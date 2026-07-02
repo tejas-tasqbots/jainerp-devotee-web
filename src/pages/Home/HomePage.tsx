@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, Calendar, Heart, IndianRupee, Megaphone } from 'lucide-react'
+import { Bell, Building2, Calendar, Heart, IndianRupee, Megaphone, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, apiError, fmtPaise } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
@@ -30,6 +30,7 @@ export function HomePage() {
     { label: 'My Donations', icon: IndianRupee, color: 'bg-green-600 text-white', path: '/donations' },
     { label: 'My Bolis', icon: Calendar, color: 'bg-amber-500 text-white', path: '/bolis' },
     { label: 'Find Temple', icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
+    { label: 'Maharaj / Mataji', icon: Sparkles, color: 'bg-purple-600 text-white', path: '/maharaj' },
   ]
 
   return (

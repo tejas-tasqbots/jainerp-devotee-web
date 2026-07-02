@@ -1,11 +1,11 @@
-import { Building2, Heart, Home, IndianRupee, User } from 'lucide-react'
+import { Building2, Heart, Home, IndianRupee, Sparkles, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const tabs = [
   { to: '/home', icon: Home, label: 'Home' },
   { to: '/donations', icon: IndianRupee, label: 'Donations' },
   { to: '/donate', icon: Heart, label: 'Donate', featured: true },
-  { to: '/temples', icon: Building2, label: 'Temples' },
+  { to: '/maharaj', icon: Sparkles, label: 'Maharaj' },
   { to: '/profile', icon: User, label: 'Profile' },
 ]
 

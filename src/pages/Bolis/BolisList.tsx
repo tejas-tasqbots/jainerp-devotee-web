@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react'
 import { Bell, Calendar, CheckCircle, IndianRupee, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, apiError, fmtPaise, parsePaise } from '../../lib/api'
+import { openRazorpayCheckout } from '../../lib/razorpay'
+import { useAuthStore } from '../../store/authStore'
 import type { Boli } from '../../types'
 
 export function BolisList() {
+  const user = useAuthStore(s => s.user)
   const [bolis, setBolis] = useState<Boli[]>([])
   const [loading, setLoading] = useState(true)
   const [payModal, setPayModal] = useState<Boli | null>(null)
   const [payAmount, setPayAmount] = useState('')
   const [paying, setPaying] = useState(false)
   const [payResult, setPayResult] = useState<string | null>(null)
+  const [payError, setPayError] = useState('')
 
   useEffect(() => { load() }, [])
 
@@ -29,17 +33,41 @@ export function BolisList() {
   async function payBoli() {
     if (!payModal) return
     const paise = parsePaise(payAmount)
-    if (paise < 100) return
-    setPaying(true)
+    if (paise < 100) { setPayError('Minimum payment is ₹1'); return }
+    setPaying(true); setPayError('')
     try {
-      const { data } = await api.post(`/me/bolis/${payModal.boli_id}/pay`, {
-        amount_paise: paise,
-        method: 'razorpay',
+      // 1. Create a Razorpay order for this boli payment.
+      const { data } = await api.post(`/me/bolis/${payModal.boli_id}/pay`, { amount_paise: paise })
+      const order = data.data
+      if (order.mock) {
+        setPayError('Payment gateway is not configured on the server yet. Please try again later.')
+        setPaying(false)
+        return
+      }
+
+      // 2. Open the Razorpay Standard Checkout modal.
+      await openRazorpayCheckout({
+        order,
+        name: payModal.temple,
+        description: `Boli payment — ${payModal.description}`,
+        prefill: { name: user?.name ?? undefined, email: user?.email, contact: user?.mobile },
+        onSuccess: async (callback) => {
+          try {
+            // 3. Verify the signature server-side; the boli is advanced there.
+            await api.post(`/me/bolis/${payModal.boli_id}/pay/verify`, callback)
+            setPayResult('Payment successful! Your boli has been updated.')
+            await load()
+          } catch (e) {
+            setPayError(apiError(e))
+          } finally {
+            setPaying(false)
+          }
+        },
+        onFailure: (msg) => { setPayError(msg); setPaying(false) },
+        onDismiss: () => { setPayError('Payment cancelled.'); setPaying(false) },
       })
-      setPayResult(`Order created: ${data.data.razorpay_order_id}. Complete payment in your bank app.`)
     } catch (e) {
-      setPayResult(apiError(e))
-    } finally {
+      setPayError(apiError(e))
       setPaying(false)
     }
   }
@@ -114,7 +142,7 @@ export function BolisList() {
                   <p className="text-xs text-slate-400 mt-0.5 text-right">{paidPct}% paid</p>
                 </div>
                 <button
-                  onClick={() => { setPayModal(boli); setPayAmount(String(boli.outstanding_paise / 100)); setPayResult(null) }}
+                  onClick={() => { setPayModal(boli); setPayAmount(String(boli.outstanding_paise / 100)); setPayResult(null); setPayError('') }}
                   className="btn-primary w-full justify-center py-2.5"
                 >
                   <IndianRupee size={15} /> Pay Now
@@ -131,7 +159,7 @@ export function BolisList() {
           <div className="bg-white w-full rounded-t-2xl p-6 space-y-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-navy-900">Pay Boli</h3>
-              <button onClick={() => { setPayModal(null); setPayResult(null) }}>
+              <button onClick={() => { setPayModal(null); setPayResult(null); setPayError('') }}>
                 <X size={20} className="text-slate-400" />
               </button>
             </div>
@@ -151,6 +179,7 @@ export function BolisList() {
                 Outstanding: ₹{fmtPaise(payModal.outstanding_paise)}
               </p>
             </div>
+            {payError && <p className="text-red-600 text-sm">{payError}</p>}
             {payResult ? (
               <div className="bg-green-50 border border-green-200 rounded-md p-3 text-sm text-green-700">
                 {payResult}

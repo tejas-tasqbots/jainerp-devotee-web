@@ -72,6 +72,11 @@ export function DonatePage() {
         remarks,
       })
       const order = data.data
+      if (order.mock) {
+        setError('Payment gateway is not configured on the server yet. Please try again later.')
+        setSubmitting(false)
+        return
+      }
 
       // 2. Open the Razorpay Standard Checkout modal.
       await openRazorpayCheckout({
