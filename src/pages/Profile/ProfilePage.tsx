@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, CheckCircle, Link, LogOut, Save, User, XCircle } from 'lucide-react'
+import { Bell, Building2, CheckCircle, Link, LogOut, Save, XCircle } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
+import { StateSelect, CitySelect } from '../../components/GeoSelect'
 import type { DevoteeUser, Temple } from '../../types'
 
 interface TempleInvite {
@@ -137,17 +138,17 @@ export function ProfilePage() {
       ) : (
         <div className="p-4 space-y-5">
           {/* User info */}
-          <div className="card p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
-                <User size={28} className="text-brand-red" />
+          <div className="card overflow-hidden">
+            <div className="hero-saffron px-4 py-5 text-white flex items-center gap-3 relative">
+              <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl font-bold">{(name || 'Y')[0].toUpperCase()}</span>
               </div>
-              <div>
-                <p className="font-bold text-slate-800">{name || 'Your Name'}</p>
-                <p className="text-sm text-slate-500">{user?.mobile}</p>
+              <div className="min-w-0">
+                <p className="font-bold text-lg leading-tight truncate">{name || 'Your Name'}</p>
+                <p className="text-sm text-white/80">{user?.mobile}</p>
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 p-4">
               <div>
                 <label className="form-label">Full Name *</label>
                 <input className="form-input" value={name} onChange={e => setName(e.target.value)} />
@@ -169,12 +170,12 @@ export function ProfilePage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="profile-city" className="form-label">City</label>
-                  <input id="profile-city" className="form-input" placeholder="Mumbai" value={city} onChange={e => setCity(e.target.value)} />
+                  <label className="form-label">State</label>
+                  <StateSelect value={state} onChange={s => { setState(s); setCity('') }} />
                 </div>
                 <div>
-                  <label htmlFor="profile-state" className="form-label">State</label>
-                  <input id="profile-state" className="form-input" placeholder="Maharashtra" value={state} onChange={e => setState(e.target.value)} />
+                  <label className="form-label">City</label>
+                  <CitySelect state={state} value={city} onChange={setCity} />
                 </div>
               </div>
               <div>

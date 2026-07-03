@@ -35,32 +35,33 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Top bar */}
-      <div className="page-header">
-        <div>
-          <p className="text-xs text-slate-400">Welcome back</p>
-          <h1 className="text-base font-bold text-navy-900">
-            {user?.name || 'Jai Jinendra 🙏'}
-          </h1>
+      {/* Saffron hero */}
+      <div className="hero-saffron px-4 pt-6 pb-16 text-white relative">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs text-white/70">Jai Jinendra 🙏</p>
+            <h1 className="text-xl font-bold leading-tight">
+              {user?.name || 'Welcome'}
+            </h1>
+          </div>
+          <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors">
+            <Bell size={20} className="text-white" />
+          </button>
         </div>
-        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full hover:bg-slate-100">
-          <Bell size={20} className="text-slate-600" />
-        </button>
       </div>
 
-      <div className="p-4 space-y-5">
-        {/* Quick actions */}
-        <section>
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Quick Actions</h2>
+      <div className="px-4 -mt-11 space-y-5 relative z-10">
+        {/* Quick actions floating card */}
+        <section className="card p-4">
           <div className="grid grid-cols-4 gap-2">
             {quickActions.map(a => (
               <button
                 key={a.path}
                 onClick={() => navigate(a.path)}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                className="flex flex-col items-center gap-1.5 py-1 group"
               >
-                <span className={`w-10 h-10 rounded-xl flex items-center justify-center ${a.color}`}>
-                  <a.icon size={18} />
+                <span className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-active:scale-95 transition-transform ${a.color}`}>
+                  <a.icon size={20} />
                 </span>
                 <span className="text-[10px] font-medium text-slate-600 text-center leading-tight">{a.label}</span>
               </button>

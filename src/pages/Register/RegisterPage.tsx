@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShieldCheck, User } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
+import { StateSelect, CitySelect } from '../../components/GeoSelect'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -18,13 +19,6 @@ export function RegisterPage() {
   const [pincode, setPincode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [states, setStates] = useState<string[]>([])
-  const [cities, setCities] = useState<string[]>([])
-
-  useEffect(() => { api.get('/geo/states').then(r => setStates(r.data.data ?? r.data ?? [])).catch(() => {}) }, [])
-  useEffect(() => {
-    if (state) api.get(`/geo/states/${encodeURIComponent(state)}/cities`).then(r => setCities(r.data.data ?? r.data ?? [])).catch(() => setCities([]))
-  }, [state])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -116,15 +110,11 @@ export function RegisterPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="form-label">State <span className="text-slate-400 font-normal">(opt.)</span></label>
-              <select className="form-select" value={state} onChange={e => { setState(e.target.value); setCity('') }}>
-                <option value="">Select…</option>
-                {states.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <StateSelect value={state} onChange={s => { setState(s); setCity('') }} />
             </div>
             <div>
               <label className="form-label">City <span className="text-slate-400 font-normal">(opt.)</span></label>
-              <input className="form-input" list="reg-cities" placeholder="Mumbai" value={city} onChange={e => setCity(e.target.value)} />
-              <datalist id="reg-cities">{cities.map(c => <option key={c} value={c} />)}</datalist>
+              <CitySelect state={state} value={city} onChange={setCity} />
             </div>
           </div>
 
