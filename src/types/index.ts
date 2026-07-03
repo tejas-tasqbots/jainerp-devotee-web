@@ -57,6 +57,9 @@ export interface Temple {
   registration_80g?: string
   custom_domain?: string
   global_sync_enabled?: boolean
+  lat?: number | string | null
+  lng?: number | string | null
+  maharaj?: { id: string; name: string; type: string; samuday?: string; photo_url?: string; note?: string }[]
 }
 
 export interface MaharajProfile {
@@ -77,8 +80,12 @@ export interface MaharajProfile {
   current_location?: {
     place: string
     city: string
+    state?: string
     from_date: string
     to_date: string
+    lat?: number | string | null
+    lng?: number | string | null
+    chaturmas?: boolean
     notes?: string
   }
   vihar_plan?: {
@@ -96,6 +103,14 @@ export interface MaharajProfile {
     needed_on: string
     city: string
     status: string
+  }[]
+  broadcasts?: {
+    id: string
+    title?: string
+    message: string
+    type: string
+    link?: string
+    created_at: string
   }[]
 }
 

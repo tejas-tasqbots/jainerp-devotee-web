@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Calendar, Camera, Heart, MapPin } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, Camera, Heart, MapPin, Navigation, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
 import type { Temple } from '../../types'
@@ -152,6 +152,54 @@ export function TempleDetails() {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* Associated Maharaj / Mataji */}
+        {temple.maharaj && temple.maharaj.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={16} className="text-slate-400" />
+              <h3 className="text-sm font-semibold text-slate-700">Maharaj / Mataji here</h3>
+            </div>
+            <div className="space-y-2">
+              {temple.maharaj.map(m => (
+                <button key={m.id} onClick={() => navigate(`/maharaj/${m.id}`)} className="card p-3 w-full text-left hover:border-brand-red transition-colors flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {m.photo_url ? <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" /> : <Sparkles size={16} className="text-amber-600" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-800">{m.name}</p>
+                    <p className="text-xs text-slate-400">{m.samuday}{m.note ? ` · ${m.note}` : ''}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Map */}
+        {temple.lat != null && temple.lng != null && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin size={16} className="text-slate-400" />
+              <h3 className="text-sm font-semibold text-slate-700">Location</h3>
+            </div>
+            <div className="rounded-xl overflow-hidden border border-slate-200">
+              <iframe
+                title="temple map"
+                className="w-full h-48"
+                loading="lazy"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(temple.lng) - 0.02}%2C${Number(temple.lat) - 0.02}%2C${Number(temple.lng) + 0.02}%2C${Number(temple.lat) + 0.02}&layer=mapnik&marker=${temple.lat}%2C${temple.lng}`}
+              />
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${temple.lat},${temple.lng}`}
+                target="_blank" rel="noreferrer"
+                className="flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium text-brand-red hover:bg-red-50"
+              >
+                <Navigation size={14} /> Get Directions
+              </a>
             </div>
           </section>
         )}

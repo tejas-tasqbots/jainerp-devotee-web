@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Bell, BellOff, Calendar, MapPin, Users } from 'lucide-react'
+import { ArrowLeft, Bell, BellOff, Calendar, MapPin, Megaphone, Navigation, Users } from 'lucide-react'
 import { format } from 'date-fns'
-import { api, apiError } from '../../lib/api'
+import { api } from '../../lib/api'
 import type { MaharajProfile } from '../../types'
 
 export function MaharajDetails() {
@@ -133,19 +133,43 @@ export function MaharajDetails() {
 
         {/* Current location */}
         {profile.current_location && (
-          <div className="card p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin size={15} className="text-brand-red" />
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Location</h3>
+          <div className="card overflow-hidden">
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin size={15} className="text-brand-red" />
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Location</h3>
+                {profile.current_location.chaturmas && <span className="badge badge-red">Chaturmas</span>}
+              </div>
+              <p className="text-sm font-semibold text-slate-800">{profile.current_location.place}</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {[profile.current_location.city, profile.current_location.state].filter(Boolean).join(', ')}
+              </p>
+              {profile.current_location.from_date && (
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {format(new Date(profile.current_location.from_date), 'dd MMM')} –{' '}
+                  {profile.current_location.to_date ? format(new Date(profile.current_location.to_date), 'dd MMM yyyy') : '—'}
+                </p>
+              )}
+              {profile.current_location.notes && (
+                <p className="text-xs text-slate-500 mt-1 italic">{profile.current_location.notes}</p>
+              )}
             </div>
-            <p className="text-sm font-semibold text-slate-800">{profile.current_location.place}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{profile.current_location.city}</p>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {format(new Date(profile.current_location.from_date), 'dd MMM')} –{' '}
-              {format(new Date(profile.current_location.to_date), 'dd MMM yyyy')}
-            </p>
-            {profile.current_location.notes && (
-              <p className="text-xs text-slate-500 mt-1 italic">{profile.current_location.notes}</p>
+            {profile.current_location.lat != null && profile.current_location.lng != null && (
+              <>
+                <iframe
+                  title="location map"
+                  className="w-full h-44 border-t border-slate-100"
+                  loading="lazy"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(profile.current_location.lng) - 0.02}%2C${Number(profile.current_location.lat) - 0.02}%2C${Number(profile.current_location.lng) + 0.02}%2C${Number(profile.current_location.lat) + 0.02}&layer=mapnik&marker=${profile.current_location.lat}%2C${profile.current_location.lng}`}
+                />
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${profile.current_location.lat},${profile.current_location.lng}`}
+                  target="_blank" rel="noreferrer"
+                  className="flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium text-brand-red hover:bg-red-50"
+                >
+                  <Navigation size={14} /> Get Directions
+                </a>
+              </>
             )}
           </div>
         )}
@@ -197,6 +221,30 @@ export function MaharajDetails() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Recent broadcasts / updates */}
+        {profile.broadcasts && profile.broadcasts.length > 0 && (
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Megaphone size={15} className="text-navy-700" />
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Recent Updates</h3>
+            </div>
+            <div className="space-y-3">
+              {profile.broadcasts.map(b => (
+                <div key={b.id} className="border-l-2 border-brand-red pl-3">
+                  {b.title && <p className="text-sm font-semibold text-slate-800">{b.title}</p>}
+                  <p className="text-sm text-slate-600">{b.message}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{format(new Date(b.created_at), 'dd MMM yyyy, h:mm a')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Vihar note */}
+        {profile.guru_name && (
+          <p className="text-center text-xs text-slate-400">Guru: {profile.guru_name}</p>
         )}
       </div>
     </div>
