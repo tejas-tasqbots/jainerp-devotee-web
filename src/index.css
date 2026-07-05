@@ -77,8 +77,9 @@
 
   /* ── Buttons ────────────────────────────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98];
     background-color: var(--color-cta);
+    box-shadow: 0 2px 8px -2px rgba(194, 65, 12, 0.45);
   }
   .btn-primary:hover:not(:disabled) { background-color: var(--color-cta-hover); }
   .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.22); }
@@ -95,22 +96,25 @@
 
   /* ── Card ───────────────────────────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl border border-slate-100 shadow-sm;
+    @apply bg-white rounded-2xl border border-slate-100;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px -8px rgba(15, 23, 42, 0.08);
   }
 
   /* ── Saffron devotional hero ────────────────────────────────────────────── */
   .hero-saffron {
-    background-image: linear-gradient(135deg, #e8590c 0%, #d62828 55%, #9e1c1c 100%);
-    border-bottom-left-radius: 1.5rem;
-    border-bottom-right-radius: 1.5rem;
+    background-image: linear-gradient(150deg, #f2670f 0%, #e03131 48%, #9e1c1c 100%);
+    border-bottom-left-radius: 1.75rem;
+    border-bottom-right-radius: 1.75rem;
   }
   .hero-saffron::after {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle at 85% 15%, rgba(244, 197, 66, 0.35), transparent 45%);
-    border-bottom-left-radius: 1.5rem;
-    border-bottom-right-radius: 1.5rem;
+    background-image:
+      radial-gradient(circle at 85% 12%, rgba(244, 197, 66, 0.4), transparent 42%),
+      radial-gradient(circle at 8% 90%, rgba(255, 255, 255, 0.08), transparent 35%);
+    border-bottom-left-radius: 1.75rem;
+    border-bottom-right-radius: 1.75rem;
     pointer-events: none;
   }
 
