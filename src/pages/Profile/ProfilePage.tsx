@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, CheckCircle, Link, LogOut, Save, XCircle } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
-import { StateSelect, CitySelect } from '../../components/GeoSelect'
+import { StateSelect, CitySelect, CountrySelect } from '../../components/GeoSelect'
 import type { DevoteeUser, Temple } from '../../types'
 
 interface TempleInvite {
@@ -33,6 +33,7 @@ export function ProfilePage() {
   const [pan, setPan] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
+  const [country, setCountry] = useState('India')
   const [address, setAddress] = useState('')
   const [pincode, setPincode] = useState('')
   const [linkSlug, setLinkSlug] = useState('')
@@ -43,14 +44,15 @@ export function ProfilePage() {
 
   async function loadAll() {
     setLoading(true)
-    try {
-      const [pRes, tRes, nRes, iRes] = await Promise.all([
-        api.get('/me'),
-        api.get('/me/temples'),
-        api.get('/me/notification-preferences'),
-        api.get('/me/invites'),
-      ])
-      const p = pRes.data.data
+    // allSettled: one failing call must not blank the whole profile
+    const [pRes, tRes, nRes, iRes] = await Promise.allSettled([
+      api.get('/me'),
+      api.get('/me/temples'),
+      api.get('/me/notification-preferences'),
+      api.get('/me/invites'),
+    ])
+    if (pRes.status === 'fulfilled') {
+      const p = pRes.value.data.data
       setProfile(p)
       setName(p.name ?? '')
       setEmail(p.email ?? '')
@@ -58,20 +60,21 @@ export function ProfilePage() {
       setPan(p.pan_masked ?? '')
       setCity(p.city ?? '')
       setState(p.state ?? '')
+      setCountry(p.country ?? 'India')
       setAddress(p.address ?? '')
       setPincode(p.pincode ?? '')
-      setTemples(tRes.data.data ?? [])
-      setNotifPrefs(nRes.data.data ?? { push: true, sms: true, whatsapp: true })
-      setInvites(iRes.data.data ?? [])
-    } catch { /* ignore */ }
-    finally { setLoading(false) }
+    }
+    if (tRes.status === 'fulfilled') setTemples(tRes.value.data.data ?? [])
+    if (nRes.status === 'fulfilled') setNotifPrefs(nRes.value.data.data ?? { push: true, sms: true, whatsapp: true })
+    if (iRes.status === 'fulfilled') setInvites(iRes.value.data.data ?? [])
+    setLoading(false)
   }
 
   async function saveProfile() {
     setSaving(true); setSaveMsg('')
     try {
       await api.patch('/me', {
-        name, email, gotra, city, state, address, pincode,
+        name, email, gotra, city, state, country, address, pincode,
         pan: pan.replace(/X/g, '') ? pan : undefined,
       })
       setSaveMsg('Profile saved!')
@@ -168,14 +171,28 @@ export function ProfilePage() {
                     value={pan} onChange={e => setPan(e.target.value.toUpperCase())} />
                 </div>
               </div>
+              <div>
+                <label className="form-label">Country</label>
+                <CountrySelect value={country} onChange={c => { setCountry(c); setState(''); setCity('') }} />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="form-label">State</label>
-                  <StateSelect value={state} onChange={s => { setState(s); setCity('') }} />
+                  {country === 'India' ? (
+                    <StateSelect value={state} onChange={s => { setState(s); setCity('') }} />
+                  ) : (
+                    <input className="form-input" placeholder="State / Province" value={state}
+                      onChange={e => setState(e.target.value)} />
+                  )}
                 </div>
                 <div>
                   <label className="form-label">City</label>
-                  <CitySelect state={state} value={city} onChange={setCity} />
+                  {country === 'India' ? (
+                    <CitySelect state={state} value={city} onChange={setCity} />
+                  ) : (
+                    <input className="form-input" placeholder="City" value={city}
+                      onChange={e => setCity(e.target.value)} />
+                  )}
                 </div>
               </div>
               <div>
@@ -183,9 +200,11 @@ export function ProfilePage() {
                 <input className="form-input" placeholder="House / Street / Locality" value={address} onChange={e => setAddress(e.target.value)} />
               </div>
               <div>
-                <label className="form-label">Pincode</label>
-                <input className="form-input" placeholder="400001" inputMode="numeric" maxLength={6}
-                  value={pincode} onChange={e => setPincode(e.target.value.replace(/\D/g, ''))} />
+                <label className="form-label">{country === 'India' ? 'Pincode' : 'Postal code'}</label>
+                <input className="form-input" placeholder={country === 'India' ? '400001' : 'Postal code'}
+                  inputMode={country === 'India' ? 'numeric' : 'text'} maxLength={country === 'India' ? 6 : 12}
+                  value={pincode}
+                  onChange={e => setPincode(country === 'India' ? e.target.value.replace(/\D/g, '') : e.target.value)} />
               </div>
               {saveMsg && (
                 <p className={`text-sm ${saveMsg.includes('saved') ? 'text-green-600' : 'text-red-600'}`}>

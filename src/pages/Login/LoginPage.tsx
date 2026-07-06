@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, Flame, Phone, ShieldCheck } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { api, apiError } from '../../lib/api'
+import { isValidPhone, PhoneInput } from '../../components/PhoneInput'
 
 type Step = 'mobile' | 'otp'
 
@@ -18,13 +19,13 @@ export function LoginPage() {
   const { setTokens, setUser, deviceId } = useAuthStore()
 
   async function sendOtp() {
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-      setError('Enter a valid 10-digit mobile number')
+    if (!isValidPhone(mobile)) {
+      setError('Enter a valid mobile number')
       return
     }
     setLoading(true); setError('')
     try {
-      const { data } = await api.post('/auth/send-otp', { mobile: `+91${mobile}`, purpose: 'login' })
+      const { data } = await api.post('/auth/send-otp', { mobile, purpose: 'login' })
       if (data.data?.dev_otp) setMockOtp(data.data.dev_otp)
       setStep('otp')
     } catch (e) {
@@ -39,7 +40,7 @@ export function LoginPage() {
     setLoading(true); setError('')
     try {
       const { data } = await api.post('/auth/verify-otp', {
-        mobile: `+91${mobile}`,
+        mobile,
         otp,
         portal: 'devotee',
         device_id: deviceId,
@@ -77,32 +78,16 @@ export function LoginPage() {
           <div className="space-y-4">
             <div>
               <label className="form-label">Mobile Number</label>
-              <input
-                type="tel"
-                inputMode="numeric"
-                maxLength={13}
-                placeholder="9876543210"
-                className="form-input"
-                value={mobile}
-                onChange={e => {
-                  const digits = e.target.value.replace(/\D/g, '')
-                  // strip leading 91 if user pastes +91XXXXXXXXXX
-                  const ten = digits.startsWith('91') && digits.length > 10
-                    ? digits.slice(2, 12)
-                    : digits.slice(0, 10)
-                  setMobile(ten)
-                  setError('')
-                }}
-                onKeyDown={e => e.key === 'Enter' && sendOtp()}
-                autoFocus
-              />
-              <p className="text-xs text-slate-400 mt-1">+91 is added automatically</p>
+              <div onKeyDown={e => e.key === 'Enter' && sendOtp()}>
+                <PhoneInput value={mobile} onChange={v => { setMobile(v); setError('') }} autoFocus />
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Pick your country code for international numbers</p>
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button
               type="button"
               onClick={sendOtp}
-              disabled={loading || mobile.length !== 10}
+              disabled={loading || !isValidPhone(mobile)}
               className="btn-primary w-full justify-center py-3"
             >
               <Phone size={16} />
@@ -125,7 +110,7 @@ export function LoginPage() {
               <ChevronLeft size={15} /> Back
             </button>
             <p className="text-sm text-slate-600">
-              OTP sent to <span className="font-semibold">+91 {mobile}</span>
+              OTP sent to <span className="font-semibold">{mobile}</span>
             </p>
             {mockOtp && (
               <div className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-xs text-amber-700">
