@@ -7,6 +7,8 @@ import type { Temple } from '../../types'
 
 type Step = 'search' | 'form' | 'result'
 
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/
+
 const CATEGORIES = [
   { value: 'general', label: 'General' },
   { value: 'annadaan', label: 'Annadaan' },
@@ -27,6 +29,8 @@ export function DonatePage() {
   const [category, setCategory] = useState('general')
   const [is80g, setIs80g] = useState(false)
   const [pan, setPan] = useState('')
+  // Masked PAN already on the devotee's profile — 80G needs no retyping then.
+  const [panOnFile, setPanOnFile] = useState<string | null>(null)
   const [remarks, setRemarks] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -38,6 +42,10 @@ export function DonatePage() {
     const t = setTimeout(() => { if (query.length >= 2) searchTemples() }, 400)
     return () => clearTimeout(t)
   }, [query])
+
+  useEffect(() => {
+    api.get('/me').then(r => setPanOnFile(r.data.data?.pan_masked ?? null)).catch(() => {})
+  }, [])
 
   async function searchTemples() {
     setSearching(true)
@@ -59,18 +67,24 @@ export function DonatePage() {
   async function submit() {
     const paise = parsePaise(amount)
     if (paise < 100) { setError('Minimum donation is ₹1'); return }
-    if (is80g && !pan.trim()) { setError('PAN is required for 80G donation'); return }
+    const needsPanEntry = is80g && !panOnFile
+    if (needsPanEntry && !PAN_REGEX.test(pan)) {
+      setError('A valid PAN (format ABCDE1234F) is required for an 80G donation')
+      return
+    }
     setSubmitting(true); setError(''); setNotice('')
     try {
-      // 1. Create the order on the backend.
+      // 1. Create the order on the backend. A newly typed PAN is saved onto
+      //    the profile there, so future 80G donations use the PAN on file.
       const { data } = await api.post('/me/donate', {
         tenant_id: selectedTemple!.id,
         category,
         amount_paise: paise,
         is_80g: is80g,
-        pan: is80g ? pan.toUpperCase() : undefined,
+        pan: needsPanEntry ? pan : undefined,
         remarks,
       })
+      if (needsPanEntry) setPanOnFile(`${pan.slice(0, 2)}XXXXX${pan.slice(-3)}`)
       const order = data.data
       if (order.mock) {
         setError('Payment gateway is not configured on the server yet. Please try again later.')
@@ -227,20 +241,30 @@ export function DonatePage() {
               />
               <label htmlFor="is80g" className="text-sm text-slate-700 cursor-pointer">
                 Claim 80G tax exemption
+                {is80g && panOnFile && (
+                  <span className="block text-xs text-green-600 mt-0.5">
+                    Uses the PAN on your profile (<span className="font-mono">{panOnFile}</span>)
+                  </span>
+                )}
               </label>
             </div>
 
-            {is80g && (
+            {is80g && !panOnFile && (
               <div>
                 <label className="form-label">PAN Number *</label>
                 <input
                   type="text"
-                  className="form-input uppercase"
+                  className="form-input uppercase font-mono"
                   placeholder="ABCDE1234F"
                   maxLength={10}
                   value={pan}
-                  onChange={e => setPan(e.target.value.toUpperCase())}
+                  onChange={e => setPan(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                 />
+                <p className="text-xs text-slate-400 mt-1">
+                  {PAN_REGEX.test(pan)
+                    ? 'Your PAN will be saved to your profile for future 80G donations.'
+                    : 'Needed for 80G — 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F).'}
+                </p>
               </div>
             )}
 

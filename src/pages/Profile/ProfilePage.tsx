@@ -71,11 +71,21 @@ export function ProfilePage() {
   }
 
   async function saveProfile() {
+    // The field shows the MASKED pan (ABXXXXX34F) when one is on file — only a
+    // newly typed full PAN is sent; the masked form must never be written back.
+    const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/
+    const isMasked = /X{3,}/.test(pan)
+    let panPatch: string | undefined
+    if (!pan && profile?.pan_masked) panPatch = '' // explicit clear
+    else if (pan && !isMasked) {
+      if (!PAN_RE.test(pan)) { setSaveMsg('Invalid PAN — format is ABCDE1234F'); return }
+      panPatch = pan
+    }
     setSaving(true); setSaveMsg('')
     try {
       await api.patch('/me', {
         name, email, gotra, city, state, country, address, pincode,
-        pan: pan.replace(/X/g, '') ? pan : undefined,
+        pan: panPatch,
       })
       setSaveMsg('Profile saved!')
       setTimeout(() => setSaveMsg(''), 3000)

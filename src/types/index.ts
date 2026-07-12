@@ -139,4 +139,5 @@ export interface DevoteeUser {
   email?: string
   city?: string
   state?: string
+  pan_masked?: string | null
 }
