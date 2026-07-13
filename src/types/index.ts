@@ -126,8 +126,11 @@ export interface FeedItem {
 
 export interface Notification {
   id: string
+  type?: string | null
   title: string
   body: string
+  /** JSON string with deep-link context (e.g. { tenant_id, donation_id }) */
+  data?: string | null
   created_at: string
   read_at: string | null
 }
@@ -139,5 +142,44 @@ export interface DevoteeUser {
   email?: string
   city?: string
   state?: string
+  address?: string | null
+  pincode?: string | null
   pan_masked?: string | null
+}
+
+/** Donor-facing payment details for the manual bank/UPI donation flow */
+export interface TemplePaymentDetails {
+  tenant_id: string
+  slug: string
+  name: string
+  accept_donor_requests: boolean
+  upi_id?: string | null
+  upi_qr_cdn_url?: string | null
+  bank_account_name?: string | null
+  bank_account_no?: string | null
+  bank_ifsc?: string | null
+  bank_name?: string | null
+  is_80g_registered?: boolean
+}
+
+/** A manual bank/UPI donation submitted for temple approval */
+export interface DonationRequest {
+  id: string
+  tenant_id: string
+  temple_name: string
+  temple_slug?: string
+  amount_paise: number
+  category?: string | null
+  payment_mode: string
+  utr_number?: string | null
+  paid_at?: string | null
+  is_80g: boolean
+  remarks?: string | null
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  donation_id?: string | null
+  receipt_no?: string | null
+  review_note?: string | null
+  reviewed_at?: string | null
+  created_at: string
+  has_proof?: boolean
 }
