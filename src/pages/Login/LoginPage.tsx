@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Flame, Phone, ShieldCheck } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { api, apiError } from '../../lib/api'
@@ -9,6 +9,10 @@ type Step = 'mobile' | 'otp'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // Set by RequireAuth when redirecting here from a deep link (e.g. a WhatsApp
+  // receipt link) — send the user back to it instead of always /home.
+  const from = (location.state as { from?: string } | null)?.from
   const [step, setStep] = useState<Step>('mobile')
   const [mobile, setMobile] = useState('')
   const [otp, setOtp] = useState('')
@@ -49,8 +53,14 @@ export function LoginPage() {
       const result = data.data
       setTokens(result.access_token, result.refresh_token)
       setUser({ id: result.user.id, mobile: result.user.mobile, name: result.user.name })
-      // New user (no name) → go to registration page, existing user → home
-      navigate(result.profile_complete ? '/home' : '/register', { replace: true })
+      // New user (no name) → registration first (carrying `from` along so
+      // RegisterPage can still land them on their original destination
+      // afterwards); existing user → straight back to where they came from.
+      if (result.profile_complete) {
+        navigate(from || '/home', { replace: true })
+      } else {
+        navigate('/register', { replace: true, state: { from } })
+      }
     } catch (e) {
       setError(apiError(e))
     } finally {

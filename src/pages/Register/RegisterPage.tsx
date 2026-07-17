@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ShieldCheck, User } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
@@ -7,6 +7,10 @@ import { StateSelect, CitySelect, CountrySelect } from '../../components/GeoSele
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // Carried from LoginPage (new user) or directly from RequireAuth (existing
+  // user whose profile was already incomplete) — send them on afterwards.
+  const from = (location.state as { from?: string } | null)?.from
   const { user: authUser, setUser } = useAuthStore()
 
   const [name, setName] = useState('')
@@ -38,7 +42,7 @@ export function RegisterPage() {
         pincode: pincode.trim() || undefined,
       })
       if (authUser) setUser({ ...authUser, name: data.data?.name ?? name.trim() })
-      navigate('/home', { replace: true })
+      navigate(from || '/home', { replace: true })
     } catch (e) {
       setError(apiError(e))
     } finally {

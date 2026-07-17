@@ -1,0 +1,65 @@
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, FileText } from 'lucide-react'
+import { api, apiError } from '../../lib/api'
+
+/**
+ * Deep-link target for a specific donation's receipt — this is the page a
+ * WhatsApp "view your receipt" link points to. Same fetch-and-render pattern
+ * as DonationsList's openHtmlDoc(), just as its own route so a link (rather
+ * than an in-app button click) can reach it; RequireAuth/LoginPage carry the
+ * intended URL through login for a logged-out click.
+ */
+export function ReceiptPage() {
+  const { tenantId, donationId } = useParams()
+  const navigate = useNavigate()
+  const [html, setHtml] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true); setError('')
+      try {
+        const { data } = await api.get<string>(`/me/receipts/${tenantId}/${donationId}`, { responseType: 'text' })
+        if (!cancelled) setHtml(data)
+      } catch (e) {
+        if (!cancelled) setError(apiError(e) || 'Could not load receipt')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    if (tenantId && donationId) load()
+    return () => { cancelled = true }
+  }, [tenantId, donationId])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        <div className="w-10 h-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !html) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="page-header">
+          <button onClick={() => navigate('/donations')} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
+            <ArrowLeft size={20} className="text-slate-600" />
+          </button>
+          <h1 className="page-title">Receipt</h1>
+        </div>
+        <div className="mx-4 mt-6 card p-8 text-center">
+          <FileText size={32} className="text-slate-300 mx-auto mb-3" />
+          <p className="text-slate-500 text-sm">{error || 'Receipt not found'}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // The receipt endpoint returns a full standalone HTML document (styling included) —
+  // render it directly rather than re-wrapping in this app's own layout/CSS.
+  return <iframe title="Receipt" srcDoc={html} style={{ border: 'none', width: '100%', height: '100vh' }} />
+}
