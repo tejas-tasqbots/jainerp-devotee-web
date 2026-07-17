@@ -44,6 +44,8 @@ export interface Boli {
   pledge_date: string
   due_date: string
   pay_link?: string
+  /** False while Razorpay isn't configured on the server — hide Pay Now rather than let the devotee hit a mocked payment. */
+  payment_enabled?: boolean
 }
 
 export interface Temple {

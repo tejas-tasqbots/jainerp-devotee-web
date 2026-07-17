@@ -141,12 +141,18 @@ export function BolisList() {
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5 text-right">{paidPct}% paid</p>
                 </div>
-                <button
-                  onClick={() => { setPayModal(boli); setPayAmount(String(boli.outstanding_paise / 100)); setPayResult(null); setPayError('') }}
-                  className="btn-primary w-full justify-center py-2.5"
-                >
-                  <IndianRupee size={15} /> Pay Now
-                </button>
+                {boli.payment_enabled !== false ? (
+                  <button
+                    onClick={() => { setPayModal(boli); setPayAmount(String(boli.outstanding_paise / 100)); setPayResult(null); setPayError('') }}
+                    className="btn-primary w-full justify-center py-2.5"
+                  >
+                    <IndianRupee size={15} /> Pay Now
+                  </button>
+                ) : (
+                  <p className="text-xs text-slate-400 text-center py-2">
+                    Online payment isn't set up for this temple yet — please pay at the counter.
+                  </p>
+                )}
               </div>
             )
           })
