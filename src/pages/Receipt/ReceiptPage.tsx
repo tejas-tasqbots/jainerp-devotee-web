@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, FileText } from 'lucide-react'
+import { ArrowLeft, Download, FileText } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 
 /**
@@ -13,9 +13,18 @@ import { api, apiError } from '../../lib/api'
 export function ReceiptPage() {
   const { tenantId, donationId } = useParams()
   const navigate = useNavigate()
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const [html, setHtml] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+
+  // No PDF-generation library on this app (mandiradmin-web has one, but it's a
+  // separate frontend and can't be imported here) — the receipt HTML already
+  // has print styling built in, so trigger the iframe's own print dialog,
+  // which every mobile/desktop browser can save as PDF from directly.
+  function downloadReceipt() {
+    iframeRef.current?.contentWindow?.print()
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -61,5 +70,26 @@ export function ReceiptPage() {
 
   // The receipt endpoint returns a full standalone HTML document (styling included) —
   // render it directly rather than re-wrapping in this app's own layout/CSS.
-  return <iframe title="Receipt" srcDoc={html} style={{ border: 'none', width: '100%', height: '100vh' }} />
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <div className="page-header">
+        <button onClick={() => navigate('/donations')} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
+          <ArrowLeft size={20} className="text-slate-600" />
+        </button>
+        <h1 className="page-title">Receipt</h1>
+        <button
+          onClick={downloadReceipt}
+          className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 px-3 py-1.5"
+        >
+          <Download size={16} /> Download
+        </button>
+      </div>
+      <iframe
+        ref={iframeRef}
+        title="Receipt"
+        srcDoc={html}
+        style={{ border: 'none', width: '100%', height: 'calc(100vh - 56px)' }}
+      />
+    </div>
+  )
 }
