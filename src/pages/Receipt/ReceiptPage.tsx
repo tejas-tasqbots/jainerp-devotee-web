@@ -20,10 +20,33 @@ export function ReceiptPage() {
 
   // No PDF-generation library on this app (mandiradmin-web has one, but it's a
   // separate frontend and can't be imported here) — the receipt HTML already
-  // has print styling built in, so trigger the iframe's own print dialog,
-  // which every mobile/desktop browser can save as PDF from directly.
+  // has print styling built in, so we hand it to the browser's own print/save
+  // dialog, which can save as PDF everywhere.
+  //
+  // Desktop: printing the embedded iframe works reliably. Mobile browsers,
+  // though, ignore programmatic print() on an iframe (that's why Download did
+  // nothing on phones), so there we open the receipt as a standalone document
+  // in a new tab where the native Share → Print / Save as PDF is available.
   function downloadReceipt() {
-    iframeRef.current?.contentWindow?.print()
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    if (isMobile && html) {
+      const blob = new Blob([html], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      const win = window.open(url, '_blank')
+      if (win) {
+        // Trigger the OS print/share sheet once the standalone doc has painted.
+        win.addEventListener('load', () => setTimeout(() => win.print(), 300))
+      } else {
+        // Popup blocked — navigate this tab to the raw receipt so the user can
+        // still use the browser menu's Print / Share.
+        window.location.href = url
+      }
+      // Revoke after a delay so the new tab has time to read the blob.
+      setTimeout(() => URL.revokeObjectURL(url), 60000)
+      return
+    }
+    const frame = iframeRef.current?.contentWindow
+    if (frame) { frame.focus(); frame.print() }
   }
 
   useEffect(() => {
