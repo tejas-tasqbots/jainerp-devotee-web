@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "होम",
+    "donations": "दान",
+    "donate": "दान करा",
+    "maharaj": "महाराज",
+    "profile": "प्रोफाइल"
+  },
+  "titles": {
+    "myDonations": "माझी दाने",
+    "myBolis": "माझ्या बोली",
+    "myProfile": "माझे प्रोफाइल",
+    "notifications": "सूचना",
+    "templeDirectory": "मंदिर निर्देशिका",
+    "receipt": "पावती",
+    "completeProfile": "तुमचे प्रोफाइल पूर्ण करा",
+    "maharajMataji": "महाराज / माताजी"
+  },
+  "login": {
+    "heading": "भक्त लॉगिन",
+    "mobileLabel": "मोबाइल क्रमांक",
+    "sendOtp": "OTP पाठवा",
+    "sendingOtp": "OTP पाठवत आहे...",
+    "otpLabel": "OTP टाका",
+    "otpPlaceholder": "6 अंकी OTP",
+    "verifyOtp": "OTP पडताळा",
+    "verifying": "पडताळत आहे...",
+    "invalidMobile": "वैध मोबाइल क्रमांक टाका",
+    "invalidOtp": "6 अंकी OTP टाका",
+    "devModeOtp": "डेव्ह मोड — OTP:",
+    "back": "मागे",
+    "otpSentTo": "OTP पाठवला"
+  },
+  "home": {
+    "quickDonate": "दान करा",
+    "quickDonations": "दान",
+    "quickBolis": "माझ्या बोली",
+    "quickTemples": "मंदिरे",
+    "quickMaharaj": "महाराज",
+    "myTemples": "माझी मंदिरे",
+    "eligible80g": "80G पात्र",
+    "payNow": "आता भरा",
+    "receipts": "पावत्या",
+    "viewAll": "सर्व पहा"
+  },
+  "common": {
+    "loading": "लोड होत आहे...",
+    "download": "डाउनलोड",
+    "payNow": "आता भरा",
+    "outstanding": "थकबाकी",
+    "due": "देय",
+    "paid": "भरले",
+    "cancel": "रद्द करा",
+    "save": "जतन करा",
+    "language": "भाषा",
+    "payAtCounter": "या मंदिरासाठी ऑनलाइन पेमेंट अद्याप उपलब्ध नाही — कृपया काउंटरवर भरा."
+  }
+}

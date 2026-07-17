@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { Bell, Calendar, CheckCircle, IndianRupee, X } from 'lucide-react'
 import { format } from 'date-fns'
@@ -7,6 +8,7 @@ import { useAuthStore } from '../../store/authStore'
 import type { Boli } from '../../types'
 
 export function BolisList() {
+  const { t } = useTranslation()
   const user = useAuthStore(s => s.user)
   const [bolis, setBolis] = useState<Boli[]>([])
   const [loading, setLoading] = useState(true)
@@ -77,7 +79,7 @@ export function BolisList() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <h1 className="page-title">My Bolis</h1>
+        <h1 className="page-title">{t('titles.myBolis')}</h1>
         <Bell size={20} className="text-slate-600" />
       </div>
 
@@ -146,11 +148,11 @@ export function BolisList() {
                     onClick={() => { setPayModal(boli); setPayAmount(String(boli.outstanding_paise / 100)); setPayResult(null); setPayError('') }}
                     className="btn-primary w-full justify-center py-2.5"
                   >
-                    <IndianRupee size={15} /> Pay Now
+                    <IndianRupee size={15} /> {t('common.payNow')}
                   </button>
                 ) : (
                   <p className="text-xs text-slate-400 text-center py-2">
-                    Online payment isn't set up for this temple yet — please pay at the counter.
+                    {t('common.payAtCounter')}
                   </p>
                 )}
               </div>

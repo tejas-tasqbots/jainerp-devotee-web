@@ -1,15 +1,16 @@
-import { Building2, Heart, Home, IndianRupee, Sparkles, User } from 'lucide-react'
+import { Heart, Home, IndianRupee, Sparkles, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
-
-const tabs = [
-  { to: '/home', icon: Home, label: 'Home' },
-  { to: '/donations', icon: IndianRupee, label: 'Donations' },
-  { to: '/donate', icon: Heart, label: 'Donate', featured: true },
-  { to: '/maharaj', icon: Sparkles, label: 'Maharaj' },
-  { to: '/profile', icon: User, label: 'Profile' },
-]
+import { useTranslation } from 'react-i18next'
 
 export function BottomNav() {
+  const { t } = useTranslation()
+  const tabs = [
+    { to: '/home', icon: Home, label: t('nav.home') },
+    { to: '/donations', icon: IndianRupee, label: t('nav.donations') },
+    { to: '/donate', icon: Heart, label: t('nav.donate'), featured: true },
+    { to: '/maharaj', icon: Sparkles, label: t('nav.maharaj') },
+    { to: '/profile', icon: User, label: t('nav.profile') },
+  ]
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 bottom-nav-safe">
       <div className="flex items-end justify-around px-2 pt-1 pb-1">

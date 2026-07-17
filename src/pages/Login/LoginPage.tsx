@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Flame, Phone, ShieldCheck } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { api, apiError } from '../../lib/api'
 import { isValidPhone, PhoneInput } from '../../components/PhoneInput'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
 
 type Step = 'mobile' | 'otp'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   // Set by RequireAuth when redirecting here from a deep link (e.g. a WhatsApp
@@ -24,7 +27,7 @@ export function LoginPage() {
 
   async function sendOtp() {
     if (!isValidPhone(mobile)) {
-      setError('Enter a valid mobile number')
+      setError(t('login.invalidMobile'))
       return
     }
     setLoading(true); setError('')
@@ -40,7 +43,7 @@ export function LoginPage() {
   }
 
   async function verifyOtp() {
-    if (otp.length !== 6) { setError('Enter 6-digit OTP'); return }
+    if (otp.length !== 6) { setError(t('login.invalidOtp')); return }
     setLoading(true); setError('')
     try {
       const { data } = await api.post('/auth/verify-otp', {
@@ -70,7 +73,8 @@ export function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-100 to-orange-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm relative">
+        <div className="absolute right-4 top-4"><LanguageSwitcher /></div>
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[var(--color-brand-red)]">
@@ -87,7 +91,7 @@ export function LoginPage() {
         {step === 'mobile' && (
           <div className="space-y-4">
             <div>
-              <label className="form-label">Mobile Number</label>
+              <label className="form-label">{t('login.mobileLabel')}</label>
               <div onKeyDown={e => e.key === 'Enter' && sendOtp()}>
                 <PhoneInput value={mobile} onChange={v => { setMobile(v); setError('') }} autoFocus />
               </div>
@@ -101,7 +105,7 @@ export function LoginPage() {
               className="btn-primary w-full justify-center py-3"
             >
               <Phone size={16} />
-              {loading ? 'Sending OTP...' : 'Send OTP'}
+              {loading ? t('login.sendingOtp') : t('login.sendOtp')}
             </button>
             <p className="text-center text-xs text-slate-400">
               New user? You'll complete your profile after OTP.
@@ -117,10 +121,10 @@ export function LoginPage() {
               onClick={() => { setStep('mobile'); setOtp(''); setError('') }}
               className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-600"
             >
-              <ChevronLeft size={15} /> Back
+              <ChevronLeft size={15} /> {t('login.back')}
             </button>
             <p className="text-sm text-slate-600">
-              OTP sent to <span className="font-semibold">{mobile}</span>
+              {t('login.otpSentTo')} <span className="font-semibold">{mobile}</span>
             </p>
             {mockOtp && (
               <div className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-xs text-amber-700">
@@ -128,12 +132,12 @@ export function LoginPage() {
               </div>
             )}
             <div>
-              <label className="form-label">Enter OTP</label>
+              <label className="form-label">{t('login.otpLabel')}</label>
               <input
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
-                placeholder="6-digit OTP"
+                placeholder={t('login.otpPlaceholder')}
                 className="form-input text-center text-2xl font-mono tracking-[0.5em]"
                 value={otp}
                 onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setError('') }}
@@ -149,7 +153,7 @@ export function LoginPage() {
               className="btn-primary w-full justify-center py-3"
             >
               <ShieldCheck size={16} />
-              {loading ? 'Verifying...' : 'Verify OTP'}
+              {loading ? t('login.verifying') : t('login.verifyOtp')}
             </button>
             {/* Numpad */}
             <div className="grid grid-cols-3 gap-2 mt-2">

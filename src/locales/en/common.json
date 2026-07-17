@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "Home",
+    "donations": "Donations",
+    "donate": "Donate",
+    "maharaj": "Maharaj",
+    "profile": "Profile"
+  },
+  "titles": {
+    "myDonations": "My Donations",
+    "myBolis": "My Bolis",
+    "myProfile": "My Profile",
+    "notifications": "Notifications",
+    "templeDirectory": "Temple Directory",
+    "receipt": "Receipt",
+    "completeProfile": "Complete Your Profile",
+    "maharajMataji": "Maharaj / Mataji"
+  },
+  "login": {
+    "heading": "Devotee Login",
+    "mobileLabel": "Mobile Number",
+    "sendOtp": "Send OTP",
+    "sendingOtp": "Sending OTP...",
+    "otpLabel": "Enter OTP",
+    "otpPlaceholder": "6-digit OTP",
+    "verifyOtp": "Verify OTP",
+    "verifying": "Verifying...",
+    "invalidMobile": "Enter a valid mobile number",
+    "invalidOtp": "Enter 6-digit OTP",
+    "devModeOtp": "Dev mode — OTP:",
+    "back": "Back",
+    "otpSentTo": "OTP sent to"
+  },
+  "home": {
+    "quickDonate": "Donate",
+    "quickDonations": "Donations",
+    "quickBolis": "My Bolis",
+    "quickTemples": "Temples",
+    "quickMaharaj": "Maharaj",
+    "myTemples": "My Temples",
+    "eligible80g": "80G eligible",
+    "payNow": "Pay now",
+    "receipts": "Receipts",
+    "viewAll": "View all"
+  },
+  "common": {
+    "loading": "Loading...",
+    "download": "Download",
+    "payNow": "Pay Now",
+    "outstanding": "Outstanding",
+    "due": "Due",
+    "paid": "paid",
+    "cancel": "Cancel",
+    "save": "Save",
+    "language": "Language",
+    "payAtCounter": "Online payment isn't set up for this temple yet — please pay at the counter."
+  }
+}

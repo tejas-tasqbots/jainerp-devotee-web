@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "होम",
+    "donations": "दान",
+    "donate": "दान करें",
+    "maharaj": "महाराज",
+    "profile": "प्रोफ़ाइल"
+  },
+  "titles": {
+    "myDonations": "मेरे दान",
+    "myBolis": "मेरी बोलियाँ",
+    "myProfile": "मेरी प्रोफ़ाइल",
+    "notifications": "सूचनाएँ",
+    "templeDirectory": "मंदिर निर्देशिका",
+    "receipt": "रसीद",
+    "completeProfile": "अपनी प्रोफ़ाइल पूरी करें",
+    "maharajMataji": "महाराज / माताजी"
+  },
+  "login": {
+    "heading": "भक्त लॉगिन",
+    "mobileLabel": "मोबाइल नंबर",
+    "sendOtp": "OTP भेजें",
+    "sendingOtp": "OTP भेजा जा रहा है...",
+    "otpLabel": "OTP दर्ज करें",
+    "otpPlaceholder": "6 अंकों का OTP",
+    "verifyOtp": "OTP सत्यापित करें",
+    "verifying": "सत्यापित हो रहा है...",
+    "invalidMobile": "मान्य मोबाइल नंबर दर्ज करें",
+    "invalidOtp": "6 अंकों का OTP दर्ज करें",
+    "devModeOtp": "डेव मोड — OTP:",
+    "back": "वापस",
+    "otpSentTo": "OTP भेजा गया"
+  },
+  "home": {
+    "quickDonate": "दान करें",
+    "quickDonations": "दान",
+    "quickBolis": "मेरी बोलियाँ",
+    "quickTemples": "मंदिर",
+    "quickMaharaj": "महाराज",
+    "myTemples": "मेरे मंदिर",
+    "eligible80g": "80G पात्र",
+    "payNow": "अभी भुगतान करें",
+    "receipts": "रसीदें",
+    "viewAll": "सभी देखें"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "download": "डाउनलोड",
+    "payNow": "अभी भुगतान करें",
+    "outstanding": "बकाया",
+    "due": "देय",
+    "paid": "भुगतान हुआ",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "language": "भाषा",
+    "payAtCounter": "इस मंदिर के लिए ऑनलाइन भुगतान अभी उपलब्ध नहीं है — कृपया काउंटर पर भुगतान करें।"
+  }
+}

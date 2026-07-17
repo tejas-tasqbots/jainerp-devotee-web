@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, CheckCircle, Link, LogOut, Save, XCircle } from 'lucide-react'
@@ -15,6 +16,7 @@ interface TempleInvite {
 }
 
 export function ProfilePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
 
@@ -138,7 +140,7 @@ export function ProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <h1 className="page-title">My Profile</h1>
+        <h1 className="page-title">{t('titles.myProfile')}</h1>
         <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>

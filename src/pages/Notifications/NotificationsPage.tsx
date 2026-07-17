@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Bell, FileText } from 'lucide-react'
@@ -17,6 +18,7 @@ function parseData(n: Notification): Record<string, string> {
 }
 
 export function NotificationsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,7 +75,7 @@ export function NotificationsPage() {
         <button onClick={() => navigate(-1)} className="p-1 -ml-1">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
-        <h1 className="page-title">Notifications</h1>
+        <h1 className="page-title">{t('titles.notifications')}</h1>
         {unread.length > 0 && (
           <span className="badge badge-red">{unread.length}</span>
         )}

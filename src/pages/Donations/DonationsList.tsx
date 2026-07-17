@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Award, Bell, Clock, FileText, IndianRupee, Loader2, XCircle } from 'lucide-react'
@@ -26,6 +27,7 @@ async function openHtmlDoc(url: string) {
 }
 
 export function DonationsList() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [view, setView] = useState<'history' | 'requests'>('history')
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -134,7 +136,7 @@ export function DonationsList() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="page-header">
-        <h1 className="page-title">My Donations</h1>
+        <h1 className="page-title">{t('titles.myDonations')}</h1>
         <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
@@ -238,6 +240,12 @@ export function DonationsList() {
               <div className="card p-8 text-center">
                 <IndianRupee size={32} className="text-slate-300 mx-auto mb-3" />
                 <p className="text-slate-500 text-sm">No transactions found</p>
+                <button
+                  onClick={() => navigate('/donate')}
+                  className="btn-primary mt-4 mx-auto justify-center px-6 py-2"
+                >
+                  {t('nav.donate')}
+                </button>
               </div>
             ) : (
               <>

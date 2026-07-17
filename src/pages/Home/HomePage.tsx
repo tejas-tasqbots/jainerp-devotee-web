@@ -7,6 +7,8 @@ import {
 import { format } from 'date-fns'
 import { api, currentFY, fmtPaise } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
 import type { Boli, FeedItem, TransactionSummary } from '../../types'
 
 interface MyTemple {
@@ -26,6 +28,7 @@ function greeting(): string {
 }
 
 export function HomePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const [feed, setFeed] = useState<FeedItem[]>([])
@@ -51,11 +54,11 @@ export function HomePage() {
   }
 
   const quickActions = [
-    { label: 'Donate', icon: Heart, color: 'bg-brand-red text-white', path: '/donate' },
-    { label: 'Donations', icon: IndianRupee, color: 'bg-green-600 text-white', path: '/donations' },
-    { label: 'My Bolis', icon: Calendar, color: 'bg-amber-500 text-white', path: '/bolis' },
-    { label: 'Temples', icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
-    { label: 'Maharaj', icon: Sparkles, color: 'bg-purple-600 text-white', path: '/maharaj' },
+    { label: t('home.quickDonate'), icon: Heart, color: 'bg-brand-red text-white', path: '/donate' },
+    { label: t('home.quickDonations'), icon: IndianRupee, color: 'bg-green-600 text-white', path: '/donations' },
+    { label: t('home.quickBolis'), icon: Calendar, color: 'bg-amber-500 text-white', path: '/bolis' },
+    { label: t('home.quickTemples'), icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
+    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-purple-600 text-white', path: '/maharaj' },
   ]
 
   const outstanding = bolis.reduce((s, b) => s + Number(b.outstanding_paise || 0), 0)
@@ -75,9 +78,12 @@ export function HomePage() {
             <p className="text-xs text-white/75">{greeting()} 🙏</p>
             <h1 className="text-xl font-bold leading-tight">{user?.name || 'Welcome'}</h1>
           </div>
-          <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors" aria-label="Notifications">
-            <Bell size={20} className="text-white" />
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors" aria-label="Notifications">
+              <Bell size={20} className="text-white" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -104,7 +110,7 @@ export function HomePage() {
           </div>
           <div className="flex gap-5 mt-2.5">
             <div>
-              <p className="text-[11px] text-slate-400">80G eligible</p>
+              <p className="text-[11px] text-slate-400">{t('home.eligible80g')}</p>
               <p className="text-sm font-semibold text-brand-gold">₹{fmtPaise(summary?.eligible_80g_paise ?? 0)}</p>
             </div>
             <div>
@@ -154,7 +160,7 @@ export function HomePage() {
         {/* My temples strip */}
         <section>
           <div className="flex items-center justify-between mb-2.5">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">My Temples</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{t('home.myTemples')}</h2>
             <button onClick={() => navigate('/temples')} className="text-xs font-medium text-brand-red flex items-center gap-0.5">
               Explore <ChevronRight size={13} />
             </button>

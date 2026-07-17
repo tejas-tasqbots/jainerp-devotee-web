@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, ChevronRight, Search } from 'lucide-react'
@@ -5,6 +6,7 @@ import { api } from '../../lib/api'
 import type { Temple } from '../../types'
 
 export function TempleDirectory() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [temples, setTemples] = useState<Temple[]>([])
@@ -40,7 +42,7 @@ export function TempleDirectory() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <h1 className="page-title">Temple Directory</h1>
+        <h1 className="page-title">{t('titles.templeDirectory')}</h1>
         <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
