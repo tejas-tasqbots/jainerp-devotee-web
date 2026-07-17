@@ -5,10 +5,10 @@ import { api, apiError } from '../../lib/api'
 
 /**
  * Deep-link target for a specific donation's receipt — this is the page a
- * WhatsApp "view your receipt" link points to. Same fetch-and-render pattern
- * as DonationsList's openHtmlDoc(), just as its own route so a link (rather
- * than an in-app button click) can reach it; RequireAuth/LoginPage carry the
- * intended URL through login for a logged-out click.
+ * WhatsApp "view your receipt" link / Download Receipt button points to.
+ * Served WITHOUT login: the two UUIDs in the URL are the access key, and the
+ * API keeps the PAN masked on this public path (full PAN needs the authed
+ * in-app receipt view).
  */
 export function ReceiptPage() {
   const { tenantId, donationId } = useParams()
@@ -31,7 +31,7 @@ export function ReceiptPage() {
     async function load() {
       setLoading(true); setError('')
       try {
-        const { data } = await api.get<string>(`/me/receipts/${tenantId}/${donationId}`, { responseType: 'text' })
+        const { data } = await api.get<string>(`/public/receipts/${tenantId}/${donationId}`, { responseType: 'text' })
         if (!cancelled) setHtml(data)
       } catch (e) {
         if (!cancelled) setError(apiError(e) || 'Could not load receipt')

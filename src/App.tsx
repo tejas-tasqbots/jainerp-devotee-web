@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { Layout } from './components/Layout/Layout'
 import { BolisList } from './pages/Bolis/BolisList'
 import { DonatePage } from './pages/Donate/DonatePage'
@@ -25,6 +25,19 @@ function RequireAuth() {
   // New user with no name — send to registration
   if (!user?.name) return <Navigate to="/register" state={{ from }} replace />
   return <Outlet />
+}
+
+/**
+ * WhatsApp template URL buttons carry one dynamic suffix, and Meta may
+ * percent-encode slashes in it — so the "Download Receipt" button uses
+ * `tenantId_donationId` in a single path segment. Expand it to the canonical
+ * two-segment receipt URL ('_' never occurs inside a UUID).
+ */
+function ReceiptComboRedirect() {
+  const { combo } = useParams()
+  const [tenantId, donationId] = (combo ?? '').split('_')
+  if (!tenantId || !donationId) return <Navigate to="/home" replace />
+  return <Navigate to={`/receipts/${tenantId}/${donationId}`} replace />
 }
 
 function GuestOnly() {
@@ -68,9 +81,13 @@ export default function App() {
             <Route path="/maharaj/:id" element={<MaharajDetails />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/receipts/:tenantId/:donationId" element={<ReceiptPage />} />
           </Route>
         </Route>
+
+        {/* Public receipt deep links (WhatsApp) — no login required; the two
+            UUIDs in the URL are the access key and the API masks the PAN. */}
+        <Route path="/receipts/:tenantId/:donationId" element={<ReceiptPage />} />
+        <Route path="/receipts/:combo" element={<ReceiptComboRedirect />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/home" replace />} />
