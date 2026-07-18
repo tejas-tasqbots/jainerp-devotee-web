@@ -41,7 +41,16 @@
     "eligible80g": "80G eligible",
     "payNow": "Pay now",
     "receipts": "Receipts",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "explore": "Explore",
+    "addTemple": "Add temple",
+    "upcomingEvents": "Upcoming Events",
+    "templeUpdates": "Temple Updates",
+    "noUpdates": "No temple updates yet",
+    "findTemples": "Find Temples",
+    "receiptsLabel": "Receipts",
+    "templesLabel": "Temples",
+    "myGiving": "My giving"
   },
   "common": {
     "loading": "Loading...",

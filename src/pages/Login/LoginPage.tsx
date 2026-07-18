@@ -72,19 +72,21 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-100 to-orange-50 p-4">
+    // Mirrors the mandir-admin login exactly (slate page, white card, brand-red
+    // icon box, navy/red wordmark) so every portal reads as one product.
+    <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm relative">
         <div className="absolute right-4 top-4"><LanguageSwitcher /></div>
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[var(--color-brand-red)]">
+          <div className="w-16 h-16 rounded-2xl bg-brand-red flex items-center justify-center mx-auto mb-4">
             <Flame size={32} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">
             <span className="text-navy-900">Jain</span>
-            <span className="text-[var(--color-brand-red)]">ERP</span>
+            <span className="text-brand-red">ERP</span>
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Devotee / Bhakt Portal</p>
+          <p className="text-slate-500 text-sm mt-1">{t('login.heading')}</p>
         </div>
 
         {/* Step 1: Mobile */}

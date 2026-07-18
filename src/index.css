@@ -100,9 +100,13 @@
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px -8px rgba(15, 23, 42, 0.08);
   }
 
-  /* ── Saffron devotional hero ────────────────────────────────────────────── */
+  /* ── Platform hero (navy, matching the mandir-admin identity) ───────────
+     Was a saffron/orange gradient, which made the devotee app look like a
+     different product; now the shared navy-900→navy-700 with a soft gold
+     glow (brand-gold from the shared palette). Class name kept so pages
+     don't churn. */
   .hero-saffron {
-    background-image: linear-gradient(150deg, #f2670f 0%, #e03131 48%, #9e1c1c 100%);
+    background-image: linear-gradient(150deg, #1b2f4a 0%, #13233a 55%, #0D1B2E 100%);
     border-bottom-left-radius: 1.75rem;
     border-bottom-right-radius: 1.75rem;
   }
@@ -111,8 +115,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(circle at 85% 12%, rgba(244, 197, 66, 0.4), transparent 42%),
-      radial-gradient(circle at 8% 90%, rgba(255, 255, 255, 0.08), transparent 35%);
+      radial-gradient(circle at 85% 12%, rgba(244, 197, 66, 0.28), transparent 42%),
+      radial-gradient(circle at 8% 90%, rgba(255, 255, 255, 0.06), transparent 35%);
     border-bottom-left-radius: 1.75rem;
     border-bottom-right-radius: 1.75rem;
     pointer-events: none;

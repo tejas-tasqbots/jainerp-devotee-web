@@ -85,10 +85,10 @@ export function BolisList() {
 
       {/* Summary */}
       {bolis.length > 0 && (
-        <div className="mx-4 mt-4 card p-4 bg-orange-50 border-orange-200">
-          <p className="text-xs text-orange-600 font-medium">Total Outstanding</p>
-          <p className="text-xl font-bold text-orange-700">₹{fmtPaise(outstanding)}</p>
-          <p className="text-xs text-orange-500 mt-0.5">{bolis.length} boli(s) pending</p>
+        <div className="mx-4 mt-4 card p-4 bg-amber-50 border-amber-200">
+          <p className="text-xs text-amber-700 font-medium">Total Outstanding</p>
+          <p className="text-xl font-bold text-amber-800">₹{fmtPaise(outstanding)}</p>
+          <p className="text-xs text-amber-600 mt-0.5">{bolis.length} boli(s) pending</p>
         </div>
       )}
 

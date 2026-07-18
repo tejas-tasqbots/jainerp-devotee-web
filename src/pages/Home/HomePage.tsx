@@ -98,7 +98,7 @@ export function HomePage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                <TrendingUp size={12} /> My giving — FY {summary?.fy ?? currentFY()}
+                <TrendingUp size={12} /> {t('home.myGiving')} — FY {summary?.fy ?? currentFY()}
               </p>
               {loading ? (
                 <div className="h-7 w-32 bg-white/10 rounded mt-1 animate-pulse" />
@@ -114,11 +114,11 @@ export function HomePage() {
               <p className="text-sm font-semibold text-brand-gold">₹{fmtPaise(summary?.eligible_80g_paise ?? 0)}</p>
             </div>
             <div>
-              <p className="text-[11px] text-slate-400">Receipts</p>
+              <p className="text-[11px] text-slate-400">{t('home.receiptsLabel')}</p>
               <p className="text-sm font-semibold">{summary?.txn_count ?? 0}</p>
             </div>
             <div>
-              <p className="text-[11px] text-slate-400">Temples</p>
+              <p className="text-[11px] text-slate-400">{t('home.templesLabel')}</p>
               <p className="text-sm font-semibold">{summary?.by_temple?.length ?? 0}</p>
             </div>
           </div>
@@ -162,7 +162,7 @@ export function HomePage() {
           <div className="flex items-center justify-between mb-2.5">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{t('home.myTemples')}</h2>
             <button onClick={() => navigate('/temples')} className="text-xs font-medium text-brand-red flex items-center gap-0.5">
-              Explore <ChevronRight size={13} />
+              {t('home.explore')} <ChevronRight size={13} />
             </button>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4">
@@ -175,7 +175,7 @@ export function HomePage() {
                   onClick={() => slug && navigate(`/temples/${slug}`)}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 w-16"
                 >
-                  <span className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-100 to-red-100 border border-orange-200 flex items-center justify-center text-brand-red font-bold text-lg">
+                  <span className="w-14 h-14 rounded-full bg-gradient-to-br from-red-50 to-amber-50 border border-slate-200 flex items-center justify-center text-brand-red font-bold text-lg">
                     {name.replace(/^(shri|shree|sri)\s+/i, '').slice(0, 1).toUpperCase()}
                   </span>
                   <span className="text-[10px] text-slate-600 text-center leading-tight line-clamp-2">{name}</span>
@@ -186,7 +186,7 @@ export function HomePage() {
               <span className="w-14 h-14 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400">
                 <Plus size={20} />
               </span>
-              <span className="text-[10px] text-slate-400 text-center leading-tight">Add temple</span>
+              <span className="text-[10px] text-slate-400 text-center leading-tight">{t('home.addTemple')}</span>
             </button>
           </div>
         </section>
@@ -194,7 +194,7 @@ export function HomePage() {
         {/* Upcoming events */}
         {upcoming.length > 0 && (
           <section>
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2.5">Upcoming Events</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2.5">{t('home.upcomingEvents')}</h2>
             <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4">
               {upcoming.map(ev => (
                 <div key={ev.id} className="card p-3.5 flex-shrink-0 w-56">
@@ -214,7 +214,7 @@ export function HomePage() {
 
         {/* Feed */}
         <section>
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2.5">Temple Updates</h2>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2.5">{t('home.templeUpdates')}</h2>
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
@@ -228,9 +228,9 @@ export function HomePage() {
           ) : feed.length === 0 ? (
             <div className="card p-8 text-center">
               <Building2 size={32} className="text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm font-medium">No temple updates yet</p>
+              <p className="text-slate-500 text-sm font-medium">{t('home.noUpdates')}</p>
               <p className="text-slate-400 text-xs mt-1">Donate to a temple or link one to start receiving updates</p>
-              <button onClick={() => navigate('/temples')} className="btn-primary mt-4 mx-auto">Find Temples</button>
+              <button onClick={() => navigate('/temples')} className="btn-primary mt-4 mx-auto">{t('home.findTemples')}</button>
             </div>
           ) : (
             <div className="space-y-3">

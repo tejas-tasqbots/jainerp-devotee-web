@@ -51,12 +51,12 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-orange-50 flex items-start justify-center p-4 pt-8">
+    <div className="min-h-screen bg-slate-100 flex items-start justify-center p-4 pt-8">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
         {/* Header */}
         <div className="text-center pt-8 pb-4 px-6">
-          <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-3">
-            <User size={26} className="text-orange-600" />
+          <div className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center mx-auto mb-3">
+            <User size={26} className="text-white" />
           </div>
           <h1 className="text-xl font-bold text-navy-900">Complete Your Profile</h1>
           <p className="text-xs text-slate-400 mt-1">

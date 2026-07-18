@@ -208,7 +208,7 @@ export function MaharajDetails() {
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Requirements</h3>
             <div className="space-y-2">
               {profile.requirements.map(r => (
-                <div key={r.id} className="bg-orange-50 rounded-lg p-3">
+                <div key={r.id} className="bg-amber-50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="badge badge-red">{r.type}</span>
                     <span className="text-xs text-slate-400">{r.city}</span>
