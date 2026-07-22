@@ -3,7 +3,7 @@
     "home": "Home",
     "donations": "Donations",
     "donate": "Donate",
-    "maharaj": "Maharaj",
+    "maharaj": "Sadhu-Sadhvi",
     "profile": "Profile"
   },
   "titles": {
@@ -14,7 +14,7 @@
     "templeDirectory": "Temple Directory",
     "receipt": "Receipt",
     "completeProfile": "Complete Your Profile",
-    "maharajMataji": "Maharaj / Mataji"
+    "maharajMataji": "Sadhu-Sadhvi"
   },
   "login": {
     "heading": "Devotee Login",
@@ -36,7 +36,7 @@
     "quickDonations": "Donations",
     "quickBolis": "My Bolis",
     "quickTemples": "Temples",
-    "quickMaharaj": "Maharaj",
+    "quickMaharaj": "Sadhu-Sadhvi",
     "myTemples": "My Temples",
     "eligible80g": "80G eligible",
     "payNow": "Pay now",

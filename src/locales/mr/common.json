@@ -3,7 +3,7 @@
     "home": "होम",
     "donations": "दान",
     "donate": "दान करा",
-    "maharaj": "महाराज",
+    "maharaj": "साधु-साध्वी",
     "profile": "प्रोफाइल"
   },
   "titles": {
@@ -14,7 +14,7 @@
     "templeDirectory": "मंदिरांची यादी",
     "receipt": "पावती",
     "completeProfile": "तुमचे प्रोफाइल पूर्ण करा",
-    "maharajMataji": "महाराज / माताजी"
+    "maharajMataji": "साधु-साध्वी"
   },
   "login": {
     "heading": "भक्त लॉगिन",
@@ -36,7 +36,7 @@
     "quickDonations": "दान",
     "quickBolis": "माझ्या बोली",
     "quickTemples": "मंदिरे",
-    "quickMaharaj": "महाराज",
+    "quickMaharaj": "साधु-साध्वी",
     "myTemples": "माझी मंदिरे",
     "eligible80g": "80G योग्य",
     "payNow": "आता भरा",
