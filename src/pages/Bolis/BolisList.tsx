@@ -6,6 +6,7 @@ import { api, apiError, fmtPaise, parsePaise } from '../../lib/api'
 import { openRazorpayCheckout } from '../../lib/razorpay'
 import { useAuthStore } from '../../store/authStore'
 import type { Boli } from '../../types'
+import { EmptyState } from '../../components/kit'
 
 export function BolisList() {
   const { t } = useTranslation()
@@ -101,11 +102,11 @@ export function BolisList() {
             </div>
           ))
         ) : bolis.length === 0 ? (
-          <div className="card p-8 text-center">
-            <CheckCircle size={32} className="text-green-400 mx-auto mb-3" />
-            <p className="text-slate-500 text-sm font-medium">No pending bolis</p>
-            <p className="text-slate-400 text-xs mt-1">All your pledges are fulfilled!</p>
-          </div>
+          <EmptyState
+            icon={CheckCircle}
+            title="No pending bolis"
+            hint="Every pledge you have made is fully paid. New bolis appear here when a temple records one for you."
+          />
         ) : (
           bolis.map(boli => {
             const paidPct = Math.round((boli.paid_amount_paise / boli.pledged_amount_paise) * 100)

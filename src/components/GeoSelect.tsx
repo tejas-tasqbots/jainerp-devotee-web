@@ -10,7 +10,7 @@ export function StateSelect({ value, onChange, className = 'form-select' }: {
   useEffect(() => { api.get('/geo/states').then(r => setStates(r.data.data ?? r.data ?? [])).catch(() => {}) }, [])
   const opts = value && !states.includes(value) ? [value, ...states] : states
   return (
-    <select className={className} value={value} autoComplete="off" onChange={e => onChange(e.target.value)}>
+    <select aria-label="State" title="State" className={className} value={value} autoComplete="off" onChange={e => onChange(e.target.value)}>
       <option value="">Select state…</option>
       {opts.map(s => <option key={s} value={s}>{s}</option>)}
     </select>
@@ -30,7 +30,7 @@ export function CitySelect({ state, value, onChange, className = 'form-select' }
   }, [state])
   const opts = value && !cities.includes(value) ? [value, ...cities] : cities
   return (
-    <select className={className} value={value} autoComplete="off" disabled={!state} onChange={e => onChange(e.target.value)}>
+    <select aria-label="City" title="City" className={className} value={value} autoComplete="off" disabled={!state} onChange={e => onChange(e.target.value)}>
       <option value="">{state ? 'Select city…' : 'Pick a state first'}</option>
       {opts.map(c => <option key={c} value={c}>{c}</option>)}
     </select>
@@ -59,7 +59,7 @@ export function CountrySelect({ value, onChange, className = 'form-select' }: {
   const effective = value || 'India'
   const opts = !names.includes(effective) ? [effective, ...names] : names
   return (
-    <select className={className} value={effective} autoComplete="off" onChange={e => onChange(e.target.value)}>
+    <select aria-label="Country" title="Country" className={className} value={effective} autoComplete="off" onChange={e => onChange(e.target.value)}>
       {opts.map(c => <option key={c} value={c}>{c}</option>)}
     </select>
   )

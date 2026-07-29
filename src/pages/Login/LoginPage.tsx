@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore'
 import { api, apiError } from '../../lib/api'
 import { isValidPhone, PhoneInput } from '../../components/PhoneInput'
 import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { MandirHero } from '../../components/MandirHero'
 
 type Step = 'mobile' | 'otp'
 
@@ -79,7 +80,9 @@ export function LoginPage() {
         <div className="absolute right-4 top-4"><LanguageSwitcher /></div>
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-brand-red flex items-center justify-center mx-auto mb-4">
+          {/* Devotional banner — bundled SVG so it renders offline (PWA). */}
+          <MandirHero className="h-24 -mx-2 mb-5" />
+          <div className="w-16 h-16 rounded-2xl bg-brand-red flex items-center justify-center mx-auto mb-4 -mt-12 relative ring-4 ring-white">
             <Flame size={32} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">

@@ -5,6 +5,7 @@ import { ArrowLeft, Bell, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, apiError } from '../../lib/api'
 import type { Notification } from '../../types'
+import { EmptyState } from '../../components/kit'
 
 /** Parse the notification's JSON `data` payload (stored as a string). */
 function parseData(n: Notification): Record<string, string> {
@@ -72,7 +73,7 @@ export function NotificationsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <button onClick={() => navigate(-1)} className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
         <h1 className="page-title">{t('titles.notifications')}</h1>
@@ -90,10 +91,11 @@ export function NotificationsPage() {
             </div>
           ))
         ) : notifications.length === 0 ? (
-          <div className="card p-8 text-center">
-            <Bell size={32} className="text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 text-sm">No notifications yet</p>
-          </div>
+          <EmptyState
+            icon={Bell}
+            title="No notifications yet"
+            hint="Receipts, temple updates and messages from the Sadhu-Sadhvi you follow will appear here."
+          />
         ) : (
           notifications.map(n => {
             const d = parseData(n)

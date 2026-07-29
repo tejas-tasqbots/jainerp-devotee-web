@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, ChevronRight, Search } from 'lucide-react'
 import { api } from '../../lib/api'
 import type { Temple } from '../../types'
+import { EmptyState } from '../../components/kit'
 
 export function TempleDirectory() {
   const { t } = useTranslation()
@@ -43,7 +44,7 @@ export function TempleDirectory() {
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
         <h1 className="page-title">{t('titles.templeDirectory')}</h1>
-        <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
+        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -75,10 +76,11 @@ export function TempleDirectory() {
             </div>
           ))
         ) : temples.length === 0 ? (
-          <div className="card p-8 text-center">
-            <Building2 size={32} className="text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 text-sm">No temples found</p>
-          </div>
+          <EmptyState
+            icon={Building2}
+            title="No temples found"
+            hint="Try a different name or city. Temples appear here once they join JainERP."
+          />
         ) : (
           <div className="space-y-3">
             {temples.map(t => (

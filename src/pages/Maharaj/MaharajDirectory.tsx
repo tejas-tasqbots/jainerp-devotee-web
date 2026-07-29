@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, ChevronRight, MapPin, Search, Users } from 'lucide-react'
 import { api } from '../../lib/api'
+import { PhotoAvatar } from '../../components/PhotoAvatar'
+import { EmptyState, SkeletonList } from '../../components/kit'
+import { useTranslation } from 'react-i18next'
 import type { MaharajProfile } from '../../types'
 
 export function MaharajDirectory() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [samuday, setSamuday] = useState('')
@@ -34,8 +38,8 @@ export function MaharajDirectory() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <h1 className="page-title">Maharaj / Mataji</h1>
-        <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
+        <h1 className="page-title">{t('titles.maharajMataji')}</h1>
+        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -70,21 +74,19 @@ export function MaharajDirectory() {
         <p className="text-xs text-slate-400">{total} profiles</p>
 
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="card p-4 animate-pulse">
-              <div className="flex gap-3">
-                <div className="w-12 h-12 bg-slate-200 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-slate-200 rounded w-2/3" />
-                  <div className="h-3 bg-slate-200 rounded w-1/3" />
-                </div>
-              </div>
-            </div>
-          ))
+          <SkeletonList rows={4} />
         ) : profiles.length === 0 ? (
-          <div className="card p-8 text-center">
-            <p className="text-slate-500 text-sm">No profiles found</p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title={query || samuday || city ? t('maharaj.noMatches') : t('maharaj.emptyTitle')}
+            hint={query || samuday || city ? t('maharaj.noMatchesHint') : t('maharaj.emptyHint')}
+            action={(query || samuday || city) ? (
+              <button className="btn-secondary"
+                onClick={() => { setQuery(''); setSamuday(''); setCity('') }}>
+                {t('maharaj.clearFilters')}
+              </button>
+            ) : undefined}
+          />
         ) : (
           profiles.map(p => (
             <button
@@ -93,13 +95,7 @@ export function MaharajDirectory() {
               className="w-full card p-4 text-left hover:border-navy-300 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {p.photo_url ? (
-                    <img src={p.photo_url} alt={p.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-bold text-amber-700">{p.name[0]}</span>
-                  )}
-                </div>
+                <PhotoAvatar name={p.name} photoUrl={p.photo_url} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-slate-800 text-sm truncate">{p.name}</p>
                   <p className="text-xs text-slate-500">{p.samuday}</p>
@@ -114,8 +110,10 @@ export function MaharajDirectory() {
                         <Users size={10} /> {p.followers_count}
                       </span>
                     )}
-                    <span className={`badge text-[9px] ${p.type === 'mataji' ? 'badge-blue' : 'badge-gold'}`}>
-                      {p.type}
+                    {/* type_display is resolved server-side from ascetic.ts —
+                        never render the raw rank enum ('muni') at the user. */}
+                    <span className="badge badge-gold text-[9px]">
+                      {p.type_display ?? p.type}
                     </span>
                   </div>
                 </div>

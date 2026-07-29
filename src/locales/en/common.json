@@ -63,5 +63,12 @@
     "save": "Save",
     "language": "Language",
     "payAtCounter": "Online payment isn't set up for this temple yet — please pay at the counter."
+  },
+  "maharaj": {
+    "noMatches": "No matches",
+    "noMatchesHint": "Try a different name, samuday or city.",
+    "emptyTitle": "No profiles yet",
+    "emptyHint": "Verified Sadhu-Sadhvi profiles will appear here once temples add them.",
+    "clearFilters": "Clear filters"
   }
 }

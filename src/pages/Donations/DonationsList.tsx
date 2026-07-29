@@ -137,7 +137,7 @@ export function DonationsList() {
       {/* Header */}
       <div className="page-header">
         <h1 className="page-title">{t('titles.myDonations')}</h1>
-        <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
+        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -208,10 +208,10 @@ export function DonationsList() {
         <>
           {/* Filters */}
           <div className="px-4 py-3 flex gap-2">
-            <select className="form-select flex-1" value={fy} onChange={e => { setFy(e.target.value); setPage(1) }}>
+            <select aria-label="Financial year" title="Financial year" className="form-select flex-1" value={fy} onChange={e => { setFy(e.target.value); setPage(1) }}>
               {fyOptions.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
-            <select className="form-select flex-1" value={type} onChange={e => { setType(e.target.value); setPage(1) }}>
+            <select aria-label="Transaction type" title="Transaction type" className="form-select flex-1" value={type} onChange={e => { setType(e.target.value); setPage(1) }}>
               <option value="">All Types</option>
               <option value="donation">Donation</option>
               <option value="seva">Seva</option>

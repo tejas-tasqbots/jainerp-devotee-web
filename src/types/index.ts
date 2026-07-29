@@ -61,17 +61,29 @@ export interface Temple {
   global_sync_enabled?: boolean
   lat?: number | string | null
   lng?: number | string | null
-  maharaj?: { id: string; name: string; type: string; samuday?: string; photo_url?: string; note?: string }[]
+  maharaj?: { id: string; name: string; type: string; samuday?: string; photo_url?: string; has_photo?: boolean; note?: string }[]
 }
 
 export interface MaharajProfile {
   id: string
   name: string
-  type: 'maharaj' | 'mataji'
+  /**
+   * Canonical ascetic RANK, not the honorific — 'maharaj'/'mataji' were never
+   * valid values (see doc-v2/Glossary_And_Naming.md). Render `type_display`,
+   * which the API resolves from ascetic.ts.
+   */
+  type: 'muni' | 'aryika' | 'kshullak' | 'kshullika' | 'ailak'
+  /** Honorific for display: "Maharaj Ji", "Mataji", "Ailak Ji", … */
+  type_display?: string
+  sect?: 'digambar' | 'shwetambar'
+  sect_display?: string
   samuday: string
   city?: string
   state?: string
   photo_url?: string
+  /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */
+  photo_base64?: string
+  has_photo?: boolean
   bio?: string
   diksha_year?: number
   guru_name?: string

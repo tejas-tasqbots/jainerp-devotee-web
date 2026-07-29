@@ -53,12 +53,15 @@ export function HomePage() {
     setLoading(false)
   }
 
+  // Brand palette only — `purple-600` and raw `green-600`/`amber-500` were
+  // off-scheme and made the row read as five unrelated apps. These are the same
+  // tokens mandiradmin uses, so the three portals look like one product.
   const quickActions = [
     { label: t('home.quickDonate'), icon: Heart, color: 'bg-brand-red text-white', path: '/donate' },
-    { label: t('home.quickDonations'), icon: IndianRupee, color: 'bg-green-600 text-white', path: '/donations' },
-    { label: t('home.quickBolis'), icon: Calendar, color: 'bg-amber-500 text-white', path: '/bolis' },
+    { label: t('home.quickDonations'), icon: IndianRupee, color: 'bg-brand-green text-white', path: '/donations' },
+    { label: t('home.quickBolis'), icon: Calendar, color: 'bg-brand-gold text-navy-900', path: '/bolis' },
     { label: t('home.quickTemples'), icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
-    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-purple-600 text-white', path: '/maharaj' },
+    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-blue text-white', path: '/maharaj' },
   ]
 
   const outstanding = bolis.reduce((s, b) => s + Number(b.outstanding_paise || 0), 0)

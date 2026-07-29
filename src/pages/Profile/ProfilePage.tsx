@@ -141,7 +141,7 @@ export function ProfilePage() {
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
         <h1 className="page-title">{t('titles.myProfile')}</h1>
-        <button onClick={() => navigate('/notifications')} className="p-2 rounded-full hover:bg-slate-100">
+        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -165,12 +165,12 @@ export function ProfilePage() {
             </div>
             <div className="space-y-3 p-4">
               <div>
-                <label className="form-label">Full Name *</label>
-                <input className="form-input" value={name} onChange={e => setName(e.target.value)} />
+                <label htmlFor="pf-name" className="form-label">Full Name *</label>
+                <input id="pf-name" className="form-input" value={name} onChange={e => setName(e.target.value)} />
               </div>
               <div>
-                <label className="form-label">Email</label>
-                <input type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} />
+                <label htmlFor="pf-email" className="form-label">Email</label>
+                <input id="pf-email" type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

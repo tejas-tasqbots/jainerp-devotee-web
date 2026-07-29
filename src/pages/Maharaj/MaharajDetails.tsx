@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Bell, BellOff, Calendar, MapPin, Megaphone, Navigation, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
+import { PhotoAvatar } from '../../components/PhotoAvatar'
 import type { MaharajProfile } from '../../types'
 
 export function MaharajDetails() {
@@ -72,7 +73,7 @@ export function MaharajDetails() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <button onClick={() => navigate(-1)} className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
         <h1 className="page-title flex-1 text-center truncate px-2">{profile.name}</h1>
@@ -80,28 +81,33 @@ export function MaharajDetails() {
       </div>
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-amber-800 to-amber-700 p-6 text-white">
+      <div className="bg-gradient-to-b from-navy-800 to-navy-600 p-6 text-white">
         <div className="flex items-start gap-4">
-          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {profile.photo_url ? (
-              <img src={profile.photo_url} alt={profile.name} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-3xl font-bold text-amber-200">{profile.name[0]}</span>
-            )}
-          </div>
+          <PhotoAvatar
+            name={profile.name}
+            photoBase64={profile.photo_base64}
+            photoUrl={profile.photo_url}
+            className="w-20 h-20"
+            textClassName="text-3xl"
+            variant="onDark"
+          />
           <div className="flex-1">
             <h2 className="font-bold text-xl leading-tight">{profile.name}</h2>
-            <p className="text-amber-200 text-sm mt-0.5">{profile.samuday}</p>
+            <p className="text-white/80 text-sm mt-0.5">{profile.samuday}</p>
             {profile.diksha_year && (
-              <p className="text-amber-300 text-xs mt-0.5">Diksha: {profile.diksha_year}</p>
+              <p className="text-white/60 text-xs mt-0.5">Diksha: {profile.diksha_year}</p>
             )}
             <div className="flex items-center gap-3 mt-2">
-              <span className={`badge ${profile.type === 'mataji' ? 'bg-blue-200 text-blue-900' : 'bg-amber-200 text-amber-900'}`}>
-                {profile.type}
+              {/* Honorific resolved server-side; the raw rank enum is never shown. */}
+              <span className="badge bg-brand-gold text-navy-900">
+                {profile.type_display ?? profile.type}
               </span>
+              {profile.sect_display && (
+                <span className="badge bg-white/20 text-white">{profile.sect_display}</span>
+              )}
               {profile.followers_count !== undefined && (
-                <span className="flex items-center gap-1 text-xs text-amber-200">
-                  <Users size={12} /> {profile.followers_count} followers
+                <span className="flex items-center gap-1 text-xs text-white/80">
+                  <Users size={12} /> {profile.followers_count} {profile.followers_count === 1 ? 'follower' : 'followers'}
                 </span>
               )}
             </div>
@@ -114,7 +120,7 @@ export function MaharajDetails() {
           className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             following
               ? 'bg-white/20 text-white hover:bg-white/30'
-              : 'bg-white text-amber-800 hover:bg-amber-50'
+              : 'bg-white text-navy-800 hover:bg-navy-50'
           }`}
         >
           {following ? <BellOff size={16} /> : <Bell size={16} />}
