@@ -81,7 +81,7 @@ export function MaharajDetails() {
       </div>
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-navy-800 to-navy-600 p-6 text-white">
+      <div className="bg-gradient-to-b from-navy-900 to-navy-700 p-6 text-white">
         <div className="flex items-start gap-4">
           <PhotoAvatar
             name={profile.name}

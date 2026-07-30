@@ -105,11 +105,11 @@ export function NotificationsPage() {
                 key={n.id}
                 onClick={() => onTap(n)}
                 className={`w-full card p-4 text-left transition-colors ${
-                  !n.read_at ? 'border-brand-blue bg-blue-50/40' : ''
+                  !n.read_at ? 'border-cta bg-navy-50/50' : ''
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 mt-2 ${!n.read_at ? 'bg-brand-blue' : 'bg-transparent'}`} />
+                  <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 mt-2 ${!n.read_at ? 'bg-cta' : 'bg-transparent'}`} />
                   <div className="flex-1">
                     <p className={`text-sm font-medium ${!n.read_at ? 'text-slate-800' : 'text-slate-600'}`}>
                       {n.title}
@@ -120,7 +120,7 @@ export function NotificationsPage() {
                         {format(new Date(n.created_at), 'dd MMM yyyy, hh:mm a')}
                       </p>
                       {hasReceipt && (
-                        <span className="inline-flex items-center gap-1 text-xs text-blue-600">
+                        <span className="inline-flex items-center gap-1 text-xs text-brand-blue">
                           <FileText size={11} /> View receipt
                         </span>
                       )}

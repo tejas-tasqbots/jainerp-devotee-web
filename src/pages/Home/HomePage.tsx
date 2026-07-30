@@ -61,7 +61,7 @@ export function HomePage() {
     { label: t('home.quickDonations'), icon: IndianRupee, color: 'bg-brand-green text-white', path: '/donations' },
     { label: t('home.quickBolis'), icon: Calendar, color: 'bg-brand-gold text-navy-900', path: '/bolis' },
     { label: t('home.quickTemples'), icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
-    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-blue text-white', path: '/maharaj' },
+    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-gold-dark text-white', path: '/maharaj' },
   ]
 
   const outstanding = bolis.reduce((s, b) => s + Number(b.outstanding_paise || 0), 0)
@@ -241,7 +241,7 @@ export function HomePage() {
                 <div key={item.id} className="card p-4">
                   <div className="flex items-start gap-3">
                     <span className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      item.type === 'event' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'
+                      item.type === 'event' ? 'bg-amber-100 text-amber-600' : 'bg-navy-50 text-navy-700'
                     }`}>
                       {item.type === 'event' ? <Calendar size={15} /> : <Megaphone size={15} />}
                     </span>

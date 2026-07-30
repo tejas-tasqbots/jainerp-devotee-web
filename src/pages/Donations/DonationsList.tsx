@@ -176,7 +176,7 @@ export function DonationsList() {
                 <button
                   onClick={() => open80gCertificate(t.tenant_id)}
                   disabled={receiptLoading === `80g-${t.tenant_id}`}
-                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50 flex-shrink-0"
+                  className="inline-flex items-center gap-1 text-xs text-brand-blue hover:text-brand-blue-dark disabled:opacity-50 flex-shrink-0"
                 >
                   {receiptLoading === `80g-${t.tenant_id}`
                     ? <Loader2 size={11} className="animate-spin" />
@@ -274,7 +274,7 @@ export function DonationsList() {
                           <button
                             onClick={() => openReceipt(txn)}
                             disabled={receiptLoading === txn.id}
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                            className="inline-flex items-center gap-1 text-xs text-brand-blue hover:text-brand-blue-dark disabled:opacity-50"
                           >
                             {receiptLoading === txn.id
                               ? <Loader2 size={11} className="animate-spin" />
@@ -349,7 +349,7 @@ export function DonationsList() {
                         <button
                           onClick={() => openRequestReceipt(r)}
                           disabled={receiptLoading === r.id}
-                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 text-xs text-brand-blue hover:text-brand-blue-dark disabled:opacity-50"
                         >
                           {receiptLoading === r.id ? <Loader2 size={11} className="animate-spin" /> : <FileText size={11} />}
                           Receipt

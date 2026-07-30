@@ -102,7 +102,7 @@ export function ReceiptPage() {
         <h1 className="page-title">Receipt</h1>
         <button
           onClick={downloadReceipt}
-          className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 px-3 py-1.5"
+          className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-blue-dark px-3 py-1.5"
         >
           <Download size={16} /> Download
         </button>
