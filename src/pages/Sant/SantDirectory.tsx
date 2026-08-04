@@ -78,12 +78,12 @@ export function SantDirectory() {
         ) : profiles.length === 0 ? (
           <EmptyState
             icon={Search}
-            title={query || samuday || city ? t('maharaj.noMatches') : t('maharaj.emptyTitle')}
-            hint={query || samuday || city ? t('maharaj.noMatchesHint') : t('maharaj.emptyHint')}
+            title={query || samuday || city ? t('sant.noMatches') : t('sant.emptyTitle')}
+            hint={query || samuday || city ? t('sant.noMatchesHint') : t('sant.emptyHint')}
             action={(query || samuday || city) ? (
               <button className="btn-secondary"
                 onClick={() => { setQuery(''); setSamuday(''); setCity('') }}>
-                {t('maharaj.clearFilters')}
+                {t('sant.clearFilters')}
               </button>
             ) : undefined}
           />
