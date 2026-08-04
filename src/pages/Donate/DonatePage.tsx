@@ -53,6 +53,8 @@ export function DonatePage() {
   const [query, setQuery] = useState('')
   const [temples, setTemples] = useState<Temple[]>([])
   const [searching, setSearching] = useState(false)
+  /** Which list is on screen when the devotee has not typed anything. */
+  const [suggestion, setSuggestion] = useState<'mine' | 'directory' | null>(null)
   const [selectedTemple, setSelectedTemple] = useState<Temple | null>(null)
   const [payDetails, setPayDetails] = useState<TemplePaymentDetails | null>(null)
 
@@ -87,6 +89,35 @@ export function DonatePage() {
   const [stateName, setStateName] = useState('')
   const [pincode, setPincode] = useState('')
 
+  /**
+   * Lead with the temples this devotee already gives to.
+   *
+   * The page used to load nothing until two characters were typed, so opening
+   * Donate — the primary giving action in the app — showed a heading, an empty
+   * search box and blank space, with no hint that typing was required
+   * (DEF-DONATE-01). Most giving goes to a temple the devotee already has a
+   * relationship with, so those come first; a devotee with none falls back to
+   * the directory rather than to nothing.
+   */
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setSearching(true)
+      try {
+        const mine = await api.get('/me/temples')
+        const rows: Temple[] = mine.data.data ?? []
+        if (!cancelled && rows.length) { setTemples(rows); setSuggestion('mine'); return }
+        const dir = await api.get('/temples/directory', { params: { limit: 10 } })
+        if (!cancelled) { setTemples(dir.data.data ?? []); setSuggestion('directory') }
+      } catch {
+        // A failed suggestion must not block the search box below it.
+      } finally {
+        if (!cancelled) setSearching(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
   useEffect(() => {
     const t = setTimeout(() => { if (query.length >= 2) searchTemples() }, 400)
     return () => clearTimeout(t)
@@ -117,6 +148,7 @@ export function DonatePage() {
   }, [method, payDetails, amount])
 
   async function searchTemples() {
+    setSuggestion(null)
     setSearching(true)
     try {
       const { data } = await api.get('/temples/directory', { params: { q: query, limit: 10 } })
@@ -314,6 +346,11 @@ export function DonatePage() {
             {searching && (
               <div className="text-center py-4 text-slate-400 text-sm">Searching...</div>
             )}
+            {!searching && suggestion && temples.length > 0 && (
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                {suggestion === 'mine' ? 'Your temples' : 'Temples on JainERP'}
+              </p>
+            )}
             {!searching && temples.length > 0 && (
               <div className="space-y-2">
                 {temples.map(t => (
@@ -337,6 +374,11 @@ export function DonatePage() {
             )}
             {!searching && query.length >= 2 && temples.length === 0 && (
               <p className="text-center text-slate-400 text-sm py-4">No temples found</p>
+            )}
+            {!searching && query.length < 2 && temples.length === 0 && (
+              <p className="py-6 text-center text-sm text-slate-400">
+                Search for a temple by name or city to give.
+              </p>
             )}
           </div>
         )}

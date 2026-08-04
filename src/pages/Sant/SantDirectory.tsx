@@ -7,7 +7,7 @@ import { EmptyState, SkeletonList } from '../../components/kit'
 import { useTranslation } from 'react-i18next'
 import type { MaharajProfile } from '../../types'
 
-export function MaharajDirectory() {
+export function SantDirectory() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
@@ -25,7 +25,7 @@ export function MaharajDirectory() {
   async function load() {
     setLoading(true)
     try {
-      const { data } = await api.get('/maharaj', { params: { q: query, samuday, city, limit: 20 } })
+      const { data } = await api.get('/sant', { params: { q: query, samuday, city, limit: 20 } })
       setProfiles(data.data ?? [])
       setTotal(data.meta?.total ?? 0)
     } catch {
@@ -91,7 +91,7 @@ export function MaharajDirectory() {
           profiles.map(p => (
             <button
               key={p.id}
-              onClick={() => navigate(`/maharaj/${p.id}`)}
+              onClick={() => navigate(`/sant/${p.id}`)}
               className="w-full card p-4 text-left hover:border-navy-300 transition-colors"
             >
               <div className="flex items-center gap-3">

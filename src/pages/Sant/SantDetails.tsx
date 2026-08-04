@@ -5,8 +5,9 @@ import { format } from 'date-fns'
 import { api } from '../../lib/api'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import type { MaharajProfile } from '../../types'
+import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks'
 
-export function MaharajDetails() {
+export function SantDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [profile, setProfile] = useState<MaharajProfile | null>(null)
@@ -19,7 +20,7 @@ export function MaharajDetails() {
   async function load() {
     setLoading(true)
     try {
-      const { data } = await api.get(`/maharaj/${id}`)
+      const { data } = await api.get(`/sant/${id}`)
       setProfile(data.data)
       setFollowing(data.data?.is_following ?? false)
     } catch {
@@ -34,10 +35,10 @@ export function MaharajDetails() {
     setToggling(true)
     try {
       if (following) {
-        await api.delete(`/maharaj/${profile.id}/follow`)
+        await api.delete(`/sant/${profile.id}/follow`)
         setFollowing(false)
       } else {
-        await api.post(`/maharaj/${profile.id}/follow`)
+        await api.post(`/sant/${profile.id}/follow`)
         setFollowing(true)
       }
     } catch { /* keep state */ }
@@ -129,11 +130,40 @@ export function MaharajDetails() {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Bio */}
-        {profile.bio && (
+        {/* Links — the first thing a devotee looks for after the name. */}
+        <ProfileLinks links={profile.links} />
+
+        {/* About. `about` is the long form (migration 034); `bio` is the older
+            one-liner. Both render, longest first, because a profile written
+            before the long field existed must not suddenly go blank. */}
+        {(profile.about || profile.bio) && (
           <div className="card p-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">About</h3>
-            <p className="text-sm text-slate-700 leading-relaxed">{profile.bio}</p>
+            <p className="whitespace-pre-line text-sm text-slate-700 leading-relaxed">
+              {profile.about || profile.bio}
+            </p>
+          </div>
+        )}
+
+        {/* Life and study */}
+        {(profile.lineage || profile.diksha_place || profile.education || profile.honours) && (
+          <div className="card p-4">
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Life & study</h3>
+            <dl className="divide-y divide-slate-100">
+              <Fact label="Lineage" value={profile.lineage} />
+              <Fact label="Diksha place" value={profile.diksha_place} />
+              <Fact label="Diksha year" value={profile.diksha_year} />
+              <Fact label="Study" value={profile.education} />
+              {/* A conferred title, never the canonical rank shown in the header. */}
+              <Fact label="Titles" value={profile.honours} />
+            </dl>
+          </div>
+        )}
+
+        {/* Published works */}
+        {!!profile.publications?.length && (
+          <div className="card p-4">
+            <Publications publications={profile.publications} title="Published works" />
           </div>
         )}
 

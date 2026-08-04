@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Bell, Building2, Calendar, ChevronRight, Heart, IndianRupee,
+  BedDouble, Bell, Building2, Calendar, ChevronRight, Heart, IndianRupee,
   Megaphone, Plus, Sparkles, TrendingUp,
 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -61,7 +61,10 @@ export function HomePage() {
     { label: t('home.quickDonations'), icon: IndianRupee, color: 'bg-brand-green text-white', path: '/donations' },
     { label: t('home.quickBolis'), icon: Calendar, color: 'bg-brand-gold text-navy-900', path: '/bolis' },
     { label: t('home.quickTemples'), icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
-    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-gold-dark text-white', path: '/maharaj' },
+    // Finding a bed is its own errand, not a sub-task of browsing temples —
+    // a devotee travelling to Palitana wants a dharamshala, not a directory.
+    { label: t('home.quickStays', 'Dharamshala'), icon: BedDouble, color: 'bg-brand-blue text-white', path: '/stays' },
+    { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-gold-dark text-white', path: '/sant' },
   ]
 
   const outstanding = bolis.reduce((s, b) => s + Number(b.outstanding_paise || 0), 0)

@@ -38,6 +38,10 @@ export function ProfilePage() {
   const [country, setCountry] = useState('India')
   const [address, setAddress] = useState('')
   const [pincode, setPincode] = useState('')
+  // Registration promises "You can change it later", so it has to be editable
+  // here. '' is "Prefer not to say" and the API maps it back to NULL.
+  const [sect, setSect] = useState('')
+  const [subSect, setSubSect] = useState('')
   const [linkSlug, setLinkSlug] = useState('')
   const [linking, setLinking] = useState(false)
   const [linkMsg, setLinkMsg] = useState('')
@@ -65,6 +69,8 @@ export function ProfilePage() {
       setCountry(p.country ?? 'India')
       setAddress(p.address ?? '')
       setPincode(p.pincode ?? '')
+      setSect(p.sect ?? '')
+      setSubSect(p.sub_sect ?? '')
     }
     if (tRes.status === 'fulfilled') setTemples(tRes.value.data.data ?? [])
     if (nRes.status === 'fulfilled') setNotifPrefs(nRes.value.data.data ?? { push: true, sms: true, whatsapp: true })
@@ -88,6 +94,7 @@ export function ProfilePage() {
       await api.patch('/me', {
         name, email, gotra, city, state, country, address, pincode,
         pan: panPatch,
+        sect, sub_sect: subSect,
       })
       setSaveMsg('Profile saved!')
       setTimeout(() => setSaveMsg(''), 3000)
@@ -183,6 +190,49 @@ export function ProfilePage() {
                     value={pan} onChange={e => setPan(e.target.value.toUpperCase())} />
                 </div>
               </div>
+              {/* Sampradaya. Registration says "You can change it later", and
+                  this is the later. It also has to be un-settable: once sect
+                  filtering is enforced a wrong value hides a devotee's own
+                  temples and blocks donating to them, and "Prefer not to say"
+                  is the self-serve way back to seeing everything. */}
+              <div>
+                <label className="form-label">Sampradaya</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: '', label: 'Prefer not to say' },
+                    { value: 'digambar', label: 'Digambar' },
+                    { value: 'shwetambar', label: 'Shwetambar' },
+                  ].map(o => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => setSect(o.value)}
+                      className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                        sect === o.value
+                          ? 'border-brand-red bg-brand-red/10 text-brand-red'
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-slate-400">
+                  Used to show you temples and sants of your own tradition.
+                </p>
+              </div>
+              {sect !== '' && (
+                <div>
+                  <label className="form-label">Panth / Gaccha <span className="text-slate-400 font-normal">(optional)</span></label>
+                  <input
+                    className="form-input"
+                    maxLength={40}
+                    placeholder={sect === 'digambar' ? 'Terapanth, Bisapanth, Taran Panth…' : 'Murtipujak, Sthanakvasi, Terapanth…'}
+                    value={subSect}
+                    onChange={e => setSubSect(e.target.value)}
+                  />
+                </div>
+              )}
               <div>
                 <label className="form-label">Country</label>
                 <CountrySelect value={country} onChange={c => { setCountry(c); setState(''); setCity('') }} />

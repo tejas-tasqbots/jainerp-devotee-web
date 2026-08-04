@@ -18,7 +18,7 @@ export function ReceiptPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  // No PDF-generation library on this app (mandiradmin-web has one, but it's a
+  // No PDF-generation library on this app (mandir-web has one, but it's a
   // separate frontend and can't be imported here) — the receipt HTML already
   // has print styling built in, so we hand it to the browser's own print/save
   // dialog, which can save as PDF everywhere.

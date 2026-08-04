@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Calendar, Camera, Heart, MapPin, Navigation, Sparkles } from 'lucide-react'
+import { ArrowLeft, BedDouble, Building2, Calendar, Camera, Heart, MapPin, Navigation, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
-import { api } from '../../lib/api'
+import { api, fmtPaise } from '../../lib/api'
 import { useTranslation } from 'react-i18next'
 import type { Temple } from '../../types'
+import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks'
 
 export function TempleDetails() {
   const { t } = useTranslation()
@@ -25,8 +26,13 @@ export function TempleDetails() {
         api.get(`/temples/${slug}/events`, { params: { status: 'upcoming' } }),
         api.get(`/temples/${slug}/gallery`),
       ])
-      setTemple(tRes.data.data)
-      setEvents(eRes.data.data ?? [])
+      const detail = tRes.data.data
+      setTemple(detail)
+      // A trust that never bought the Events module has no event calendar, so
+      // hide the section rather than render an empty "Upcoming Events" heading
+      // that suggests the temple simply has nothing planned (migration 031).
+      const modules: string[] = detail?.modules ?? []
+      setEvents(modules.length && !modules.includes('events') ? [] : eRes.data.data ?? [])
       setGallery(gRes.data.data ?? [])
     } catch {
       // keep nulls
@@ -95,6 +101,90 @@ export function TempleDetails() {
       </div>
 
       <div className="p-4 space-y-5">
+        {/* Book a room — gated on the trust actually HAVING a room, not merely
+            being entitled to the module. A trust can hold `dharamshala` and own
+            nothing: this button used to take the devotee to a search that could
+            only ever answer "no rooms free", which is a dead end dressed up as
+            an offer. `facilities.dharamshala.bookable` is the server's answer to
+            "is there genuinely a room"; an older API that sends no `facilities`
+            falls back to the module flag, i.e. the previous behaviour. */}
+        {(temple.facilities
+          ? temple.facilities.dharamshala?.bookable
+          : (temple.modules ?? []).includes('dharamshala')) && (
+          <button
+            onClick={() => navigate(`/temples/${temple.slug}/book`)}
+            className="btn-secondary w-full"
+          >
+            <BedDouble size={18} /> Book a room
+            {temple.facilities?.dharamshala?.from_paise != null && (
+              <span className="text-slate-500 font-normal">
+                — from ₹{fmtPaise(temple.facilities.dharamshala.from_paise).replace(/\.00$/, '')}/night
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* What this trust actually runs. A Dharamshala trust or a Gaushala
+            trust is not a mandir with things switched off — it is its own kind
+            of organisation, and its page should say so in counts a devotee
+            understands, never in module names. */}
+        {temple.facilities && Object.keys(temple.facilities).length > 0 && (
+          <div className="card p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              What this trust runs
+            </p>
+            <ul className="mt-2 space-y-1 text-sm text-slate-700">
+              {(temple.facilities.dharamshala?.rooms ?? 0) > 0 && (
+                <li className="flex items-center gap-2">
+                  <BedDouble size={14} className="text-slate-400" />
+                  Dharamshala — {temple.facilities.dharamshala!.rooms} rooms
+                  {(temple.facilities.dharamshala!.halls ?? 0) > 0 &&
+                    ` · ${temple.facilities.dharamshala!.halls} halls`}
+                </li>
+              )}
+              {(temple.facilities.gaushala?.cattle ?? 0) > 0 && (
+                <li>🐄 Gaushala — {temple.facilities.gaushala!.cattle} cattle in care</li>
+              )}
+              {(temple.facilities.seva?.sevas ?? 0) > 0 && (
+                <li>🙏 Seva — {temple.facilities.seva!.sevas} offered</li>
+              )}
+              {(temple.facilities.prasad?.items ?? 0) > 0 && (
+                <li>🍚 Prasad — {temple.facilities.prasad!.items} items</li>
+              )}
+              {temple.facilities.bhojanshala?.runs && <li>🍽 Bhojanshala — community dining</li>}
+            </ul>
+          </div>
+        )}
+
+        {/* Links */}
+        <ProfileLinks links={temple.links} />
+
+        {/* About this trust, in its own words */}
+        {temple.about && (
+          <div className="card p-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">About</h3>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{temple.about}</p>
+          </div>
+        )}
+
+        {(temple.main_deity || temple.founded_year || temple.darshan_timings ||
+          temple.profile_languages?.length) && (
+          <div className="card p-4">
+            <dl className="divide-y divide-slate-100">
+              <Fact label="Mulnayak" value={temple.main_deity} />
+              <Fact label="Founded" value={temple.founded_year} />
+              <Fact label="Darshan" value={temple.darshan_timings} />
+              <Fact label="Languages" value={temple.profile_languages?.join(', ')} />
+            </dl>
+          </div>
+        )}
+
+        {!!temple.publications?.length && (
+          <div className="card p-4">
+            <Publications publications={temple.publications} />
+          </div>
+        )}
+
         {/* Donate CTA */}
         <button
           onClick={() => navigate('/donate')}
@@ -167,7 +257,7 @@ export function TempleDetails() {
             </div>
             <div className="space-y-2">
               {temple.maharaj.map(m => (
-                <button key={m.id} onClick={() => navigate(`/maharaj/${m.id}`)} className="card p-3 w-full text-left hover:border-brand-red transition-colors flex items-center gap-3">
+                <button key={m.id} onClick={() => navigate(`/sant/${m.id}`)} className="card p-3 w-full text-left hover:border-brand-red transition-colors flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {/* List payload carries photo_url only — see Images_And_Photos.md §6.3. */}
                     {m.photo_url ? <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" loading="lazy" /> : <Sparkles size={16} className="text-amber-600" />}

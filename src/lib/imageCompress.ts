@@ -1,6 +1,6 @@
 /**
  * VENDORED COPY — kept in sync by hand across three repos:
- *   - mandiradmin-web/src/lib/imageCompress.ts
+ *   - mandir-web/src/lib/imageCompress.ts
  *   - maharaj-web/src/lib/imageCompress.ts
  * There is no shared frontend package (each app is its own GitHub repo).
  * If you change this file, port the change to the siblings above or they drift.

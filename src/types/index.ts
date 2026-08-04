@@ -62,6 +62,80 @@ export interface Temple {
   lat?: number | string | null
   lng?: number | string | null
   maharaj?: { id: string; name: string; type: string; samuday?: string; photo_url?: string; has_photo?: boolean; note?: string }[]
+  /**
+   * Modules this trust runs (migration 031). The portal renders its actions
+   * from this — offering "Book a room" for a trust with no Dharamshala module
+   * is a link straight to a dead end. Empty/absent means "not known", which is
+   * treated as "show everything" rather than hiding real features.
+   */
+  modules?: string[]
+  /** Public profile (migration 034) — what a devotee reads before giving. */
+  about?: string | null
+  founded_year?: number | null
+  main_deity?: string | null
+  darshan_timings?: string | null
+  profile_languages?: string[]
+  links?: { id: string; kind: string; label?: string | null; url: string }[]
+  publications?: {
+    id: string; title: string; kind: string; language?: string | null
+    year?: number | null; publisher?: string | null; description?: string | null
+    url?: string | null; has_cover?: boolean
+  }[]
+  /**
+   * What the trust can actually give a devotee **today** — inventory, not
+   * entitlement, and the two are different in a way users can see. A trust may
+   * hold the `dharamshala` module and own no rooms; gating "Book a room" on the
+   * module sent devotees to a search that could only answer "none free".
+   *
+   * Absent on an older API, which is why every read falls back to `modules`
+   * rather than treating a missing block as "nothing here".
+   */
+  facilities?: {
+    dharamshala?: { rooms: number; halls: number; bookable: boolean; from_paise: number | null }
+    gaushala?: { cattle: number; sponsorable: boolean }
+    prasad?: { items: number }
+    seva?: { sevas: number; bookable: boolean }
+    bhojanshala?: { runs: boolean }
+  }
+}
+
+/** One dharamshala in the cross-temple stay search. */
+export interface StayResult {
+  tenant_id: string
+  slug: string
+  name: string
+  temple_type: string
+  sect: string | null
+  city: string | null
+  state: string | null
+  area: string | null
+  lat: number | null
+  lng: number | null
+  /** Only when the search carried coordinates. Kilometres, one decimal. */
+  distance_km: number | null
+  rooms_total: number | null
+  rooms_available: number
+  /** Cheapest nightly tariff, before GST. */
+  from_paise: number | null
+  sleeps_max: number | null
+  nights: number | null
+  /** from_paise × nights — the number devotees actually compare on. */
+  from_total_paise: number | null
+}
+
+export interface StaySearchMeta {
+  page: number
+  limit: number
+  total: number
+  /** The shortlist was capped: say "refine your search", never imply this is all. */
+  truncated: boolean
+  searched: number
+  from: string | null
+  to: string | null
+  nights: number | null
+  persons: number
+  sort: 'distance' | 'price' | 'name'
+  near: { lat: number; lng: number; radius_km: number | null } | null
 }
 
 export interface MaharajProfile {
@@ -87,6 +161,19 @@ export interface MaharajProfile {
   bio?: string
   diksha_year?: number
   guru_name?: string
+  /** Long-form public profile (migration 034). `bio` is the older one-liner. */
+  about?: string | null
+  diksha_place?: string | null
+  education?: string | null
+  /** Conferred titles — never the canonical `type` rank. */
+  honours?: string | null
+  lineage?: string | null
+  links?: { id: string; kind: string; label?: string | null; url: string }[]
+  publications?: {
+    id: string; title: string; kind: string; language?: string | null
+    year?: number | null; publisher?: string | null; description?: string | null
+    url?: string | null; has_cover?: boolean
+  }[]
   languages?: string[]
   verified: boolean
   followers_count?: number
@@ -149,6 +236,7 @@ export interface Notification {
   read_at: string | null
 }
 
+/** Mirrors the RETURNING list of `PATCH /me` in devotee-api profile.service.ts. */
 export interface DevoteeUser {
   id: string
   mobile: string
@@ -156,9 +244,15 @@ export interface DevoteeUser {
   email?: string
   city?: string
   state?: string
+  country?: string | null
+  gotra?: string | null
   address?: string | null
   pincode?: string | null
   pan_masked?: string | null
+  /** Sampradaya (migration 032). NULL = "not told us", which sees every tradition. */
+  sect?: 'digambar' | 'shwetambar' | null
+  /** Panth/gaccha — free text by design, the regional list varies. */
+  sub_sect?: string | null
 }
 
 /** Donor-facing payment details for the manual bank/UPI donation flow */

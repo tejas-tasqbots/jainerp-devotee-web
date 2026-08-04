@@ -5,13 +5,16 @@ import { DonatePage } from './pages/Donate/DonatePage'
 import { DonationsList } from './pages/Donations/DonationsList'
 import { HomePage } from './pages/Home/HomePage'
 import { LoginPage } from './pages/Login/LoginPage'
-import { MaharajDetails } from './pages/Maharaj/MaharajDetails'
-import { MaharajDirectory } from './pages/Maharaj/MaharajDirectory'
+import { SantDetails } from './pages/Sant/SantDetails'
+import { SantDirectory } from './pages/Sant/SantDirectory'
 import { NotificationsPage } from './pages/Notifications/NotificationsPage'
 import { ProfilePage } from './pages/Profile/ProfilePage'
 import { ReceiptPage } from './pages/Receipt/ReceiptPage'
 import { RegisterPage } from './pages/Register/RegisterPage'
 import { TempleDetails } from './pages/Temples/TempleDetails'
+import { StaySearchPage } from './pages/Booking/StaySearchPage'
+import { RoomBookingPage } from './pages/Booking/RoomBookingPage'
+import { BookingTicketPage } from './pages/Booking/BookingTicketPage'
 import { TempleDirectory } from './pages/Temples/TempleDirectory'
 import { useAuthStore } from './store/authStore'
 
@@ -77,8 +80,11 @@ export default function App() {
             <Route path="/donate" element={<DonatePage />} />
             <Route path="/temples" element={<TempleDirectory />} />
             <Route path="/temples/:slug" element={<TempleDetails />} />
-            <Route path="/maharaj" element={<MaharajDirectory />} />
-            <Route path="/maharaj/:id" element={<MaharajDetails />} />
+            <Route path="/stays" element={<StaySearchPage />} />
+            <Route path="/temples/:slug/book" element={<RoomBookingPage />} />
+            <Route path="/bookings/:slug/:id" element={<BookingTicketPage />} />
+            <Route path="/sant" element={<SantDirectory />} />
+            <Route path="/sant/:id" element={<SantDetails />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
           </Route>

@@ -16,6 +16,8 @@ export function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [gotra, setGotra] = useState('')
+  // Sampradaya (migration 032). Asked once here and editable later in Profile.
+  const [sect, setSect] = useState('')
   const [pan, setPan] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('India')
@@ -34,6 +36,7 @@ export function RegisterPage() {
         name: name.trim(),
         email: email.trim() || undefined,
         gotra: gotra.trim() || undefined,
+        sect: sect || undefined,
         pan: pan.trim() || undefined,
         city: city.trim() || undefined,
         state: state.trim() || undefined,
@@ -87,6 +90,37 @@ export function RegisterPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
+          </div>
+
+          {/* Sampradaya — optional, and skipping it must cost the devotee
+              nothing: someone who does not answer keeps seeing every temple. */}
+          <div>
+            <label className="form-label">
+              Sampradaya <span className="text-slate-400 font-normal">(opt.)</span>
+            </label>
+            <div className="flex gap-2">
+              {[
+                { value: '', label: 'Prefer not to say' },
+                { value: 'digambar', label: 'Digambar' },
+                { value: 'shwetambar', label: 'Shwetambar' },
+              ].map(o => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setSect(o.value)}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                    sect === o.value
+                      ? 'border-brand-red bg-brand-red/10 text-brand-red'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              Used to show you temples and sants of your own tradition. You can change it later.
+            </p>
           </div>
 
           {/* Gotra + PAN */}

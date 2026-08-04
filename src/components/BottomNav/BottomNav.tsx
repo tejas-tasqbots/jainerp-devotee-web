@@ -8,7 +8,7 @@ export function BottomNav() {
     { to: '/home', icon: Home, label: t('nav.home') },
     { to: '/donations', icon: IndianRupee, label: t('nav.donations') },
     { to: '/donate', icon: Heart, label: t('nav.donate'), featured: true },
-    { to: '/maharaj', icon: Sparkles, label: t('nav.maharaj') },
+    { to: '/sant', icon: Sparkles, label: t('nav.sant') },
     { to: '/profile', icon: User, label: t('nav.profile') },
   ]
   return (
