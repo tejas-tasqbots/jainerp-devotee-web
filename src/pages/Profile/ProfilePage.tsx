@@ -105,12 +105,6 @@ export function ProfilePage() {
     }
   }
 
-  async function saveNotifPrefs() {
-    try {
-      await api.patch('/me/notification-preferences', notifPrefs)
-    } catch { /* ignore */ }
-  }
-
   async function linkTemple() {
     if (!linkSlug.trim()) return
     setLinking(true); setLinkMsg('')
