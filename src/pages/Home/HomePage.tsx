@@ -79,7 +79,11 @@ export function HomePage() {
     <div className="min-h-screen bg-slate-50">
       {/* Saffron hero */}
       <div className="hero-saffron px-4 pt-6 pb-20 text-white relative">
-        <div className="flex items-start justify-between relative z-10">
+        {/* z-30, not z-10: the content block below is a later sibling at z-10,
+            so at equal z-index it painted over this header — and the language
+            menu's own z-50 could not escape, because this row is the stacking
+            context it lives in. Two of the three options were unclickable. */}
+        <div className="flex items-start justify-between relative z-30">
           <div>
             <p className="text-xs text-white/75">{greeting()} 🙏</p>
             <h1 className="text-xl font-bold leading-tight">{user?.name || 'Welcome'}</h1>
