@@ -73,7 +73,7 @@ export function NotificationsPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
-        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label={t('ui.goBack')} className="p-1 -ml-1">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
         <h1 className="page-title">{t('titles.notifications')}</h1>
@@ -93,7 +93,7 @@ export function NotificationsPage() {
         ) : notifications.length === 0 ? (
           <EmptyState
             icon={Bell}
-            title="No notifications yet"
+            title={t('ui.noNotifications')}
             hint="Receipts, temple updates and messages from the Sadhu-Sadhvi you follow will appear here."
           />
         ) : (
@@ -121,8 +121,7 @@ export function NotificationsPage() {
                       </p>
                       {hasReceipt && (
                         <span className="inline-flex items-center gap-1 text-xs text-brand-blue">
-                          <FileText size={11} /> View receipt
-                        </span>
+                          <FileText size={11} />{t('ui.viewReceipt')}</span>
                       )}
                     </div>
                   </div>

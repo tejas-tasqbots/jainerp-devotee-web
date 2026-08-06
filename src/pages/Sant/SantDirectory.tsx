@@ -39,7 +39,7 @@ export function SantDirectory() {
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
         <h1 className="page-title">{t('titles.maharajMataji')}</h1>
-        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
+        <button onClick={() => navigate('/notifications')} aria-label={t('ui.notifications')} title={t('ui.notifications')} className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -49,7 +49,7 @@ export function SantDirectory() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder={t('ui.searchByName')}
             className="form-input pl-9"
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -58,14 +58,14 @@ export function SantDirectory() {
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Samuday..."
+            placeholder={t('ui.samudayPh')}
             className="form-input flex-1"
             value={samuday}
             onChange={e => setSamuday(e.target.value)}
           />
           <input
             type="text"
-            placeholder="City..."
+            placeholder={t('ui.cityPh')}
             className="form-input flex-1"
             value={city}
             onChange={e => setCity(e.target.value)}

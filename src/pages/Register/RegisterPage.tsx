@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ShieldCheck, User } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
@@ -6,6 +7,7 @@ import { useAuthStore } from '../../store/authStore'
 import { StateSelect, CitySelect, CountrySelect } from '../../components/GeoSelect'
 
 export function RegisterPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   // Carried from LoginPage (new user) or directly from RequireAuth (existing
@@ -61,16 +63,15 @@ export function RegisterPage() {
           <div className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center mx-auto mb-3">
             <User size={26} className="text-white" />
           </div>
-          <h1 className="text-xl font-bold text-navy-900">Complete Your Profile</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Mobile: <strong className="text-slate-600">{authUser?.mobile}</strong>
+          <h1 className="text-xl font-bold text-navy-900">{t('ui.completeProfile')}</h1>
+          <p className="text-xs text-slate-400 mt-1">{t('ui.mobileColon')}<strong className="text-slate-600">{authUser?.mobile}</strong>
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 pb-8 space-y-3">
           {/* Full Name */}
           <div>
-            <label className="form-label">Full Name *</label>
+            <label className="form-label">{t('ui.fullName')}</label>
             <input
               className="form-input"
               placeholder="Ayush Kasliwal"
@@ -82,7 +83,7 @@ export function RegisterPage() {
 
           {/* Email */}
           <div>
-            <label className="form-label">Email <span className="text-slate-400 font-normal">(optional)</span></label>
+            <label className="form-label">{t('ui.email')}<span className="text-slate-400 font-normal">(optional)</span></label>
             <input
               type="email"
               className="form-input"
@@ -95,8 +96,7 @@ export function RegisterPage() {
           {/* Sampradaya — optional, and skipping it must cost the devotee
               nothing: someone who does not answer keeps seeing every temple. */}
           <div>
-            <label className="form-label">
-              Sampradaya <span className="text-slate-400 font-normal">(opt.)</span>
+            <label className="form-label">{t('ui.sampradaya')}<span className="text-slate-400 font-normal">(opt.)</span>
             </label>
             <div className="flex gap-2">
               {[
@@ -118,15 +118,13 @@ export function RegisterPage() {
                 </button>
               ))}
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Used to show you temples and sants of your own tradition. You can change it later.
-            </p>
+            <p className="mt-1 text-xs text-slate-400">{t('ui.sectHelpLong')}</p>
           </div>
 
           {/* Gotra + PAN */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="form-label">Gotra <span className="text-slate-400 font-normal">(opt.)</span></label>
+              <label className="form-label">{t('ui.gotra')}<span className="text-slate-400 font-normal">(opt.)</span></label>
               <input
                 className="form-input"
                 placeholder="e.g. Kashyap"
@@ -148,27 +146,27 @@ export function RegisterPage() {
 
           {/* Country */}
           <div>
-            <label className="form-label">Country</label>
+            <label className="form-label">{t('ui.country')}</label>
             <CountrySelect value={country} onChange={c => { setCountry(c); setState(''); setCity('') }} />
           </div>
 
           {/* State + City */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="form-label">State <span className="text-slate-400 font-normal">(opt.)</span></label>
+              <label className="form-label">{t('ui.state')}<span className="text-slate-400 font-normal">(opt.)</span></label>
               {country === 'India' ? (
                 <StateSelect value={state} onChange={s => { setState(s); setCity('') }} />
               ) : (
-                <input className="form-input" placeholder="State / Province" value={state}
+                <input className="form-input" placeholder={t('ui.stateProvince')} value={state}
                   onChange={e => setState(e.target.value)} />
               )}
             </div>
             <div>
-              <label className="form-label">City <span className="text-slate-400 font-normal">(opt.)</span></label>
+              <label className="form-label">{t('ui.city')}<span className="text-slate-400 font-normal">(opt.)</span></label>
               {country === 'India' ? (
                 <CitySelect state={state} value={city} onChange={setCity} />
               ) : (
-                <input className="form-input" placeholder="City" value={city}
+                <input className="form-input" placeholder={t('ui.city')} value={city}
                   onChange={e => setCity(e.target.value)} />
               )}
             </div>
@@ -176,10 +174,10 @@ export function RegisterPage() {
 
           {/* Address */}
           <div>
-            <label className="form-label">Address <span className="text-slate-400 font-normal">(optional)</span></label>
+            <label className="form-label">{t('ui.address')}<span className="text-slate-400 font-normal">(optional)</span></label>
             <input
               className="form-input"
-              placeholder="House / Street / Locality"
+              placeholder={t('ui.houseStreet')}
               value={address}
               onChange={e => setAddress(e.target.value)}
             />
@@ -187,7 +185,7 @@ export function RegisterPage() {
 
           {/* Pincode */}
           <div>
-            <label className="form-label">Pincode <span className="text-slate-400 font-normal">(optional)</span></label>
+            <label className="form-label">{t('ui.pincode')}<span className="text-slate-400 font-normal">(optional)</span></label>
             <input
               className="form-input"
               placeholder={country === 'India' ? '400001' : 'Postal code'}
@@ -213,9 +211,7 @@ export function RegisterPage() {
             type="button"
             onClick={() => navigate('/home', { replace: true })}
             className="w-full text-center text-xs text-slate-400 hover:text-slate-600 py-1"
-          >
-            Skip for now
-          </button>
+          >{t('ui.skipForNow')}</button>
         </form>
       </div>
     </div>

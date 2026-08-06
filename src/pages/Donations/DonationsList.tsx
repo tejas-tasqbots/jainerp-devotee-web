@@ -137,7 +137,7 @@ export function DonationsList() {
       {/* Header */}
       <div className="page-header">
         <h1 className="page-title">{t('titles.myDonations')}</h1>
-        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
+        <button onClick={() => navigate('/notifications')} aria-label={t('ui.notifications')} title={t('ui.notifications')} className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -153,7 +153,7 @@ export function DonationsList() {
               <p className="text-sm font-semibold text-brand-gold">₹{fmtPaise(summary.eligible_80g_paise)}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-400">Transactions</p>
+              <p className="text-xs text-slate-400">{t('ui.transactions')}</p>
               <p className="text-sm font-semibold text-white">{summary.txn_count}</p>
             </div>
           </div>
@@ -208,12 +208,12 @@ export function DonationsList() {
         <>
           {/* Filters */}
           <div className="px-4 py-3 flex gap-2">
-            <select aria-label="Financial year" title="Financial year" className="form-select flex-1" value={fy} onChange={e => { setFy(e.target.value); setPage(1) }}>
+            <select aria-label={t('ui.financialYear')} title={t('ui.financialYear')} className="form-select flex-1" value={fy} onChange={e => { setFy(e.target.value); setPage(1) }}>
               {fyOptions.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
-            <select aria-label="Transaction type" title="Transaction type" className="form-select flex-1" value={type} onChange={e => { setType(e.target.value); setPage(1) }}>
-              <option value="">All Types</option>
-              <option value="donation">Donation</option>
+            <select aria-label={t('ui.transactionType')} title={t('ui.transactionType')} className="form-select flex-1" value={type} onChange={e => { setType(e.target.value); setPage(1) }}>
+              <option value="">{t('ui.allTypes')}</option>
+              <option value="donation">{t('ui.donation')}</option>
               <option value="seva">Seva</option>
               <option value="room">Room</option>
               <option value="boli">Boli</option>
@@ -239,7 +239,7 @@ export function DonationsList() {
             ) : transactions.length === 0 ? (
               <div className="card p-8 text-center">
                 <IndianRupee size={32} className="text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm">No transactions found</p>
+                <p className="text-slate-500 text-sm">{t('ui.noTransactions')}</p>
                 <button
                   onClick={() => navigate('/donate')}
                   className="btn-primary mt-4 mx-auto justify-center px-6 py-2"
@@ -294,9 +294,7 @@ export function DonationsList() {
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="btn-secondary text-xs px-3 py-1.5"
-                    >
-                      Previous
-                    </button>
+                    >{t('ui.previous')}</button>
                     <span className="text-xs text-slate-400">Page {page} of {Math.ceil(total / 20)}</span>
                     <button
                       onClick={() => setPage(p => p + 1)}
@@ -318,8 +316,8 @@ export function DonationsList() {
           {requests.length === 0 ? (
             <div className="card p-8 text-center">
               <Clock size={32} className="text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm">No donation requests yet</p>
-              <p className="text-xs text-slate-400 mt-1">Donate via UPI / bank transfer and your requests appear here.</p>
+              <p className="text-slate-500 text-sm">{t('ui.noRequestsYet')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('ui.requestsAppear')}</p>
             </div>
           ) : (
             requests.map(r => {
@@ -361,8 +359,7 @@ export function DonationsList() {
                           disabled={actionId === r.id}
                           className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-red-600 disabled:opacity-50"
                         >
-                          <XCircle size={11} /> Cancel
-                        </button>
+                          <XCircle size={11} />{t('ui.cancel')}</button>
                       )}
                     </div>
                   </div>

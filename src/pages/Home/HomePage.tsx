@@ -90,7 +90,7 @@ export function HomePage() {
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
-            <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors" aria-label="Notifications">
+            <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors" aria-label={t('ui.notifications')}>
               <Bell size={20} className="text-white" />
             </button>
           </div>
@@ -149,7 +149,7 @@ export function HomePage() {
                 <p className="text-xs text-amber-600">{bolis.length} pledge{bolis.length > 1 ? 's' : ''} awaiting payment</p>
               </div>
             </div>
-            <span className="text-xs font-semibold text-amber-700 bg-amber-100 rounded-full px-3 py-1.5 flex-shrink-0">Pay now</span>
+            <span className="text-xs font-semibold text-amber-700 bg-amber-100 rounded-full px-3 py-1.5 flex-shrink-0">{t('ui.payNow')}</span>
           </button>
         )}
 
@@ -239,7 +239,7 @@ export function HomePage() {
             <div className="card p-8 text-center">
               <Building2 size={32} className="text-slate-300 mx-auto mb-3" />
               <p className="text-slate-500 text-sm font-medium">{t('home.noUpdates')}</p>
-              <p className="text-slate-400 text-xs mt-1">Donate to a temple or link one to start receiving updates</p>
+              <p className="text-slate-400 text-xs mt-1">{t('ui.donateToStart')}</p>
               <button onClick={() => navigate('/temples')} className="btn-primary mt-4 mx-auto">{t('home.findTemples')}</button>
             </div>
           ) : (

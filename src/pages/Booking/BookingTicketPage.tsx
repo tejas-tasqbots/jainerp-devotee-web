@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Download, XCircle } from 'lucide-react'
 import QRCode from 'qrcode'
@@ -37,6 +38,7 @@ const day = (v: string) => new Date(v).toLocaleDateString('en-IN', { day: '2-dig
  * other receipt in the product.
  */
 export function BookingTicketPage() {
+  const { t } = useTranslation()
   const { slug, id } = useParams<{ slug: string; id: string }>()
   const navigate = useNavigate()
   const [ticket, setTicket] = useState<Ticket | null>(null)
@@ -78,17 +80,17 @@ export function BookingTicketPage() {
   }
 
   if (error) return <div className="p-4 text-sm text-red-600">{error}</div>
-  if (!ticket) return <div className="p-4 text-sm text-slate-500">Loading…</div>
+  if (!ticket) return <div className="p-4 text-sm text-slate-500">{t('ui.loading')}</div>
 
   const cancelled = ticket.status === 'cancelled'
 
   return (
     <div className="pb-24">
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-white px-4 py-3 shadow-sm print:hidden">
-        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label={t('ui.goBack')} className="p-1 -ml-1">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="text-base font-semibold text-slate-800">Your booking</h1>
+        <h1 className="text-base font-semibold text-slate-800">{t('ui.yourBooking')}</h1>
       </header>
 
       <div className="space-y-4 p-4">
@@ -98,8 +100,8 @@ export function BookingTicketPage() {
             <p className="mt-2 text-2xl font-bold tracking-widest text-slate-800">
               {ticket.ticket_code ?? '—'}
             </p>
-            <p className="text-xs text-slate-500">Show this code at the front desk</p>
-            {cancelled && <p className="mt-2 text-sm font-semibold text-red-600">CANCELLED</p>}
+            <p className="text-xs text-slate-500">{t('ui.showAtDesk')}</p>
+            {cancelled && <p className="mt-2 text-sm font-semibold text-red-600">{t('ui.cancelled')}</p>}
             <canvas ref={qrRef} className="mx-auto mt-3" />
           </div>
 
@@ -118,7 +120,7 @@ export function BookingTicketPage() {
             {ticket.cgst_paise > 0 && <Row label="CGST" value={`₹${fmtPaise(ticket.cgst_paise)}`} />}
             {ticket.sgst_paise > 0 && <Row label="SGST" value={`₹${fmtPaise(ticket.sgst_paise)}`} />}
             <div className="flex justify-between pt-1 font-bold text-slate-800">
-              <span>Total paid</span><span>₹{fmtPaise(ticket.total_paise)}</span>
+              <span>{t('ui.totalPaid')}</span><span>₹{fmtPaise(ticket.total_paise)}</span>
             </div>
           </div>
 
@@ -130,8 +132,7 @@ export function BookingTicketPage() {
 
         <div className="flex gap-2 print:hidden">
           <button onClick={() => window.print()} className="btn-secondary flex-1">
-            <Download size={14} /> Save / print
-          </button>
+            <Download size={14} />{t('ui.saveOrPrint')}</button>
           {!cancelled && ticket.status !== 'checked_out' && (
             <button onClick={cancel} disabled={cancelling} className="btn-secondary flex-1 text-red-600">
               <XCircle size={14} /> {cancelling ? 'Cancelling…' : 'Cancel'}

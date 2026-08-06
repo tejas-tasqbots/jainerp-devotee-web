@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Building2, Camera, Check, Clock, Copy, CreditCard, Heart, Landmark, QrCode, Search, X } from 'lucide-react'
 import QRCode from 'qrcode'
 import { api, apiError, parsePaise } from '../../lib/api'
@@ -49,6 +50,7 @@ async function compressImage(file: File, maxDim = 1200, quality = 0.6): Promise<
 }
 
 export function DonatePage() {
+  const { t } = useTranslation()
   const [step, setStep] = useState<Step>('search')
   const [query, setQuery] = useState('')
   const [temples, setTemples] = useState<Temple[]>([])
@@ -322,9 +324,7 @@ export function DonatePage() {
           <button
             onClick={resetAll}
             className="text-xs text-slate-500 hover:text-slate-700 underline"
-          >
-            Change
-          </button>
+          >{t('ui.change')}</button>
         )}
       </div>
 
@@ -336,7 +336,7 @@ export function DonatePage() {
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search temple by name or city..."
+                placeholder={t('ui.searchTemplePh')}
                 className="form-input pl-9"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -344,7 +344,7 @@ export function DonatePage() {
               />
             </div>
             {searching && (
-              <div className="text-center py-4 text-slate-400 text-sm">Searching...</div>
+              <div className="text-center py-4 text-slate-400 text-sm">{t('ui.searching')}</div>
             )}
             {!searching && suggestion && temples.length > 0 && (
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -373,12 +373,10 @@ export function DonatePage() {
               </div>
             )}
             {!searching && query.length >= 2 && temples.length === 0 && (
-              <p className="text-center text-slate-400 text-sm py-4">No temples found</p>
+              <p className="text-center text-slate-400 text-sm py-4">{t('ui.noTemplesFound')}</p>
             )}
             {!searching && query.length < 2 && temples.length === 0 && (
-              <p className="py-6 text-center text-sm text-slate-400">
-                Search for a temple by name or city to give.
-              </p>
+              <p className="py-6 text-center text-sm text-slate-400">{t('ui.searchToGive')}</p>
             )}
           </div>
         )}
@@ -404,22 +402,22 @@ export function DonatePage() {
                   className={`card p-3 text-left border-2 transition-colors ${method === 'online' ? 'border-brand-red bg-red-50' : 'border-slate-200'}`}
                 >
                   <CreditCard size={16} className={method === 'online' ? 'text-brand-red' : 'text-slate-400'} />
-                  <p className="text-xs font-semibold mt-1 text-slate-800">Pay Online</p>
-                  <p className="text-[10px] text-slate-500">Card / UPI via Razorpay</p>
+                  <p className="text-xs font-semibold mt-1 text-slate-800">{t('ui.payOnline')}</p>
+                  <p className="text-[10px] text-slate-500">{t('ui.cardUpiVia')}</p>
                 </button>
                 <button
                   onClick={() => { setMethod('manual'); setError(''); if (is80g && payDetails?.is_80g_registered !== true) setIs80g(false) }}
                   className={`card p-3 text-left border-2 transition-colors ${method === 'manual' ? 'border-brand-red bg-red-50' : 'border-slate-200'}`}
                 >
                   <Landmark size={16} className={method === 'manual' ? 'text-brand-red' : 'text-slate-400'} />
-                  <p className="text-xs font-semibold mt-1 text-slate-800">UPI / Bank Transfer</p>
-                  <p className="text-[10px] text-slate-500">Pay directly, upload proof</p>
+                  <p className="text-xs font-semibold mt-1 text-slate-800">{t('ui.upiBankTransfer')}</p>
+                  <p className="text-[10px] text-slate-500">{t('ui.payDirectUpload')}</p>
                 </button>
               </div>
             )}
 
             <div>
-              <label className="form-label">Amount (₹) *</label>
+              <label className="form-label">{t('ui.amountReq')}</label>
               <input
                 type="number"
                 className="form-input"
@@ -446,7 +444,7 @@ export function DonatePage() {
             </div>
 
             <div>
-              <label className="form-label">Category</label>
+              <label className="form-label">{t('ui.category')}</label>
               <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
                 {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
@@ -456,8 +454,7 @@ export function DonatePage() {
             {method === 'manual' && payDetails && (
               <div className="card p-4 space-y-3" data-testid="bank-details-card">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
-                  <QrCode size={13} /> Pay the temple directly
-                </p>
+                  <QrCode size={13} />{t('ui.payTempleDirect')}</p>
                 {(payDetails.upi_qr_cdn_url || qrDataUrl) && (
                   <div className="flex justify-center">
                     <img
@@ -481,7 +478,7 @@ export function DonatePage() {
                 {payDetails.bank_account_no && (
                   <div className="bg-slate-50 rounded-lg px-3 py-2 space-y-1 text-sm">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] text-slate-400 uppercase">Bank Transfer</p>
+                      <p className="text-[10px] text-slate-400 uppercase">{t('ui.bankTransfer')}</p>
                       <button
                         onClick={() => copyText('bank', `${payDetails.bank_account_name ?? payDetails.name}\nA/C: ${payDetails.bank_account_no}\nIFSC: ${payDetails.bank_ifsc ?? ''}\n${payDetails.bank_name ?? ''}`)}
                         className="p-1 text-slate-400 hover:text-slate-700"
@@ -494,9 +491,7 @@ export function DonatePage() {
                     <p className="text-slate-600 text-xs">IFSC: {payDetails.bank_ifsc || '—'}{payDetails.bank_name ? ` · ${payDetails.bank_name}` : ''}</p>
                   </div>
                 )}
-                <p className="text-[11px] text-slate-400">
-                  After paying, fill in the details below — the temple verifies your payment and issues the receipt.
-                </p>
+                <p className="text-[11px] text-slate-400">{t('ui.afterPaying')}</p>
               </div>
             )}
 
@@ -504,18 +499,18 @@ export function DonatePage() {
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="form-label">Paid via</label>
+                    <label className="form-label">{t('ui.paidVia')}</label>
                     <select className="form-select" value={manualMode} onChange={e => setManualMode(e.target.value)}>
                       {MANUAL_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="form-label">Date paid</label>
+                    <label className="form-label">{t('ui.datePaid')}</label>
                     <input type="date" className="form-input" value={paidAt} max={new Date().toISOString().slice(0, 10)} onChange={e => setPaidAt(e.target.value)} />
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">UTR / Transaction reference</label>
+                  <label className="form-label">{t('ui.utrRef')}</label>
                   <input
                     type="text"
                     className="form-input font-mono"
@@ -524,16 +519,16 @@ export function DonatePage() {
                     value={utr}
                     onChange={e => setUtr(e.target.value)}
                   />
-                  <p className="text-xs text-slate-400 mt-1">From your UPI app / bank statement — helps the temple verify faster.</p>
+                  <p className="text-xs text-slate-400 mt-1">{t('ui.utrHelp')}</p>
                 </div>
 
                 {/* Proof screenshot */}
                 <div>
-                  <label className="form-label">Payment screenshot</label>
+                  <label className="form-label">{t('ui.paymentScreenshot')}</label>
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => pickProof(e.target.files?.[0])} />
                   {proof ? (
                     <div className="relative inline-block">
-                      <img src={proof} alt="Payment proof" className="h-36 rounded-lg border border-slate-200 object-contain bg-white" />
+                      <img src={proof} alt={t('ui.paymentProof')} className="h-36 rounded-lg border border-slate-200 object-contain bg-white" />
                       <button
                         onClick={() => { setProof(null); if (fileRef.current) fileRef.current.value = '' }}
                         className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center"
@@ -575,14 +570,12 @@ export function DonatePage() {
                 </label>
               </div>
             ) : method === 'manual' && payDetails && (
-              <p className="text-xs text-slate-400 card p-3">
-                This temple is not 80G-registered, so donations here can't claim 80G tax exemption.
-              </p>
+              <p className="text-xs text-slate-400 card p-3">{t('ui.no80g')}</p>
             )}
 
             {is80g && needsPanEntry && (
               <div>
-                <label className="form-label">PAN Number *</label>
+                <label className="form-label">{t('ui.panNumber')}</label>
                 <input
                   type="text"
                   className="form-input uppercase font-mono"
@@ -611,7 +604,7 @@ export function DonatePage() {
                 </div>
                 <div>
                   <label className="form-label">Address {is80g && '*'}</label>
-                  <input type="text" className="form-input" placeholder="House / street" value={address} onChange={e => setAddress(e.target.value)} />
+                  <input type="text" className="form-input" placeholder={t('ui.houseStreet2')} value={address} onChange={e => setAddress(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -632,11 +625,11 @@ export function DonatePage() {
             )}
 
             <div>
-              <label className="form-label">Remarks (optional)</label>
+              <label className="form-label">{t('ui.remarksOpt')}</label>
               <textarea
                 className="form-textarea"
                 rows={2}
-                placeholder="In memory of... / For the occasion of..."
+                placeholder={t('ui.inMemoryPh')}
                 value={remarks}
                 onChange={e => setRemarks(e.target.value)}
               />
@@ -676,7 +669,7 @@ export function DonatePage() {
             </p>
             <div className="card p-4 text-left space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Temple</span>
+                <span className="text-slate-500">{t('ui.temple')}</span>
                 <span className="font-medium">{selectedTemple?.name}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -685,14 +678,12 @@ export function DonatePage() {
               </div>
               {result.manual && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Status</span>
-                  <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>Pending approval</span>
+                  <span className="text-slate-500">{t('ui.status')}</span>
+                  <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>{t('ui.pendingApproval')}</span>
                 </div>
               )}
             </div>
-            <button onClick={resetAll} className="btn-primary mx-auto">
-              Donate Again
-            </button>
+            <button onClick={resetAll} className="btn-primary mx-auto">{t('ui.donateAgain')}</button>
           </div>
         )}
       </div>

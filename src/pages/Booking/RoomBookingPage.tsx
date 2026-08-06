@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, BedDouble, Clock, Users } from 'lucide-react'
 import { api, apiError, fmtPaise } from '../../lib/api'
@@ -46,6 +47,7 @@ function roomTypeLabel(raw: string) {
  * failed payment is the worst version of this flow.
  */
 export function RoomBookingPage() {
+  const { t } = useTranslation()
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const [params] = useSearchParams()
@@ -147,11 +149,11 @@ export function RoomBookingPage() {
   return (
     <div className="pb-24">
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
-        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label={t('ui.goBack')} className="p-1 -ml-1">
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-base font-semibold text-slate-800">Book a room</h1>
+          <h1 className="text-base font-semibold text-slate-800">{t('ui.bookARoom')}</h1>
           {templeName && <p className="text-xs text-slate-500">{templeName}</p>}
         </div>
       </header>
@@ -160,18 +162,18 @@ export function RoomBookingPage() {
         <div className="card p-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="form-label">Check in</label>
+              <label className="form-label">{t('ui.checkIn')}</label>
               <input type="date" className="form-input" value={from} min={isoDay(0)}
                 onChange={e => setFrom(e.target.value)} />
             </div>
             <div>
-              <label className="form-label">Check out</label>
+              <label className="form-label">{t('ui.checkOut')}</label>
               <input type="date" className="form-input" value={to} min={from}
                 onChange={e => setTo(e.target.value)} />
             </div>
           </div>
           <div className="mt-3">
-            <label className="form-label">Guests</label>
+            <label className="form-label">{t('ui.guests')}</label>
             <input type="number" min={1} max={20} className="form-input" value={persons}
               onChange={e => setPersons(Math.max(1, Number(e.target.value)))} />
           </div>
@@ -194,8 +196,8 @@ export function RoomBookingPage() {
         {rooms?.length === 0 && (
           <div className="card p-6 text-center">
             <BedDouble size={28} className="mx-auto text-slate-300" />
-            <p className="mt-2 text-sm font-medium text-slate-700">No rooms free for those dates</p>
-            <p className="mt-1 text-xs text-slate-500">Try different dates, or fewer guests.</p>
+            <p className="mt-2 text-sm font-medium text-slate-700">{t('ui.noRoomsFree')}</p>
+            <p className="mt-1 text-xs text-slate-500">{t('ui.tryDifferent')}</p>
           </div>
         )}
 

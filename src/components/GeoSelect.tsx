@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '../lib/api'
 import { loadDialCodes } from './PhoneInput'
 
@@ -6,12 +7,13 @@ import { loadDialCodes } from './PhoneInput'
 export function StateSelect({ value, onChange, className = 'form-select' }: {
   value: string; onChange: (state: string) => void; className?: string
 }) {
+  const { t } = useTranslation()
   const [states, setStates] = useState<string[]>([])
   useEffect(() => { api.get('/geo/states').then(r => setStates(r.data.data ?? r.data ?? [])).catch(() => {}) }, [])
   const opts = value && !states.includes(value) ? [value, ...states] : states
   return (
-    <select aria-label="State" title="State" className={className} value={value} autoComplete="off" onChange={e => onChange(e.target.value)}>
-      <option value="">Select state…</option>
+    <select aria-label={t('ui.state')} title={t('ui.state')} className={className} value={value} autoComplete="off" onChange={e => onChange(e.target.value)}>
+      <option value="">{t('ui.selectState')}</option>
       {opts.map(s => <option key={s} value={s}>{s}</option>)}
     </select>
   )
@@ -21,6 +23,7 @@ export function StateSelect({ value, onChange, className = 'form-select' }: {
 export function CitySelect({ state, value, onChange, className = 'form-select' }: {
   state: string; value: string; onChange: (city: string) => void; className?: string
 }) {
+  const { t } = useTranslation()
   const [cities, setCities] = useState<string[]>([])
   useEffect(() => {
     if (!state) { setCities([]); return }
@@ -30,7 +33,7 @@ export function CitySelect({ state, value, onChange, className = 'form-select' }
   }, [state])
   const opts = value && !cities.includes(value) ? [value, ...cities] : cities
   return (
-    <select aria-label="City" title="City" className={className} value={value} autoComplete="off" disabled={!state} onChange={e => onChange(e.target.value)}>
+    <select aria-label={t('ui.city')} title={t('ui.city')} className={className} value={value} autoComplete="off" disabled={!state} onChange={e => onChange(e.target.value)}>
       <option value="">{state ? 'Select city…' : 'Pick a state first'}</option>
       {opts.map(c => <option key={c} value={c}>{c}</option>)}
     </select>
@@ -54,12 +57,13 @@ export const COUNTRIES = [
 export function CountrySelect({ value, onChange, className = 'form-select' }: {
   value: string; onChange: (country: string) => void; className?: string
 }) {
+  const { t } = useTranslation()
   const [names, setNames] = useState<string[]>(COUNTRIES)
   useEffect(() => { loadDialCodes().then(l => setNames(l.map(c => c.name))).catch(() => {}) }, [])
   const effective = value || 'India'
   const opts = !names.includes(effective) ? [effective, ...names] : names
   return (
-    <select aria-label="Country" title="Country" className={className} value={effective} autoComplete="off" onChange={e => onChange(e.target.value)}>
+    <select aria-label={t('ui.country')} title={t('ui.country')} className={className} value={effective} autoComplete="off" onChange={e => onChange(e.target.value)}>
       {opts.map(c => <option key={c} value={c}>{c}</option>)}
     </select>
   )

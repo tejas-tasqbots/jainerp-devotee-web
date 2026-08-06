@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, BedDouble, Crosshair, MapPin, Navigation, Search, SlidersHorizontal } from 'lucide-react'
 import { api, apiError, fmtPaise } from '../../lib/api'
@@ -27,6 +28,7 @@ import type { StayResult, StaySearchMeta } from '../../types'
  * already uses, and cannot break because a billing account lapsed.
  */
 export function StaySearchPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
 
@@ -129,12 +131,12 @@ export function StaySearchPage() {
   return (
     <div className="pb-24">
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
-        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label={t('ui.goBack')} className="p-1 -ml-1">
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-base font-semibold text-slate-800">Find a dharamshala</h1>
-          <p className="text-xs text-slate-500">Across every trust on JainERP</p>
+          <h1 className="text-base font-semibold text-slate-800">{t('ui.findDharamshala')}</h1>
+          <p className="text-xs text-slate-500">{t('ui.acrossEveryTrust')}</p>
         </div>
       </header>
 
@@ -145,7 +147,7 @@ export function StaySearchPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               className="form-input pl-9"
-              placeholder="Temple, city or area — e.g. Palitana"
+              placeholder={t('ui.templeCityPh')}
               value={q}
               onChange={e => setQ(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && search()}
@@ -154,12 +156,12 @@ export function StaySearchPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="form-label">Check in</label>
+              <label className="form-label">{t('ui.checkIn')}</label>
               <input type="date" className="form-input" value={from}
                 onChange={e => setFrom(e.target.value)} />
             </div>
             <div>
-              <label className="form-label">Check out</label>
+              <label className="form-label">{t('ui.checkOut')}</label>
               <input type="date" className="form-input" value={to} min={from}
                 onChange={e => setTo(e.target.value)} />
             </div>
@@ -167,16 +169,16 @@ export function StaySearchPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="form-label">Guests</label>
+              <label className="form-label">{t('ui.guests')}</label>
               <input type="number" min={1} max={20} className="form-input" value={persons}
                 onChange={e => setPersons(Math.max(1, Number(e.target.value)))} />
             </div>
             <div>
-              <label className="form-label">Sort by</label>
+              <label className="form-label">{t('ui.sortBy')}</label>
               <select className="form-input" value={sort}
                 onChange={e => { const v = e.target.value as typeof sort; setSort(v); search({ sort: v }) }}>
                 <option value="name">Name</option>
-                <option value="price">Price</option>
+                <option value="price">{t('ui.price')}</option>
                 <option value="distance" disabled={!near}>Distance{!near && ' (needs location)'}</option>
               </select>
             </div>
@@ -187,16 +189,14 @@ export function StaySearchPage() {
               {loading ? 'Searching…' : 'Search'}
             </button>
             <button onClick={locate} disabled={locating} className="btn-secondary"
-              title="Rank by distance from where you are">
+              title={t('ui.rankByDistance')}>
               <Crosshair size={16} /> {locating ? 'Locating…' : 'Near me'}
             </button>
           </div>
 
           {near && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
-              <SlidersHorizontal size={12} />
-              Within
-              <input type="number" min={1} max={2000} placeholder="any"
+              <SlidersHorizontal size={12} />{t('ui.within')}<input type="number" min={1} max={2000} placeholder="any"
                 className="w-20 rounded border border-slate-200 px-2 py-1"
                 value={radiusKm}
                 onChange={e => setRadiusKm(e.target.value === '' ? '' : Number(e.target.value))} />
@@ -247,7 +247,7 @@ export function StaySearchPage() {
         {stays?.length === 0 && !loading && (
           <div className="card p-6 text-center">
             <BedDouble size={28} className="mx-auto text-slate-300" />
-            <p className="mt-2 text-sm font-medium text-slate-700">Nothing free for that search</p>
+            <p className="mt-2 text-sm font-medium text-slate-700">{t('ui.nothingFree')}</p>
             <p className="mt-1 text-xs text-slate-500">
               {from && to
                 ? 'Try different dates, fewer guests, or a wider area.'
@@ -290,7 +290,7 @@ export function StaySearchPage() {
                     ) : null}
                   </>
                 ) : (
-                  <p className="text-xs text-slate-400">Tariff on request</p>
+                  <p className="text-xs text-slate-400">{t('ui.tariffOnRequest')}</p>
                 )}
               </div>
             </div>
@@ -312,7 +312,7 @@ export function StaySearchPage() {
                 target="_blank"
                 rel="noreferrer"
                 className="btn-secondary"
-                title="Open in your maps app"
+                title={t('ui.openInMaps')}
               >
                 <Navigation size={16} />
               </a>
@@ -321,9 +321,7 @@ export function StaySearchPage() {
         ))}
 
         {meta?.truncated && (
-          <p className="pt-2 text-center text-xs text-slate-400">
-            Showing the closest matches only — narrow by city or dates to see more.
-          </p>
+          <p className="pt-2 text-center text-xs text-slate-400">{t('ui.closestMatches')}</p>
         )}
       </div>
     </div>

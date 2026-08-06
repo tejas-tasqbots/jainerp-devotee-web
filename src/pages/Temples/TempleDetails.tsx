@@ -61,8 +61,8 @@ export function TempleDetails() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <Building2 size={32} className="text-slate-300 mx-auto mb-2" />
-          <p className="text-slate-500 text-sm">Temple not found</p>
-          <button onClick={() => navigate(-1)} className="btn-secondary mt-3 text-xs">Go Back</button>
+          <p className="text-slate-500 text-sm">{t('ui.templeNotFound')}</p>
+          <button onClick={() => navigate(-1)} className="btn-secondary mt-3 text-xs">{t('ui.goBackCaps')}</button>
         </div>
       </div>
     )
@@ -72,7 +72,7 @@ export function TempleDetails() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="page-header">
-        <button onClick={() => navigate(-1)} aria-label="Go back" className="p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label={t('ui.goBack')} className="p-1 -ml-1">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
         <h1 className="page-title flex-1 text-center truncate px-2">{temple.name}</h1>
@@ -130,9 +130,7 @@ export function TempleDetails() {
             understands, never in module names. */}
         {temple.facilities && Object.keys(temple.facilities).length > 0 && (
           <div className="card p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              What this trust runs
-            </p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t('ui.whatTrustRuns')}</p>
             <ul className="mt-2 space-y-1 text-sm text-slate-700">
               {(temple.facilities.dharamshala?.rooms ?? 0) > 0 && (
                 <li className="flex items-center gap-2">
@@ -162,7 +160,7 @@ export function TempleDetails() {
         {/* About this trust, in its own words */}
         {temple.about && (
           <div className="card p-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">About</h3>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">{t('ui.about')}</h3>
             <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{temple.about}</p>
           </div>
         )}
@@ -198,7 +196,7 @@ export function TempleDetails() {
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Camera size={16} className="text-slate-400" />
-              <h3 className="text-sm font-semibold text-slate-700">Gallery</h3>
+              <h3 className="text-sm font-semibold text-slate-700">{t('ui.gallery')}</h3>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2">
               {gallery.map((img: any) => (
@@ -221,7 +219,7 @@ export function TempleDetails() {
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Calendar size={16} className="text-slate-400" />
-              <h3 className="text-sm font-semibold text-slate-700">Upcoming Events</h3>
+              <h3 className="text-sm font-semibold text-slate-700">{t('ui.upcomingEvents')}</h3>
             </div>
             <div className="space-y-2">
               {events.map((e: any) => (
@@ -277,7 +275,7 @@ export function TempleDetails() {
           <section>
             <div className="flex items-center gap-2 mb-3">
               <MapPin size={16} className="text-slate-400" />
-              <h3 className="text-sm font-semibold text-slate-700">Location</h3>
+              <h3 className="text-sm font-semibold text-slate-700">{t('ui.location')}</h3>
             </div>
             <div className="rounded-xl overflow-hidden border border-slate-200">
               <iframe
@@ -291,8 +289,7 @@ export function TempleDetails() {
                 target="_blank" rel="noreferrer"
                 className="flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium text-brand-red hover:bg-red-50"
               >
-                <Navigation size={14} /> Get Directions
-              </a>
+                <Navigation size={14} />{t('ui.getDirections')}</a>
             </div>
           </section>
         )}

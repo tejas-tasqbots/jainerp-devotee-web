@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Download, FileText } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
@@ -11,6 +12,7 @@ import { api, apiError } from '../../lib/api'
  * in-app receipt view).
  */
 export function ReceiptPage() {
+  const { t } = useTranslation()
   const { tenantId, donationId } = useParams()
   const navigate = useNavigate()
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -81,7 +83,7 @@ export function ReceiptPage() {
           <button onClick={() => navigate('/donations')} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
             <ArrowLeft size={20} className="text-slate-600" />
           </button>
-          <h1 className="page-title">Receipt</h1>
+          <h1 className="page-title">{t('ui.receipt')}</h1>
         </div>
         <div className="mx-4 mt-6 card p-8 text-center">
           <FileText size={32} className="text-slate-300 mx-auto mb-3" />
@@ -99,17 +101,16 @@ export function ReceiptPage() {
         <button onClick={() => navigate('/donations')} className="p-2 -ml-2 rounded-full hover:bg-slate-100">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
-        <h1 className="page-title">Receipt</h1>
+        <h1 className="page-title">{t('ui.receipt')}</h1>
         <button
           onClick={downloadReceipt}
           className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-blue-dark px-3 py-1.5"
         >
-          <Download size={16} /> Download
-        </button>
+          <Download size={16} />{t('ui.download')}</button>
       </div>
       <iframe
         ref={iframeRef}
-        title="Receipt"
+        title={t('ui.receipt')}
         srcDoc={html}
         style={{ border: 'none', width: '100%', height: 'calc(100vh - 56px)' }}
       />

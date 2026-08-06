@@ -142,7 +142,7 @@ export function ProfilePage() {
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
         <h1 className="page-title">{t('titles.myProfile')}</h1>
-        <button onClick={() => navigate('/notifications')} aria-label="Notifications" title="Notifications" className="p-2 rounded-full hover:bg-slate-100">
+        <button onClick={() => navigate('/notifications')} aria-label={t('ui.notifications')} title={t('ui.notifications')} className="p-2 rounded-full hover:bg-slate-100">
           <Bell size={20} className="text-slate-600" />
         </button>
       </div>
@@ -166,16 +166,16 @@ export function ProfilePage() {
             </div>
             <div className="space-y-3 p-4">
               <div>
-                <label htmlFor="pf-name" className="form-label">Full Name *</label>
+                <label htmlFor="pf-name" className="form-label">{t('ui.fullName')}</label>
                 <input id="pf-name" className="form-input" value={name} onChange={e => setName(e.target.value)} />
               </div>
               <div>
-                <label htmlFor="pf-email" className="form-label">Email</label>
+                <label htmlFor="pf-email" className="form-label">{t('ui.email')}</label>
                 <input id="pf-email" type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="form-label">Gotra</label>
+                  <label className="form-label">{t('ui.gotra')}</label>
                   <input className="form-input" placeholder="e.g. Kashyap" value={gotra} onChange={e => setGotra(e.target.value)} />
                 </div>
                 <div>
@@ -190,7 +190,7 @@ export function ProfilePage() {
                   temples and blocks donating to them, and "Prefer not to say"
                   is the self-serve way back to seeing everything. */}
               <div>
-                <label className="form-label">Sampradaya</label>
+                <label className="form-label">{t('ui.sampradaya')}</label>
                 <div className="flex gap-2">
                   {[
                     { value: '', label: 'Prefer not to say' },
@@ -211,13 +211,11 @@ export function ProfilePage() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-1 text-xs text-slate-400">
-                  Used to show you temples and sants of your own tradition.
-                </p>
+                <p className="mt-1 text-xs text-slate-400">{t('ui.sectHelp')}</p>
               </div>
               {sect !== '' && (
                 <div>
-                  <label className="form-label">Panth / Gaccha <span className="text-slate-400 font-normal">(optional)</span></label>
+                  <label className="form-label">{t('ui.panthGaccha')}<span className="text-slate-400 font-normal">(optional)</span></label>
                   <input
                     className="form-input"
                     maxLength={40}
@@ -228,32 +226,32 @@ export function ProfilePage() {
                 </div>
               )}
               <div>
-                <label className="form-label">Country</label>
+                <label className="form-label">{t('ui.country')}</label>
                 <CountrySelect value={country} onChange={c => { setCountry(c); setState(''); setCity('') }} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="form-label">State</label>
+                  <label className="form-label">{t('ui.state')}</label>
                   {country === 'India' ? (
                     <StateSelect value={state} onChange={s => { setState(s); setCity('') }} />
                   ) : (
-                    <input className="form-input" placeholder="State / Province" value={state}
+                    <input className="form-input" placeholder={t('ui.stateProvince')} value={state}
                       onChange={e => setState(e.target.value)} />
                   )}
                 </div>
                 <div>
-                  <label className="form-label">City</label>
+                  <label className="form-label">{t('ui.city')}</label>
                   {country === 'India' ? (
                     <CitySelect state={state} value={city} onChange={setCity} />
                   ) : (
-                    <input className="form-input" placeholder="City" value={city}
+                    <input className="form-input" placeholder={t('ui.city')} value={city}
                       onChange={e => setCity(e.target.value)} />
                   )}
                 </div>
               </div>
               <div>
-                <label className="form-label">Address</label>
-                <input className="form-input" placeholder="House / Street / Locality" value={address} onChange={e => setAddress(e.target.value)} />
+                <label className="form-label">{t('ui.address')}</label>
+                <input className="form-input" placeholder={t('ui.houseStreet')} value={address} onChange={e => setAddress(e.target.value)} />
               </div>
               <div>
                 <label className="form-label">{country === 'India' ? 'Pincode' : 'Postal code'}</label>
@@ -278,7 +276,7 @@ export function ProfilePage() {
             <div className="card p-4 border-amber-200 bg-amber-50">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 size={15} className="text-amber-600" />
-                <h3 className="text-sm font-semibold text-amber-800">Temple Invitations</h3>
+                <h3 className="text-sm font-semibold text-amber-800">{t('ui.templeInvites')}</h3>
                 <span className="ml-auto text-xs bg-amber-600 text-white px-2 py-0.5 rounded-full font-bold">{invites.length}</span>
               </div>
               <div className="space-y-3">
@@ -296,15 +294,13 @@ export function ProfilePage() {
                         disabled={inviteActionId === invite.id}
                         className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg disabled:opacity-50"
                       >
-                        <CheckCircle size={12} /> Accept
-                      </button>
+                        <CheckCircle size={12} />{t('ui.accept')}</button>
                       <button
                         onClick={() => respondToInvite(invite.id, false)}
                         disabled={inviteActionId === invite.id}
                         className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-200 text-slate-700 text-xs font-medium rounded-lg disabled:opacity-50"
                       >
-                        <XCircle size={12} /> Reject
-                      </button>
+                        <XCircle size={12} />{t('ui.reject')}</button>
                     </div>
                   </div>
                 ))}
@@ -316,10 +312,10 @@ export function ProfilePage() {
           <div className="card p-4">
             <div className="flex items-center gap-2 mb-3">
               <Building2 size={15} className="text-slate-400" />
-              <h3 className="text-sm font-semibold text-slate-700">Linked Temples</h3>
+              <h3 className="text-sm font-semibold text-slate-700">{t('ui.linkedTemples')}</h3>
             </div>
             {temples.length === 0 ? (
-              <p className="text-xs text-slate-400">No temples linked yet. Donate to a temple to link automatically.</p>
+              <p className="text-xs text-slate-400">{t('ui.noTemplesLinked')}</p>
             ) : (
               <div className="space-y-2 mb-3">
                 {temples.map(t => (
@@ -337,7 +333,7 @@ export function ProfilePage() {
             <div className="flex gap-2">
               <input
                 className="form-input flex-1"
-                placeholder="Temple slug (e.g. shree-jain-derasar-surat)"
+                placeholder={t('ui.templeSlugPh')}
                 value={linkSlug}
                 onChange={e => setLinkSlug(e.target.value)}
               />
@@ -354,7 +350,7 @@ export function ProfilePage() {
 
           {/* Notification preferences */}
           <div className="card p-4">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">Notification Preferences</h3>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">{t('ui.notifPrefs')}</h3>
             {([
               { key: 'push', label: 'Push Notifications' },
               { key: 'sms', label: 'SMS Notifications' },
@@ -381,8 +377,7 @@ export function ProfilePage() {
             onClick={doLogout}
             className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
           >
-            <LogOut size={16} /> Logout
-          </button>
+            <LogOut size={16} />{t('ui.logout')}</button>
         </div>
       )}
     </div>

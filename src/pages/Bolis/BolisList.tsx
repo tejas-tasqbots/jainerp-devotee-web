@@ -87,7 +87,7 @@ export function BolisList() {
       {/* Summary */}
       {bolis.length > 0 && (
         <div className="mx-4 mt-4 card p-4 bg-amber-50 border-amber-200">
-          <p className="text-xs text-amber-700 font-medium">Total Outstanding</p>
+          <p className="text-xs text-amber-700 font-medium">{t('ui.totalOutstanding')}</p>
           <p className="text-xl font-bold text-amber-800">₹{fmtPaise(outstanding)}</p>
           <p className="text-xs text-amber-600 mt-0.5">{bolis.length} boli(s) pending</p>
         </div>
@@ -104,7 +104,7 @@ export function BolisList() {
         ) : bolis.length === 0 ? (
           <EmptyState
             icon={CheckCircle}
-            title="No pending bolis"
+            title={t('ui.noPendingBolis')}
             hint="Every pledge you have made is fully paid. New bolis appear here when a temple records one for you."
           />
         ) : (
@@ -126,7 +126,7 @@ export function BolisList() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-slate-400">Outstanding</p>
+                    <p className="text-xs text-slate-400">{t('ui.outstanding')}</p>
                     <p className="text-base font-bold text-red-600">₹{fmtPaise(boli.outstanding_paise)}</p>
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export function BolisList() {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
           <div className="bg-white w-full rounded-t-2xl p-6 space-y-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-navy-900">Pay Boli</h3>
+              <h3 className="font-bold text-navy-900">{t('ui.payBoli')}</h3>
               <button onClick={() => { setPayModal(null); setPayResult(null); setPayError('') }}>
                 <X size={20} className="text-slate-400" />
               </button>
@@ -175,7 +175,7 @@ export function BolisList() {
             <p className="text-sm text-slate-600">{payModal.description}</p>
             <p className="text-sm text-slate-500">Temple: {payModal.temple}</p>
             <div>
-              <label className="form-label">Amount (₹)</label>
+              <label className="form-label">{t('ui.amount')}</label>
               <input
                 type="number"
                 className="form-input"
