@@ -29,7 +29,9 @@
     "invalidOtp": "Enter 6-digit OTP",
     "devModeOtp": "Dev mode — OTP:",
     "back": "Back",
-    "otpSentTo": "OTP sent to"
+    "otpSentTo": "OTP sent to",
+    "countryHint": "Pick your country code for international numbers",
+    "newUserHint": "New user? You'll complete your profile after OTP."
   },
   "home": {
     "quickDonate": "Donate",

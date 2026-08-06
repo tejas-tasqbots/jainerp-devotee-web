@@ -29,7 +29,9 @@
     "invalidOtp": "6 अंकी OTP टाका",
     "devModeOtp": "डेव्ह मोड — OTP:",
     "back": "मागे",
-    "otpSentTo": "OTP पाठवला"
+    "otpSentTo": "OTP पाठवला",
+    "countryHint": "आंतरराष्ट्रीय क्रमांकांसाठी तुमचा देश कोड निवडा",
+    "newUserHint": "नवीन वापरकर्ता? OTP नंतर तुम्ही तुमची प्रोफाइल पूर्ण कराल."
   },
   "home": {
     "quickDonate": "दान करा",

@@ -77,7 +77,12 @@ export function LoginPage() {
     // icon box, navy/red wordmark) so every portal reads as one product.
     <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm relative">
-        <div className="absolute right-4 top-4"><LanguageSwitcher /></div>
+        {/* The switcher sits in its own row rather than floating over the
+            header. It used to be absolutely positioned on top of the logo and
+            hero, so opening it covered the branding — the menu was always
+            clickable, it just landed on top of the artwork. Giving it a row of
+            its own makes all three portal logins read the same way. */}
+        <div className="flex justify-end -mt-2 mb-1 relative z-50"><LanguageSwitcher /></div>
         {/* Header */}
         <div className="text-center mb-8">
           {/* Devotional banner — bundled SVG so it renders offline (PWA). */}
@@ -100,7 +105,7 @@ export function LoginPage() {
               <div onKeyDown={e => e.key === 'Enter' && sendOtp()}>
                 <PhoneInput value={mobile} onChange={v => { setMobile(v); setError('') }} autoFocus />
               </div>
-              <p className="text-xs text-slate-400 mt-1">Pick your country code for international numbers</p>
+              <p className="text-xs text-slate-400 mt-1">{t('login.countryHint')}</p>
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button
@@ -113,7 +118,7 @@ export function LoginPage() {
               {loading ? t('login.sendingOtp') : t('login.sendOtp')}
             </button>
             <p className="text-center text-xs text-slate-400">
-              New user? You'll complete your profile after OTP.
+              {t('login.newUserHint')}
             </p>
           </div>
         )}

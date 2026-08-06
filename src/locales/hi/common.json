@@ -29,7 +29,9 @@
     "invalidOtp": "6 अंकों का OTP दर्ज करें",
     "devModeOtp": "डेव मोड — OTP:",
     "back": "वापस",
-    "otpSentTo": "OTP भेजा गया"
+    "otpSentTo": "OTP भेजा गया",
+    "countryHint": "अंतरराष्ट्रीय नंबर के लिए अपना देश कोड चुनें",
+    "newUserHint": "नए उपयोगकर्ता? OTP के बाद आप अपनी प्रोफ़ाइल पूरी करेंगे।"
   },
   "home": {
     "quickDonate": "दान करें",
