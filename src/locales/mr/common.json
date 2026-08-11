@@ -195,6 +195,19 @@
     "chaturmas": "चातुर्मास",
     "upcomingVihar": "आगामी विहार योजना",
     "recentUpdates": "अलीकडील अपडेट",
-    "publishedWorks": "प्रकाशित साहित्य"
+    "publishedWorks": "प्रकाशित साहित्य",
+    "searchDonations": "मंदिर, प्रकार किंवा पावती शोधा",
+    "searchPledges": "मंदिर, सेवा किंवा कार्यक्रम शोधा",
+    "allYears": "सर्व वर्षे",
+    "sortNewest": "नवीन आधी",
+    "sortOldest": "जुने आधी",
+    "sortHighest": "जास्त रक्कम",
+    "sortLowest": "कमी रक्कम",
+    "only80g": "फक्त 80G पात्र",
+    "showingCount": "{{count}} दिसत आहेत",
+    "eligible80g": "{{amount}} 80G साठी पात्र",
+    "noResults": "काहीही जुळत नाही",
+    "noResultsHint": "वेगळा शोध करून पाहा, किंवा काढा.",
+    "clearFilters": "फिल्टर काढा"
   }
 }

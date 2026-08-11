@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Award, Bell, Clock, FileText, IndianRupee, Loader2, XCircle } from 'lucide-react'
+import { Award, Bell, Clock, FileText, IndianRupee, Loader2, Search, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, apiError, currentFY, fmtPaise } from '../../lib/api'
 import type { DonationRequest, Transaction, TransactionSummary } from '../../types'
@@ -35,6 +35,14 @@ export function DonationsList() {
   const [summary, setSummary] = useState<TransactionSummary | null>(null)
   const [fy, setFy] = useState(currentFY())
   const [type, setType] = useState('')
+  // `q` is what the user is typing; `search` is what has actually been sent.
+  // Without the split every keystroke is a request, and the responses come
+  // back out of order.
+  const [q, setQ] = useState('')
+  const [search, setSearch] = useState('')
+  const [only80g, setOnly80g] = useState(false)
+  const [sort, setSort] = useState('date_desc')
+  const [filteredTotals, setFilteredTotals] = useState<{ total: number; sum: number; eligible: number } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
@@ -42,18 +50,40 @@ export function DonationsList() {
   const [receiptLoading, setReceiptLoading] = useState<string | null>(null)
   const [actionId, setActionId] = useState<string | null>(null)
 
-  useEffect(() => { load() }, [fy, type, page])
+  useEffect(() => { load() }, [fy, type, page, search, only80g, sort])
   useEffect(() => { loadRequests() }, [])
+
+  // 350ms is long enough to avoid a request per keystroke and short enough to
+  // still feel live.
+  useEffect(() => {
+    const timer = setTimeout(() => { setSearch(q.trim()); setPage(1) }, 350)
+    return () => clearTimeout(timer)
+  }, [q])
 
   async function load() {
     setLoading(true); setError('')
     try {
       const [txnRes, sumRes] = await Promise.all([
-        api.get('/me/transactions', { params: { fy, type: type || undefined, page, limit: 20, include_unsynced: true } }),
-        api.get('/me/transactions/summary', { params: { fy } }),
+        api.get('/me/transactions', {
+          params: {
+            fy, type: type || undefined, page, limit: 20, include_unsynced: true,
+            q: search || undefined,
+            only_80g: only80g ? 'true' : undefined,
+            sort,
+          },
+        }),
+        // The summary is always the FY's own figure. It answers a different
+        // question from the filter totals below, so it is not re-filtered.
+        api.get('/me/transactions/summary', { params: { fy: fy === 'all' ? currentFY() : fy } }),
       ])
       setTransactions(txnRes.data.data?.rows ?? txnRes.data.data ?? [])
-      setTotal(txnRes.data.meta?.total ?? 0)
+      const meta = txnRes.data.meta ?? {}
+      setTotal(meta.total ?? 0)
+      setFilteredTotals({
+        total: Number(meta.total ?? 0),
+        sum: Number(meta.filtered_total_paise ?? 0),
+        eligible: Number(meta.filtered_80g_paise ?? 0),
+      })
       setSummary(sumRes.data.data)
     } catch (e) {
       setError(apiError(e))
@@ -129,6 +159,10 @@ export function DonationsList() {
   }
 
   const fyOptions = ['2026-27', '2025-26', '2024-25']
+  const filtering = !!search || only80g || !!type || fy === 'all'
+  function clearFilters() {
+    setQ(''); setSearch(''); setOnly80g(false); setType(''); setFy(currentFY()); setSort('date_desc'); setPage(1)
+  }
   const pendingCount = requests.filter(r => r.status === 'pending').length
   const temples80g = (summary?.by_temple ?? []).filter(t => t.eligible_80g_paise > 0)
 
@@ -206,10 +240,24 @@ export function DonationsList() {
 
       {view === 'history' && (
         <>
-          {/* Filters */}
-          <div className="px-4 py-3 flex gap-2">
+          {/* Search + filters */}
+          <div className="px-4 pt-3">
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                className="form-input w-full pl-9"
+                placeholder={t('ui.searchDonations', { defaultValue: 'Search temple, category or receipt' })}
+                value={q}
+                onChange={e => setQ(e.target.value)}
+                aria-label={t('ui.searchDonations', { defaultValue: 'Search temple, category or receipt' })}
+              />
+            </div>
+          </div>
+          <div className="px-4 py-3 flex gap-2 flex-wrap">
             <select aria-label={t('ui.financialYear')} title={t('ui.financialYear')} className="form-select flex-1" value={fy} onChange={e => { setFy(e.target.value); setPage(1) }}>
               {fyOptions.map(f => <option key={f} value={f}>{f}</option>)}
+              <option value="all">{t('ui.allYears', { defaultValue: 'All years' })}</option>
             </select>
             <select aria-label={t('ui.transactionType')} title={t('ui.transactionType')} className="form-select flex-1" value={type} onChange={e => { setType(e.target.value); setPage(1) }}>
               <option value="">{t('ui.allTypes')}</option>
@@ -218,7 +266,41 @@ export function DonationsList() {
               <option value="room">Room</option>
               <option value="boli">Boli</option>
             </select>
+            <select
+              aria-label={t('ui.sortBy', { defaultValue: 'Sort by' })}
+              title={t('ui.sortBy', { defaultValue: 'Sort by' })}
+              className="form-select flex-1"
+              value={sort}
+              onChange={e => { setSort(e.target.value); setPage(1) }}
+            >
+              <option value="date_desc">{t('ui.sortNewest', { defaultValue: 'Newest first' })}</option>
+              <option value="date_asc">{t('ui.sortOldest', { defaultValue: 'Oldest first' })}</option>
+              <option value="amount_desc">{t('ui.sortHighest', { defaultValue: 'Highest amount' })}</option>
+              <option value="amount_asc">{t('ui.sortLowest', { defaultValue: 'Lowest amount' })}</option>
+            </select>
+            <label className="flex items-center gap-1.5 text-sm text-slate-600 px-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={only80g}
+                onChange={e => { setOnly80g(e.target.checked); setPage(1) }}
+              />
+              {t('ui.only80g', { defaultValue: '80G eligible only' })}
+            </label>
           </div>
+
+          {/* What the CURRENT filter adds up to — the summary card above is
+              always the whole year, which is a different question. */}
+          {filteredTotals && filteredTotals.total > 0 && (
+            <div className="px-4 pb-2 text-xs text-slate-500">
+              <span className="font-semibold text-slate-700">
+                {t('ui.showingCount', { defaultValue: '{{count}} shown', count: filteredTotals.total })}
+              </span>
+              {' · '}{fmtPaise(filteredTotals.sum)}
+              {filteredTotals.eligible > 0 && (
+                <> · {t('ui.eligible80g', { defaultValue: '{{amount}} eligible for 80G', amount: fmtPaise(filteredTotals.eligible) })}</>
+              )}
+            </div>
+          )}
 
           {/* List */}
           <div className="px-4 space-y-3 pb-6">
@@ -237,16 +319,31 @@ export function DonationsList() {
             ) : error ? (
               <div className="card p-6 text-center text-red-600 text-sm">{error}</div>
             ) : transactions.length === 0 ? (
-              <div className="card p-8 text-center">
-                <IndianRupee size={32} className="text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm">{t('ui.noTransactions')}</p>
-                <button
-                  onClick={() => navigate('/donate')}
-                  className="btn-primary mt-4 mx-auto justify-center px-6 py-2"
-                >
-                  {t('nav.donate')}
-                </button>
-              </div>
+              // A filtered empty list is a different situation from an empty
+              // ledger. Telling somebody who has just typed a search that they
+              // have never donated reads as data loss.
+              filtering ? (
+                <div className="card p-8 text-center">
+                  <Search size={32} className="text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 text-sm">
+                    {t('ui.noResults', { defaultValue: 'Nothing matches' })}
+                  </p>
+                  <button onClick={clearFilters} className="btn-secondary mt-4 mx-auto justify-center px-6 py-2">
+                    {t('ui.clearFilters', { defaultValue: 'Clear filters' })}
+                  </button>
+                </div>
+              ) : (
+                <div className="card p-8 text-center">
+                  <IndianRupee size={32} className="text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 text-sm">{t('ui.noTransactions')}</p>
+                  <button
+                    onClick={() => navigate('/donate')}
+                    className="btn-primary mt-4 mx-auto justify-center px-6 py-2"
+                  >
+                    {t('nav.donate')}
+                  </button>
+                </div>
+              )
             ) : (
               <>
                 {transactions.map(txn => (

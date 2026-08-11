@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import { Bell, Calendar, CheckCircle, IndianRupee, X } from 'lucide-react'
+import { Bell, Calendar, CheckCircle, IndianRupee, Search, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, apiError, fmtPaise, parsePaise } from '../../lib/api'
 import { openRazorpayCheckout } from '../../lib/razorpay'
@@ -18,13 +18,24 @@ export function BolisList() {
   const [paying, setPaying] = useState(false)
   const [payResult, setPayResult] = useState<string | null>(null)
   const [payError, setPayError] = useState('')
+  const [q, setQ] = useState('')
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('date_asc')
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [search, sort])
+
+  // Debounced, so typing a temple name is one request rather than one per key.
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(q.trim()), 350)
+    return () => clearTimeout(timer)
+  }, [q])
 
   async function load() {
     setLoading(true)
     try {
-      const { data } = await api.get('/me/bolis?status=pledged,partially_paid')
+      const { data } = await api.get('/me/bolis', {
+        params: { status: 'pledged,partially_paid', q: search || undefined, sort },
+      })
       setBolis(data.data ?? [])
     } catch {
       setBolis([])
@@ -93,6 +104,32 @@ export function BolisList() {
         </div>
       )}
 
+      <div className="px-4 pt-4 flex gap-2">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="search"
+            className="form-input w-full pl-9"
+            placeholder={t('ui.searchPledges', { defaultValue: 'Search temple, seva or event' })}
+            aria-label={t('ui.searchPledges', { defaultValue: 'Search temple, seva or event' })}
+            value={q}
+            onChange={e => setQ(e.target.value)}
+          />
+        </div>
+        <select
+          className="form-select"
+          aria-label={t('ui.sortBy', { defaultValue: 'Sort by' })}
+          title={t('ui.sortBy', { defaultValue: 'Sort by' })}
+          value={sort}
+          onChange={e => setSort(e.target.value)}
+        >
+          <option value="date_asc">{t('ui.sortOldest', { defaultValue: 'Oldest first' })}</option>
+          <option value="date_desc">{t('ui.sortNewest', { defaultValue: 'Newest first' })}</option>
+          <option value="amount_desc">{t('ui.sortHighest', { defaultValue: 'Highest amount' })}</option>
+          <option value="amount_asc">{t('ui.sortLowest', { defaultValue: 'Lowest amount' })}</option>
+        </select>
+      </div>
+
       <div className="px-4 py-4 space-y-4">
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -102,11 +139,19 @@ export function BolisList() {
             </div>
           ))
         ) : bolis.length === 0 ? (
-          <EmptyState
-            icon={CheckCircle}
-            title={t('ui.noPendingBolis')}
-            hint="Every pledge you have made is fully paid. New bolis appear here when a temple records one for you."
-          />
+          search ? (
+            <EmptyState
+              icon={Search}
+              title={t('ui.noResults', { defaultValue: 'Nothing matches' })}
+              hint={t('ui.noResultsHint', { defaultValue: 'Try a different search, or clear it.' })}
+            />
+          ) : (
+            <EmptyState
+              icon={CheckCircle}
+              title={t('ui.noPendingBolis')}
+              hint="Every pledge you have made is fully paid. New bolis appear here when a temple records one for you."
+            />
+          )
         ) : (
           bolis.map(boli => {
             const paidPct = Math.round((boli.paid_amount_paise / boli.pledged_amount_paise) * 100)

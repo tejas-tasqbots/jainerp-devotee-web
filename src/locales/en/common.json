@@ -195,6 +195,19 @@
     "chaturmas": "Chaturmas",
     "upcomingVihar": "Upcoming Vihar Plan",
     "recentUpdates": "Recent Updates",
-    "publishedWorks": "Published works"
+    "publishedWorks": "Published works",
+    "searchDonations": "Search temple, category or receipt",
+    "searchPledges": "Search temple, seva or event",
+    "allYears": "All years",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortHighest": "Highest amount",
+    "sortLowest": "Lowest amount",
+    "only80g": "80G eligible only",
+    "showingCount": "{{count}} shown",
+    "eligible80g": "{{amount}} eligible for 80G",
+    "noResults": "Nothing matches",
+    "noResultsHint": "Try a different search, or clear it.",
+    "clearFilters": "Clear filters"
   }
 }
