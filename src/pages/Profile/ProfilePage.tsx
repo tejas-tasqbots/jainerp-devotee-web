@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Building2, CheckCircle, Link, LogOut, Save, XCircle } from 'lucide-react'
+import { BedDouble, Bell, Building2, CheckCircle, ChevronRight, Link, LogOut, Save, XCircle } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { StateSelect, CitySelect, CountrySelect } from '../../components/GeoSelect'
@@ -307,6 +307,20 @@ export function ProfilePage() {
               </div>
             </div>
           )}
+
+          {/* Room bookings are not donations, so they never appear under My
+              Donations — before this link there was no route back to a ticket
+              once the confirmation page had been dismissed. */}
+          <button
+            onClick={() => navigate('/bookings')}
+            className="card p-4 w-full flex items-center gap-3 text-left hover:border-brand-red transition-colors"
+          >
+            <BedDouble size={16} className="text-slate-400 shrink-0" />
+            <span className="flex-1 text-sm font-semibold text-slate-700">
+              {t('titles.myBookings', { defaultValue: 'My Bookings' })}
+            </span>
+            <ChevronRight size={16} className="text-slate-300" />
+          </button>
 
           {/* Linked temples */}
           <div className="card p-4">

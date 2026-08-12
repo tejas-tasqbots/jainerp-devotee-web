@@ -14,7 +14,8 @@
     "templeDirectory": "Temple Directory",
     "receipt": "Receipt",
     "completeProfile": "Complete Your Profile",
-    "maharajMataji": "Sadhu-Sadhvi"
+    "maharajMataji": "Sadhu-Sadhvi",
+    "myBookings": "My Bookings"
   },
   "login": {
     "heading": "Devotee Login",
@@ -208,6 +209,22 @@
     "eligible80g": "{{amount}} eligible for 80G",
     "noResults": "Nothing matches",
     "noResultsHint": "Try a different search, or clear it.",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "allStates": "All states",
+    "allCities": "All cities",
+    "stay": "Stay",
+    "allStays": "All stays",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "earlier": "Earlier",
+    "allStatuses": "Any status",
+    "statusBooked": "Booked",
+    "statusCheckedIn": "Checked in",
+    "statusCheckedOut": "Checked out",
+    "statusCancelled": "Cancelled",
+    "searchStays": "Search temple, room or ticket",
+    "noBookingsYet": "No room bookings yet",
+    "noBookingsHint": "Rooms you book at any temple appear here, with the ticket to show at the gate.",
+    "findAStay": "Find a dharamshala"
   }
 }

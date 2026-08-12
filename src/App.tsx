@@ -15,6 +15,7 @@ import { TempleDetails } from './pages/Temples/TempleDetails'
 import { StaySearchPage } from './pages/Booking/StaySearchPage'
 import { RoomBookingPage } from './pages/Booking/RoomBookingPage'
 import { BookingTicketPage } from './pages/Booking/BookingTicketPage'
+import { MyBookingsPage } from './pages/Booking/MyBookingsPage'
 import { TempleDirectory } from './pages/Temples/TempleDirectory'
 import { useAuthStore } from './store/authStore'
 
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/temples/:slug" element={<TempleDetails />} />
             <Route path="/stays" element={<StaySearchPage />} />
             <Route path="/temples/:slug/book" element={<RoomBookingPage />} />
+            <Route path="/bookings" element={<MyBookingsPage />} />
             <Route path="/bookings/:slug/:id" element={<BookingTicketPage />} />
             <Route path="/sant" element={<SantDirectory />} />
             <Route path="/sant/:id" element={<SantDetails />} />

@@ -4,27 +4,50 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, ChevronRight, Search } from 'lucide-react'
 import { api } from '../../lib/api'
 import type { Temple } from '../../types'
+
+/** Directory filter options, counted over the temples that actually exist. */
+interface Facets {
+  states: { value: string; count: number }[]
+  cities: { value: string; count: number }[]
+}
 import { EmptyState } from '../../components/kit'
 
 export function TempleDirectory() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
+  const [state, setState] = useState('')
+  const [city, setCity] = useState('')
+  const [facets, setFacets] = useState<Facets>({ states: [], cities: [] })
   const [temples, setTemples] = useState<Temple[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
 
-  useEffect(() => { load() }, [page])
+  useEffect(() => { load() }, [page, state, city])
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); load() }, 400)
     return () => clearTimeout(t)
   }, [query])
 
+  // Options come from the temples that actually exist, scoped by the chosen
+  // state. A filter built from a static list of Indian states offers 36 choices
+  // of which three have temples, and picking one of the other 33 returns an
+  // empty list that reads as a broken app.
+  useEffect(() => {
+    let cancelled = false
+    api.get('/temples/directory/facets', { params: { state: state || undefined } })
+      .then(({ data }) => { if (!cancelled) setFacets(data.data ?? { states: [], cities: [] }) })
+      .catch(() => { /* the filter is optional; search still works without it */ })
+    return () => { cancelled = true }
+  }, [state])
+
   async function load() {
     setLoading(true)
     try {
-      const { data } = await api.get('/temples/directory', { params: { q: query, page, limit: 15 } })
+      const { data } = await api.get('/temples/directory', {
+        params: { q: query, state: state || undefined, city: city || undefined, page, limit: 15 },
+      })
       setTemples(data.data ?? [])
       setTotal(data.meta?.total ?? 0)
     } catch {
@@ -33,6 +56,15 @@ export function TempleDirectory() {
       setLoading(false)
     }
   }
+
+  /** Changing state invalidates the city — Pune is not in Madhya Pradesh. */
+  function onStateChange(next: string) {
+    setState(next)
+    setCity('')
+    setPage(1)
+  }
+
+  const filtering = !!query || !!state || !!city
 
   const TYPE_COLORS: Record<string, string> = {
     jain: 'badge-gold',
@@ -61,7 +93,44 @@ export function TempleDirectory() {
           />
         </div>
 
-        <p className="text-xs text-slate-400">{total} temples found</p>
+        <div className="flex gap-2">
+          <select
+            className="form-select flex-1"
+            aria-label={t('ui.state', { defaultValue: 'State' })}
+            title={t('ui.state', { defaultValue: 'State' })}
+            value={state}
+            onChange={e => onStateChange(e.target.value)}
+          >
+            <option value="">{t('ui.allStates', { defaultValue: 'All states' })}</option>
+            {facets.states.map(s => (
+              <option key={s.value} value={s.value}>{s.value} ({s.count})</option>
+            ))}
+          </select>
+          <select
+            className="form-select flex-1"
+            aria-label={t('ui.city', { defaultValue: 'City' })}
+            title={t('ui.city', { defaultValue: 'City' })}
+            value={city}
+            onChange={e => { setCity(e.target.value); setPage(1) }}
+          >
+            <option value="">{t('ui.allCities', { defaultValue: 'All cities' })}</option>
+            {facets.cities.map(c => (
+              <option key={c.value} value={c.value}>{c.value} ({c.count})</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-slate-400">{total} temples found</p>
+          {filtering && (
+            <button
+              onClick={() => { setQuery(''); setState(''); setCity(''); setPage(1) }}
+              className="text-xs font-semibold text-brand-red hover:underline"
+            >
+              {t('ui.clearFilters', { defaultValue: 'Clear filters' })}
+            </button>
+          )}
+        </div>
 
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (

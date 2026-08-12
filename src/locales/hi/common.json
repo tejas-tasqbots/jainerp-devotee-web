@@ -14,7 +14,8 @@
     "templeDirectory": "मंदिरों की सूची",
     "receipt": "रसीद",
     "completeProfile": "अपनी प्रोफ़ाइल पूरी करें",
-    "maharajMataji": "साधु-साध्वी"
+    "maharajMataji": "साधु-साध्वी",
+    "myBookings": "मेरी बुकिंग"
   },
   "login": {
     "heading": "भक्त लॉगिन",
@@ -208,6 +209,22 @@
     "eligible80g": "{{amount}} 80G के लिए योग्य",
     "noResults": "कुछ नहीं मिला",
     "noResultsHint": "कोई और खोज आज़माएँ, या हटाएँ।",
-    "clearFilters": "फ़िल्टर हटाएँ"
+    "clearFilters": "फ़िल्टर हटाएँ",
+    "allStates": "सभी राज्य",
+    "allCities": "सभी शहर",
+    "stay": "ठहराव",
+    "allStays": "सभी ठहराव",
+    "upcoming": "आगामी",
+    "past": "पिछले",
+    "earlier": "पहले",
+    "allStatuses": "कोई भी स्थिति",
+    "statusBooked": "बुक किया",
+    "statusCheckedIn": "चेक-इन",
+    "statusCheckedOut": "चेक-आउट",
+    "statusCancelled": "रद्द",
+    "searchStays": "मंदिर, कमरा या टिकट खोजें",
+    "noBookingsYet": "अभी कोई कमरा बुक नहीं",
+    "noBookingsHint": "किसी भी मंदिर में बुक किए कमरे यहाँ दिखेंगे, गेट पर दिखाने के टिकट के साथ।",
+    "findAStay": "धर्मशाला खोजें"
   }
 }
