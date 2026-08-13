@@ -94,7 +94,7 @@ export function LoginPage() {
             <span className="text-navy-900">Jain</span>
             <span className="text-brand-red">ERP</span>
           </h1>
-          <p className="text-slate-500 text-sm mt-1">{t('login.heading')}</p>
+          <p className="text-slate-500 text-sm font-semibold mt-1">{t('brand.portal')}</p>
         </div>
 
         {/* Step 1: Mobile */}

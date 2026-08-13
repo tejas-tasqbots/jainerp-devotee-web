@@ -17,8 +17,10 @@
     "maharajMataji": "साधु-साध्वी",
     "myBookings": "माझी बुकिंग"
   },
+  "brand": {
+    "portal": "भक्त"
+  },
   "login": {
-    "heading": "भक्त लॉगिन",
     "mobileLabel": "मोबाइल क्रमांक",
     "sendOtp": "OTP पाठवा",
     "sendingOtp": "OTP पाठवत आहे...",

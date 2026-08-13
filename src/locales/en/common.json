@@ -17,8 +17,10 @@
     "maharajMataji": "Sadhu-Sadhvi",
     "myBookings": "My Bookings"
   },
+  "brand": {
+    "portal": "Devotee"
+  },
   "login": {
-    "heading": "Devotee Login",
     "mobileLabel": "Mobile Number",
     "sendOtp": "Send OTP",
     "sendingOtp": "Sending OTP...",
