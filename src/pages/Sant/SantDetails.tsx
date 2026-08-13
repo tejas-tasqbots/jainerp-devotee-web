@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Bell, BellOff, Calendar, MapPin, Megaphone, Navigation, Users } from 'lucide-react'
+import {
+  ArrowLeft, Bell, BellOff, Calendar, CalendarDays, Cake, Clock,
+  MapPin, Megaphone, Navigation, Send, Users,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import type { MaharajProfile } from '../../types'
 import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks'
+import { eventTypeLabel, santDisplayName } from '../../lib/ascetic'
+import { ReportLocationDialog } from './ReportLocationDialog'
 
 export function SantDetails() {
   const { t } = useTranslation()
@@ -16,6 +21,7 @@ export function SantDetails() {
   const [loading, setLoading] = useState(true)
   const [following, setFollowing] = useState(false)
   const [toggling, setToggling] = useState(false)
+  const [reporting, setReporting] = useState(false)
 
   useEffect(() => { if (id) load() }, [id])
 
@@ -95,7 +101,8 @@ export function SantDetails() {
             variant="onDark"
           />
           <div className="flex-1">
-            <h2 className="font-bold text-xl leading-tight">{profile.name}</h2>
+            {/* "Acharya Shri …" — the post reads as part of the name. */}
+            <h2 className="font-bold text-xl leading-tight">{santDisplayName(profile)}</h2>
             <p className="text-white/80 text-sm mt-0.5">{profile.samuday}</p>
             {profile.diksha_year && (
               <p className="text-white/60 text-xs mt-0.5">Diksha: {profile.diksha_year}</p>
@@ -211,6 +218,116 @@ export function SantDetails() {
           </div>
         )}
 
+        {/* Report a sighting.
+            A devotee who has actually seen the Sant is the fastest source of a
+            location update, and until now had no way to say so. This does NOT
+            change the location — it queues a proposal the Sant's own
+            representative approves, exactly like a mandir's (migration 016). */}
+        {!profile.samadhi_date && (
+          <button
+            onClick={() => setReporting(true)}
+            className="w-full card p-3 flex items-center justify-center gap-2 text-sm
+                       font-medium text-brand-red hover:bg-red-50"
+          >
+            <Send size={15} />{t('sant.reportSeen')}
+          </button>
+        )}
+
+        {/* Anniversaries — derived from the profile's dates, never stored. */}
+        {!!profile.anniversaries?.length && (
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Cake size={15} className="text-navy-700" />
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {t('sant.anniversaries')}
+              </h3>
+            </div>
+            <div className="space-y-2">
+              {profile.anniversaries.map(a => (
+                <div key={a.kind} className="flex items-center justify-between py-1.5
+                                             border-b border-slate-100 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">{a.label}</p>
+                    {/* Observance follows the tithi, not the Gregorian date, so
+                        the tithi is shown next to it wherever it is recorded. */}
+                    {a.tithi_note && <p className="text-[11px] text-slate-400">{a.tithi_note}</p>}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-600">{formatIsoDay(a.date)}</p>
+                    {a.next_on && (
+                      <p className="text-[11px] text-slate-400">
+                        {t('sant.nextOn', { date: formatIsoDay(a.next_on) })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming events */}
+        {!!profile.events?.length && (
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarDays size={15} className="text-navy-700" />
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {t('sant.upcomingEvents')}
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {profile.events.map(e => (
+                <div key={e.id} className="border-l-2 border-brand-gold pl-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-slate-800">{e.title}</p>
+                    <span className="badge badge-gold text-[9px]">{eventTypeLabel(e.type)}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {[e.place, e.city, e.state].filter(Boolean).join(', ')}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
+                    <span>{formatIsoDay(e.starts_on)}{e.ends_on ? ` – ${formatIsoDay(e.ends_on)}` : ''}</span>
+                    {e.starts_at_time && (
+                      <span className="flex items-center gap-0.5"><Clock size={10} />{e.starts_at_time}</span>
+                    )}
+                  </p>
+                  {e.description && (
+                    <p className="text-xs text-slate-600 mt-1 whitespace-pre-line">{e.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Varshayog history — the monsoons already recorded for this profile. */}
+        {!!profile.chaturmas_history?.length && (
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarDays size={15} className="text-brand-red" />
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {t('sant.chaturmasHistory')}
+              </h3>
+            </div>
+            <div className="space-y-1.5">
+              {profile.chaturmas_history.map(c => (
+                <div key={c.id} className="flex items-baseline gap-3 py-1.5
+                                           border-b border-slate-100 last:border-0">
+                  <span className="text-xs font-bold text-navy-700 w-10 shrink-0">
+                    {c.chaturmas_year ?? '—'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-700 truncate">{c.place}</p>
+                    <p className="text-[11px] text-slate-400 truncate">
+                      {[c.city, c.state].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Vihar plan */}
         {profile.vihar_plan && profile.vihar_plan.length > 0 && (
           <div className="card p-4">
@@ -284,6 +401,28 @@ export function SantDetails() {
           <p className="text-center text-xs text-slate-400">Guru: {profile.guru_name}</p>
         )}
       </div>
+
+      {reporting && (
+        <ReportLocationDialog
+          santId={profile.id}
+          santName={profile.name}
+          onClose={() => setReporting(false)}
+        />
+      )}
     </div>
   )
+}
+
+/**
+ * Formats a Postgres `YYYY-MM-DD` without a timezone round-trip.
+ *
+ * `new Date('2026-09-14')` parses as UTC midnight and renders in local time,
+ * which prints the previous day anywhere west of Greenwich. `date-fns` format
+ * on that value has the same problem — this repo has already shipped one
+ * off-by-one date bug of exactly this shape.
+ */
+function formatIsoDay(iso: string): string {
+  const [y, m, d] = (iso ?? '').slice(0, 10).split('-').map(Number)
+  if (!y || !m || !d) return iso ?? ''
+  return format(new Date(y, m - 1, d), 'dd MMM yyyy')
 }

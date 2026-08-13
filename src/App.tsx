@@ -7,6 +7,9 @@ import { HomePage } from './pages/Home/HomePage'
 import { LoginPage } from './pages/Login/LoginPage'
 import { SantDetails } from './pages/Sant/SantDetails'
 import { SantDirectory } from './pages/Sant/SantDirectory'
+import { SantMap } from './pages/Sant/SantMap'
+import { ChaturmasPage } from './pages/Sant/ChaturmasPage'
+import { SantEventsPage } from './pages/Sant/SantEventsPage'
 import { NotificationsPage } from './pages/Notifications/NotificationsPage'
 import { ProfilePage } from './pages/Profile/ProfilePage'
 import { ReceiptPage } from './pages/Receipt/ReceiptPage'
@@ -76,6 +79,11 @@ export default function App() {
             <Route path="/bookings" element={<MyBookingsPage />} />
             <Route path="/bookings/:slug/:id" element={<BookingTicketPage />} />
             <Route path="/sant" element={<SantDirectory />} />
+            {/* Declared before /sant/:id — a param route matches anything, so
+                these would otherwise resolve as a profile with id="map". */}
+            <Route path="/sant-map" element={<SantMap />} />
+            <Route path="/chaturmas" element={<ChaturmasPage />} />
+            <Route path="/sant-events" element={<SantEventsPage />} />
             <Route path="/sant/:id" element={<SantDetails />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationsPage />} />

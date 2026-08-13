@@ -149,10 +149,27 @@ export interface MaharajProfile {
   type: 'muni' | 'aryika' | 'kshullak' | 'kshullika' | 'ailak'
   /** Honorific for display: "Maharaj Ji", "Mataji", "Ailak Ji", … */
   type_display?: string
+  /** The formal rank: "Muni Shri", "Aryika Shri", … */
+  rank_display?: string
+  /**
+   * POST held (migration 039) — not the rank. An Acharya is still a Muni, which
+   * is why this is separate from `type`. 'none' is a real answer, not a missing one.
+   */
+  pad?: 'acharya' | 'elacharya' | 'upadhyaya' | 'ganini' | 'none'
+  /** "Acharya", "Upadhyaya", … Empty string when pad is 'none'. */
+  pad_display?: string
   sect?: 'digambar' | 'shwetambar'
   sect_display?: string
   samuday: string
+  /** Home/base city. */
   city?: string
+  /**
+   * Where they are now, denormalised from the current location row. Returned by
+   * the list endpoint since migration 002 and never typed, so no screen showed
+   * it — a directory that knows where someone is and prints their home city
+   * instead is answering the wrong question.
+   */
+  current_city?: string | null
   state?: string
   photo_url?: string
   /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */
@@ -168,6 +185,16 @@ export interface MaharajProfile {
   /** Conferred titles — never the canonical `type` rank. */
   honours?: string | null
   lineage?: string | null
+  /**
+   * Anniversary dates (migration 039). Nullable: for most historical ascetics
+   * only `diksha_year` is known, and a guessed day would be fabricated record.
+   */
+  birth_date?: string | null
+  diksha_date?: string | null
+  /** Non-null means the profile is historical — no current location is shown. */
+  samadhi_date?: string | null
+  /** The observed date in the Jain calendar, in words. */
+  tithi_note?: string | null
   links?: { id: string; kind: string; label?: string | null; url: string }[]
   publications?: {
     id: string; title: string; kind: string; language?: string | null
@@ -189,6 +216,12 @@ export interface MaharajProfile {
     chaturmas?: boolean
     notes?: string
   }
+  /** Varshayog history — every chaturmas recorded against this profile. */
+  chaturmas_history?: ChaturmasStay[]
+  /** Upcoming public events. */
+  events?: SantEvent[]
+  /** Derived from the dates above — never stored as rows. */
+  anniversaries?: SantAnniversary[]
   vihar_plan?: {
     id: string
     place: string
@@ -290,4 +323,117 @@ export interface DonationRequest {
   reviewed_at?: string | null
   created_at: string
   has_proof?: boolean
+}
+
+// ── Sant directory: discovery (migration 039) ───────────────────────────────
+
+/** A chaturmas (varshayog) stay — one monsoon, one place. */
+export interface ChaturmasStay {
+  id: string
+  chaturmas_year: number | null
+  place: string
+  city?: string | null
+  state?: string | null
+  from_date?: string | null
+  to_date?: string | null
+  lat?: number | string | null
+  lng?: number | string | null
+}
+
+/** A chaturmas row joined to the ascetic who spent it there. */
+export interface ChaturmasEntry extends ChaturmasStay {
+  sant_id: string
+  name: string
+  type: string
+  type_display?: string
+  pad?: string
+  pad_display?: string
+  sect?: string | null
+  sect_display?: string
+  samuday?: string | null
+  photo_url?: string | null
+  has_photo?: boolean
+}
+
+export interface SantEvent {
+  id: string
+  title: string
+  type: string
+  description?: string | null
+  place?: string | null
+  city?: string | null
+  state?: string | null
+  lat?: number | string | null
+  lng?: number | string | null
+  starts_on: string
+  ends_on?: string | null
+  /** Free text — real programmes start "after aahar" as often as at a clock time. */
+  starts_at_time?: string | null
+  tithi_note?: string | null
+  status?: string
+  /** Present on the cross-ascetic feed, absent on a profile's own events. */
+  sant_id?: string
+  sant_name?: string
+  sant_type?: string
+  sant_pad?: string
+  photo_url?: string | null
+}
+
+/** Derived from the profile's dates at query time, never stored. */
+export interface SantAnniversary {
+  kind: 'janma_jayanti' | 'diksha_jayanti' | 'punya_tithi'
+  label: string
+  date: string
+  year: number
+  /** Next occurrence, or null once the ascetic has attained samadhi. */
+  next_on: string | null
+  tithi_note?: string | null
+}
+
+/** One pin on the discovery map. */
+export interface SantMapMarker {
+  sant_id: string
+  name: string
+  type: string
+  type_display?: string
+  pad?: string
+  pad_display?: string
+  sect?: string | null
+  photo_url?: string | null
+  location_id: string
+  place: string
+  city?: string | null
+  state?: string | null
+  lat: number | string
+  lng: number | string
+  chaturmas?: boolean
+  from_date?: string | null
+  to_date?: string | null
+}
+
+/** Distinct filter values with counts, so the UI never offers an empty option. */
+export interface SantFacets {
+  types: { value: string; count: number }[]
+  pads: { value: string; count: number }[]
+  sects: { value: string; count: number }[]
+  states: { value: string; count: number }[]
+}
+
+/** Outcome of a devotee's location report. */
+export interface SantLocationReport {
+  id: string
+  place: string
+  city?: string | null
+  state?: string | null
+  from_date?: string | null
+  chaturmas?: boolean
+  notes?: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  decided_at?: string | null
+  decision_note?: string | null
+  sant_id: string
+  sant_name: string
+  sant_type?: string
+  photo_url?: string | null
 }
