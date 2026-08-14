@@ -1,3 +1,5 @@
+import type { SectScopeMeta } from '../lib/traditions'
+
 export interface Transaction {
   id: string
   tenant: { id: string; name: string }
@@ -53,6 +55,13 @@ export interface Temple {
   slug: string
   name: string
   temple_type: string
+  /**
+   * Sampradaya (migration 032). Null for a Jain trust that never recorded one,
+   * and for every non-Jain trust — read `sect_applicable` on the detail
+   * response to tell those apart. Renders as a badge; never used to hide a row.
+   */
+  sect?: string | null
+  sub_sect?: string | null
   city: string
   state: string
   address?: Record<string, string>
@@ -136,6 +145,8 @@ export interface StaySearchMeta {
   persons: number
   sort: 'distance' | 'price' | 'name'
   near: { lat: number; lng: number; radius_km: number | null } | null
+  /** Which sampradaya scope produced this list — see lib/traditions.ts. */
+  sect_scope?: SectScopeMeta
 }
 
 export interface MaharajProfile {

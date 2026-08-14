@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, Building2, ChevronRight, Search } from 'lucide-react'
 import { api } from '../../lib/api'
 import type { Temple } from '../../types'
+import { SectBadge, TraditionSwitch } from '../../components/TraditionSwitch'
+import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
 
 /** Directory filter options, counted over the temples that actually exist. */
 interface Facets {
@@ -19,12 +21,16 @@ export function TempleDirectory() {
   const [state, setState] = useState('')
   const [city, setCity] = useState('')
   const [facets, setFacets] = useState<Facets>({ states: [], cities: [] })
+  // Sampradaya scoping. The list defaults to the devotee's own tradition; the
+  // switch above the results is how they see that and step outside it.
+  const [scope, setScope] = useTraditionScope()
+  const [sectScope, setSectScope] = useState<SectScopeMeta | null>(null)
   const [temples, setTemples] = useState<Temple[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
 
-  useEffect(() => { load() }, [page, state, city])
+  useEffect(() => { load() }, [page, state, city, scope])
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); load() }, 400)
     return () => clearTimeout(t)
@@ -36,20 +42,26 @@ export function TempleDirectory() {
   // empty list that reads as a broken app.
   useEffect(() => {
     let cancelled = false
-    api.get('/temples/directory/facets', { params: { state: state || undefined } })
+    api.get('/temples/directory/facets', {
+      params: { state: state || undefined, ...traditionsParam(scope) },
+    })
       .then(({ data }) => { if (!cancelled) setFacets(data.data ?? { states: [], cities: [] }) })
       .catch(() => { /* the filter is optional; search still works without it */ })
     return () => { cancelled = true }
-  }, [state])
+  }, [state, scope])
 
   async function load() {
     setLoading(true)
     try {
       const { data } = await api.get('/temples/directory', {
-        params: { q: query, state: state || undefined, city: city || undefined, page, limit: 15 },
+        params: {
+          q: query, state: state || undefined, city: city || undefined, page, limit: 15,
+          ...traditionsParam(scope),
+        },
       })
       setTemples(data.data ?? [])
       setTotal(data.meta?.total ?? 0)
+      setSectScope(data.meta?.sect_scope ?? null)
     } catch {
       setTemples([])
     } finally {
@@ -120,6 +132,12 @@ export function TempleDirectory() {
           </select>
         </div>
 
+        <TraditionSwitch
+          meta={sectScope}
+          scope={scope}
+          onChange={next => { setScope(next); setPage(1) }}
+        />
+
         <div className="flex items-center justify-between">
           <p className="text-xs text-slate-400">{total} temples found</p>
           {filtering && (
@@ -173,6 +191,7 @@ export function TempleDirectory() {
                           {t.temple_type}
                         </span>
                       )}
+                      <SectBadge sect={t.sect} />
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-slate-300 flex-shrink-0" />

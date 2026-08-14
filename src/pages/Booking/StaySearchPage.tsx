@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, BedDouble, Crosshair, MapPin, Navigation, Search, SlidersHorizontal } from 'lucide-react'
 import { api, apiError, fmtPaise } from '../../lib/api'
 import type { StayResult, StaySearchMeta } from '../../types'
+import { SectBadge, TraditionSwitch } from '../../components/TraditionSwitch'
+import { traditionsParam, useTraditionScope, type TraditionScope } from '../../lib/traditions'
 
 /**
  * Find a dharamshala across every trust — "somewhere near Palitana, for these
@@ -38,6 +40,8 @@ export function StaySearchPage() {
   const [to, setTo] = useState(params.get('to') ?? '')
   const [persons, setPersons] = useState(Number(params.get('persons') ?? 1))
   const [sort, setSort] = useState<'distance' | 'price' | 'name'>('name')
+  // Same sampradaya scope as the temple directory, and the same stored choice.
+  const [scope, setScope] = useTraditionScope()
   const [near, setNear] = useState<{ lat: number; lng: number } | null>(null)
   const [radiusKm, setRadiusKm] = useState<number | ''>('')
 
@@ -49,18 +53,23 @@ export function StaySearchPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    api.get('/stays/localities')
+    api.get('/stays/localities', { params: traditionsParam(scope) })
       .then(r => setLocalities(r.data.data ?? []))
       .catch(() => setLocalities([]))
-  }, [])
+  }, [scope])
 
   useEffect(() => { search() }, [])
 
-  async function search(override?: { lat?: number; lng?: number; sort?: typeof sort }) {
+  async function search(override?: {
+    lat?: number; lng?: number; sort?: typeof sort; traditions?: TraditionScope
+  }) {
     setLoading(true); setError('')
     const lat = override?.lat ?? near?.lat
     const lng = override?.lng ?? near?.lng
     const useSort = override?.sort ?? sort
+    // Read from the override, not state: a scope just chosen has not been
+    // committed yet, and searching with the old one shows the wrong list once.
+    const useScope = override?.traditions ?? scope
     try {
       const { data } = await api.get('/stays/search', {
         params: {
@@ -72,6 +81,7 @@ export function StaySearchPage() {
           ...(radiusKm !== '' ? { radius_km: radiusKm } : {}),
           sort: useSort,
           limit: 30,
+          ...traditionsParam(useScope),
         },
       })
       setStays(data.data?.stays ?? [])
@@ -206,6 +216,12 @@ export function StaySearchPage() {
           )}
         </div>
 
+        <TraditionSwitch
+          meta={meta?.sect_scope}
+          scope={scope}
+          onChange={next => { setScope(next); search({ traditions: next }) }}
+        />
+
         {/* ── locality chips ─────────────────────────────────────────── */}
         {localities.length > 0 && !near && (
           <div className="flex flex-wrap gap-2">
@@ -260,7 +276,12 @@ export function StaySearchPage() {
           <div key={s.tenant_id} className="card p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-800">{s.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-slate-800">{s.name}</p>
+                  {/* Which tradition this trust belongs to — the answer to
+                      "why is this in my results?" while browsing all of them. */}
+                  <SectBadge sect={s.sect} />
+                </div>
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500">
                   <MapPin size={12} />
                   {[s.area, s.city, s.state].filter(Boolean).join(', ') || '—'}

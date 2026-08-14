@@ -291,7 +291,14 @@
     "noBookingsHint": "कोणत्याही मंदिरात बुक केलेल्या खोल्या इथे दिसतील, गेटवर दाखवण्याच्या तिकिटासह.",
     "findAStay": "धर्मशाळा शोधा",
     "close": "बंद करा",
-    "done": "झाले"
+    "done": "झाले",
+    "allTraditions": "सर्व परंपरा",
+    "allTraditionsHint": "सर्व परंपरा दाखवल्या जात आहेत.",
+    "myTraditionHint": "प्रथम {{sect}} दाखवले जात आहेत.",
+    "setSampradayaHint": "तुमची परंपरा प्रथम पाहण्यासाठी तुमचा संप्रदाय जोडा.",
+    "setSampradayaCta": "जोडा",
+    "sect_digambar": "दिगंबर",
+    "sect_shwetambar": "श्वेतांबर"
   },
   "feed": {
     "event": "कार्यक्रम",

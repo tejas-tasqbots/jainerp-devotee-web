@@ -7,6 +7,8 @@ import { EmptyState, SkeletonList } from '../../components/kit'
 import { useTranslation } from 'react-i18next'
 import { asceticRank, padLabel, santDisplayName, sectLabel } from '../../lib/ascetic'
 import type { MaharajProfile, SantFacets } from '../../types'
+import { TraditionSwitch } from '../../components/TraditionSwitch'
+import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
 
 /**
  * The Sant directory.
@@ -26,7 +28,12 @@ export function SantDirectory() {
   const [state, setState] = useState('')
   const [type, setType] = useState('')
   const [pad, setPad] = useState('')
+  // An explicit sampradaya from the filter row. Distinct from `scope`: this is
+  // "show me Shwetambar ascetics" and overrides the default scoping, which is
+  // why the picker only appears once the devotee is browsing all traditions.
   const [sect, setSect] = useState('')
+  const [scope, setScope] = useTraditionScope()
+  const [sectScope, setSectScope] = useState<SectScopeMeta | null>(null)
   const [sort, setSort] = useState('name')
   const [showFilters, setShowFilters] = useState(false)
   const [facets, setFacets] = useState<SantFacets | null>(null)
@@ -35,25 +42,29 @@ export function SantDirectory() {
   const [total, setTotal] = useState(0)
 
   useEffect(() => {
-    api.get('/sant/directory/facets')
+    api.get('/sant/directory/facets', { params: traditionsParam(scope) })
       .then(({ data }) => setFacets(data.data ?? null))
       .catch(() => setFacets(null))
-  }, [])
+  }, [scope])
 
   useEffect(() => {
     const handle = setTimeout(load, 400)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, samuday, city, state, type, pad, sect, sort])
+  }, [query, samuday, city, state, type, pad, sect, sort, scope])
 
   async function load() {
     setLoading(true)
     try {
       const { data } = await api.get('/sant', {
-        params: { q: query, samuday, city, state, type, pad, sect, sort, limit: 20 },
+        params: {
+          q: query, samuday, city, state, type, pad, sect, sort, limit: 20,
+          ...traditionsParam(scope),
+        },
       })
       setProfiles(data.data ?? [])
       setTotal(data.meta?.total ?? 0)
+      setSectScope(data.meta?.sect_scope ?? null)
     } catch {
       setProfiles([])
     } finally {
@@ -63,6 +74,11 @@ export function SantDirectory() {
 
   const activeCount = [samuday, city, state, type, pad, sect].filter(Boolean).length
   const hasAnyFilter = activeCount > 0 || !!query
+
+  function onScopeChange(next: 'mine' | 'all') {
+    setScope(next)
+    if (next === 'mine') setSect('')
+  }
 
   function clearAll() {
     setQuery(''); setSamuday(''); setCity(''); setState('')
@@ -150,15 +166,17 @@ export function SantDirectory() {
               </select>
             </div>
             <div className="flex gap-2">
-              <select className="form-input flex-1 text-xs" value={sect}
-                onChange={e => setSect(e.target.value)} aria-label={t('sant.sect')}>
-                <option value="">{t('sant.allSects')}</option>
-                {(facets?.sects ?? []).map(o => (
-                  <option key={o.value} value={o.value}>
-                    {sectLabel(o.value)} ({o.count})
-                  </option>
-                ))}
-              </select>
+              {scope === 'all' && (
+                <select className="form-input flex-1 text-xs" value={sect}
+                  onChange={e => setSect(e.target.value)} aria-label={t('sant.sect')}>
+                  <option value="">{t('sant.allSects')}</option>
+                  {(facets?.sects ?? []).map(o => (
+                    <option key={o.value} value={o.value}>
+                      {sectLabel(o.value)} ({o.count})
+                    </option>
+                  ))}
+                </select>
+              )}
               <select className="form-input flex-1 text-xs" value={state}
                 onChange={e => setState(e.target.value)} aria-label={t('sant.state')}>
                 <option value="">{t('sant.allStates')}</option>
@@ -180,6 +198,8 @@ export function SantDirectory() {
             )}
           </div>
         )}
+
+        <TraditionSwitch meta={sectScope} scope={scope} onChange={onScopeChange} />
 
         <p className="text-xs text-slate-400">{t('sant.profileCount', { count: total })}</p>
 

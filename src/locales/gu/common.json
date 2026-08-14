@@ -291,7 +291,14 @@
     "noBookingsHint": "કોઈપણ મંદિરમાં તમે બુક કરેલા રૂમ અહીં દેખાશે, ગેટ પર બતાવવાની ટિકિટ સાથે.",
     "findAStay": "ધર્મશાળા શોધો",
     "close": "બંધ કરો",
-    "done": "થઈ ગયું"
+    "done": "થઈ ગયું",
+    "allTraditions": "બધી પરંપરાઓ",
+    "allTraditionsHint": "બધી પરંપરાઓ બતાવાઈ રહી છે.",
+    "myTraditionHint": "પહેલાં {{sect}} બતાવાઈ રહ્યા છે.",
+    "setSampradayaHint": "તમારી પોતાની પરંપરા પહેલાં જોવા માટે તમારો સંપ્રદાય ઉમેરો.",
+    "setSampradayaCta": "ઉમેરો",
+    "sect_digambar": "દિગંબર",
+    "sect_shwetambar": "શ્વેતાંબર"
   },
   "feed": {
     "event": "કાર્યક્રમ",

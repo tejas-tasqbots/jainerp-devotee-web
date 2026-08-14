@@ -291,7 +291,14 @@
     "noBookingsHint": "Rooms you book at any temple appear here, with the ticket to show at the gate.",
     "findAStay": "Find a dharamshala",
     "close": "Close",
-    "done": "Done"
+    "done": "Done",
+    "allTraditions": "All traditions",
+    "allTraditionsHint": "Showing every tradition.",
+    "myTraditionHint": "Showing {{sect}} first.",
+    "setSampradayaHint": "Add your sampradaya to see your own tradition first.",
+    "setSampradayaCta": "Add it",
+    "sect_digambar": "Digambar",
+    "sect_shwetambar": "Shwetambar"
   },
   "feed": {
     "event": "Event",
