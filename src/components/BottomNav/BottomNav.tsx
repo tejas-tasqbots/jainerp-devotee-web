@@ -12,8 +12,12 @@ export function BottomNav() {
     { to: '/profile', icon: User, label: t('nav.profile') },
   ]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 bottom-nav-safe">
-      <div className="flex items-end justify-around px-2 pt-1 pb-1">
+    // The bar stays pinned across the full viewport so it still covers the
+    // safe-area inset on a phone, but its CONTENT is centred to the same
+    // max-width as the app column — otherwise on a desktop the five tabs
+    // spread across 1900px while the content sat in a 672px column above them.
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white bottom-nav-safe">
+      <div className="mx-auto flex w-full max-w-2xl items-end justify-around px-2 pt-1 pb-1">
         {tabs.map(({ to, icon: Icon, label, featured }) =>
           featured ? (
             <NavLink

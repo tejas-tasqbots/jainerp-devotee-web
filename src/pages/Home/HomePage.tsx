@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  BedDouble, Bell, Building2, Calendar, ChevronRight, Heart, IndianRupee,
-  Megaphone, Plus, Sparkles, TrendingUp,
+  BedDouble, Bell, Building2, Calendar, CalendarDays, ChevronRight, Heart,
+  IndianRupee, MapPin, Plus, Sparkles, TrendingUp,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, currentFY, fmtPaise } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { feedTypeStyle } from '../../lib/feedTypes'
 import type { Boli, FeedItem, TransactionSummary } from '../../types'
 
 interface MyTemple {
@@ -65,6 +66,33 @@ export function HomePage() {
     // a devotee travelling to Palitana wants a dharamshala, not a directory.
     { label: t('home.quickStays', 'Dharamshala'), icon: BedDouble, color: 'bg-brand-blue text-white', path: '/stays' },
     { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-gold-dark text-white', path: '/sant' },
+  ]
+
+  // The three Sant-directory views. Kept beside quickActions rather than merged
+  // into it: these are places to browse, not actions to take, and mixing them
+  // into the icon row made a nine-tile grid nobody could scan.
+  const discover = [
+    {
+      label: t('sant.mapTitle'),
+      hint: t('home.discoverMapHint'),
+      icon: MapPin,
+      color: 'bg-navy-50 text-navy-700',
+      path: '/sant-map',
+    },
+    {
+      label: t('sant.chaturmasTitle'),
+      hint: t('home.discoverChaturmasHint'),
+      icon: CalendarDays,
+      color: 'bg-red-50 text-brand-red',
+      path: '/chaturmas',
+    },
+    {
+      label: t('sant.eventsTitle'),
+      hint: t('home.discoverEventsHint'),
+      icon: Sparkles,
+      color: 'bg-brand-gold-light text-brand-gold-dark',
+      path: '/sant-events',
+    },
   ]
 
   const outstanding = bolis.reduce((s, b) => s + Number(b.outstanding_paise || 0), 0)
@@ -153,15 +181,59 @@ export function HomePage() {
           </button>
         )}
 
-        {/* Quick actions */}
+        {/* Quick actions.
+            `grid-cols-3` at every width, not the old hardcoded `grid-cols-5`:
+            there are six actions, so five columns put one orphan on a second
+            row, and on anything wider than a phone the five stretched across
+            the full width with the icons marooned in the middle of their
+            cells. Three columns divide six exactly and keep the tiles the
+            same size on a phone and a laptop. */}
         <section className="card p-4">
-          <div className="grid grid-cols-5 gap-1.5">
+          <div className="grid grid-cols-3 gap-y-4 sm:grid-cols-6">
             {quickActions.map(a => (
-              <button key={a.path} onClick={() => navigate(a.path)} className="flex flex-col items-center gap-1.5 py-1 group">
-                <span className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-active:scale-95 transition-transform ${a.color}`}>
+              <button
+                key={a.path}
+                onClick={() => navigate(a.path)}
+                className="group flex flex-col items-center gap-2 rounded-xl py-1 transition-colors hover:bg-slate-50"
+              >
+                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:-translate-y-0.5 group-active:scale-95 ${a.color}`}>
                   <a.icon size={20} />
                 </span>
-                <span className="text-[10px] font-medium text-slate-600 text-center leading-tight">{a.label}</span>
+                <span className="px-1 text-center text-[11px] font-medium leading-tight text-slate-600">{a.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Discover — the Sant directory's three views.
+            The map, the chaturmas directory and the events feed were reachable
+            only from icons inside the Sant directory header, so a devotee who
+            never opened that tab had no idea they existed. These are the parts
+            of the platform with nothing comparable elsewhere, so they earn a
+            place on the home screen rather than a second-level icon. */}
+        <section>
+          <h2 className="mb-2.5 text-sm font-semibold uppercase tracking-wider text-slate-500">
+            {t('home.discover')}
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {discover.map(d => (
+              <button
+                key={d.path}
+                onClick={() => navigate(d.path)}
+                className="group flex items-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+              >
+                <span className={`flex h-11 w-11 flex-none items-center justify-center rounded-xl ${d.color}`}>
+                  <d.icon size={19} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold leading-tight text-slate-800">{d.label}</span>
+                  {/* No `truncate`: at three columns inside a 672px app column
+                      each card is ~205px, so every hint was cut to "See who is
+                      ne…". Two lines of wrapped text costs nothing — the grid
+                      keeps the cards equal height anyway. */}
+                  <span className="mt-0.5 block text-xs leading-snug text-slate-500">{d.hint}</span>
+                </span>
+                <ChevronRight size={16} className="flex-none text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-brand-red" />
               </button>
             ))}
           </div>
@@ -244,26 +316,32 @@ export function HomePage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {(rest.length ? rest : feed).map(item => (
-                <div key={item.id} className="card p-4">
-                  <div className="flex items-start gap-3">
-                    <span className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      item.type === 'event' ? 'bg-amber-100 text-amber-600' : 'bg-navy-50 text-navy-700'
-                    }`}>
-                      {item.type === 'event' ? <Calendar size={15} /> : <Megaphone size={15} />}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-xs text-slate-400 truncate">{item.temple_name}</span>
-                        <span className={`badge text-[9px] ${item.type === 'event' ? 'badge-gold' : 'badge-blue'}`}>{item.type}</span>
+              {(rest.length ? rest : feed).map(item => {
+                // The badge used to render `item.type` verbatim, so a Sant's
+                // broadcast showed devotees the literal string
+                // "maharaj_message". feedTypeStyle maps every type to an icon,
+                // a tint and a translated label, and falls back to a generic
+                // "Update" for anything unknown rather than leaking the enum.
+                const { Icon, labelKey, avatar, badge } = feedTypeStyle(item.type)
+                return (
+                  <div key={item.id} className="card p-4 transition hover:border-slate-300 hover:shadow-md">
+                    <div className="flex items-start gap-3">
+                      <span className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${avatar}`}>
+                        <Icon size={16} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-0.5 flex items-center gap-2">
+                          <span className="truncate text-xs text-slate-400">{item.temple_name}</span>
+                          <span className={`badge text-[9px] ${badge}`}>{t(labelKey)}</span>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-800">{item.title}</p>
+                        {item.body && <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{item.body}</p>}
+                        <p className="mt-1 text-xs text-slate-400">{format(new Date(item.date), 'dd MMM yyyy')}</p>
                       </div>
-                      <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                      {item.body && <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{item.body}</p>}
-                      <p className="text-xs text-slate-400 mt-1">{format(new Date(item.date), 'dd MMM yyyy')}</p>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </section>

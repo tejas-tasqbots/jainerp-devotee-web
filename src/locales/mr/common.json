@@ -55,7 +55,11 @@
     "findTemples": "मंदिरे शोधा",
     "receiptsLabel": "पावत्या",
     "templesLabel": "मंदिरे",
-    "myGiving": "माझे दान"
+    "myGiving": "माझे दान",
+    "discover": "शोधा",
+    "discoverMapHint": "तुमच्या जवळ कोण आहे पहा",
+    "discoverChaturmasHint": "वर्षानुसार वर्षायोग",
+    "discoverEventsHint": "प्रवचन व कार्यक्रम"
   },
   "common": {
     "loading": "लोड होत आहे...",
@@ -287,5 +291,14 @@
     "findAStay": "धर्मशाळा शोधा",
     "close": "बंद करा",
     "done": "झाले"
+  },
+  "feed": {
+    "event": "कार्यक्रम",
+    "donation": "दान",
+    "santMessage": "संदेश",
+    "santLocation": "स्थान",
+    "santVihar": "विहार",
+    "santNeed": "गरज",
+    "update": "अपडेट"
   }
 }

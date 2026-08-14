@@ -55,7 +55,11 @@
     "findTemples": "મંદિરો શોધો",
     "receiptsLabel": "રસીદો",
     "templesLabel": "મંદિરો",
-    "myGiving": "મારું દાન"
+    "myGiving": "મારું દાન",
+    "discover": "શોધો",
+    "discoverMapHint": "જુઓ કોણ તમારી નજીક છે",
+    "discoverChaturmasHint": "વર્ષ પ્રમાણે વર્ષાયોગ",
+    "discoverEventsHint": "પ્રવચન અને કાર્યક્રમો"
   },
   "common": {
     "loading": "લોડ થઈ રહ્યું છે...",
@@ -287,5 +291,14 @@
     "findAStay": "ધર્મશાળા શોધો",
     "close": "બંધ કરો",
     "done": "થઈ ગયું"
+  },
+  "feed": {
+    "event": "કાર્યક્રમ",
+    "donation": "દાન",
+    "santMessage": "સંદેશ",
+    "santLocation": "સ્થાન",
+    "santVihar": "વિહાર",
+    "santNeed": "આવશ્યકતા",
+    "update": "અપડેટ"
   }
 }

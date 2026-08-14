@@ -55,7 +55,11 @@
     "findTemples": "ಮಂದಿರಗಳನ್ನು ಹುಡುಕಿ",
     "receiptsLabel": "ರಸೀದಿಗಳು",
     "templesLabel": "ಮಂದಿರಗಳು",
-    "myGiving": "ನನ್ನ ದಾನ"
+    "myGiving": "ನನ್ನ ದಾನ",
+    "discover": "ಅನ್ವೇಷಿಸಿ",
+    "discoverMapHint": "ನಿಮ್ಮ ಸಮೀಪ ಯಾರಿದ್ದಾರೆ ನೋಡಿ",
+    "discoverChaturmasHint": "ವರ್ಷವಾರು ವರ್ಷಾಯೋಗ",
+    "discoverEventsHint": "ಪ್ರವಚನ ಮತ್ತು ಕಾರ್ಯಕ್ರಮಗಳು"
   },
   "common": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
@@ -287,5 +291,14 @@
     "findAStay": "ಧರ್ಮಶಾಲೆ ಹುಡುಕಿ",
     "close": "ಮುಚ್ಚಿ",
     "done": "ಮುಗಿದಿದೆ"
+  },
+  "feed": {
+    "event": "ಕಾರ್ಯಕ್ರಮ",
+    "donation": "ದಾನ",
+    "santMessage": "ಸಂದೇಶ",
+    "santLocation": "ಸ್ಥಳ",
+    "santVihar": "ವಿಹಾರ",
+    "santNeed": "ಅಗತ್ಯ",
+    "update": "ನವೀಕರಣ"
   }
 }

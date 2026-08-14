@@ -55,7 +55,11 @@
     "findTemples": "Find Temples",
     "receiptsLabel": "Receipts",
     "templesLabel": "Temples",
-    "myGiving": "My giving"
+    "myGiving": "My giving",
+    "discover": "Discover",
+    "discoverMapHint": "See who is near you",
+    "discoverChaturmasHint": "Varshayog by year",
+    "discoverEventsHint": "Pravachan & programmes"
   },
   "common": {
     "loading": "Loading...",
@@ -287,5 +291,14 @@
     "findAStay": "Find a dharamshala",
     "close": "Close",
     "done": "Done"
+  },
+  "feed": {
+    "event": "Event",
+    "donation": "Donation",
+    "santMessage": "Message",
+    "santLocation": "Location",
+    "santVihar": "Vihar",
+    "santNeed": "Need",
+    "update": "Update"
   }
 }
