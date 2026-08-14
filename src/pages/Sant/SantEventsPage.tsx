@@ -7,6 +7,8 @@ import { PhotoAvatar } from '../../components/PhotoAvatar'
 import { EmptyState, SkeletonList } from '../../components/kit'
 import { EVENT_TYPES, eventTypeLabel, padLabel } from '../../lib/ascetic'
 import type { SantEvent } from '../../types'
+import { TraditionSwitch } from '../../components/TraditionSwitch'
+import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
 
 /**
  * Upcoming events across every ascetic a devotee can see.
@@ -23,17 +25,22 @@ export function SantEventsPage() {
   const [city, setCity] = useState('')
   const [type, setType] = useState('')
   const [loading, setLoading] = useState(true)
+  const [scope, setScope] = useTraditionScope()
+  const [sectScope, setSectScope] = useState<SectScopeMeta | null>(null)
 
   useEffect(() => {
     const handle = setTimeout(() => {
       setLoading(true)
-      api.get('/sant/events', { params: { city, type } })
-        .then(({ data }) => setRows(data.data ?? []))
+      api.get('/sant/events', { params: { city, type, ...traditionsParam(scope) } })
+        .then(({ data }) => {
+          setRows(data.data ?? [])
+          setSectScope(data.meta?.sect_scope ?? null)
+        })
         .catch(() => setRows([]))
         .finally(() => setLoading(false))
     }, 350)
     return () => clearTimeout(handle)
-  }, [city, type])
+  }, [city, type, scope])
 
   const byDate = useMemo(() => {
     const map = new Map<string, SantEvent[]>()
@@ -86,6 +93,8 @@ export function SantEventsPage() {
             {EVENT_TYPES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
+
+        <TraditionSwitch meta={sectScope} scope={scope} onChange={setScope} />
 
         {loading ? (
           <SkeletonList rows={4} />

@@ -5,6 +5,8 @@ import 'leaflet/dist/leaflet.css'
 import { Crosshair, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
+import { TraditionSwitch } from '../../components/TraditionSwitch'
+import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
 import { PADS, SECTS, ASCETIC_TYPES, santDisplayName } from '../../lib/ascetic'
 import type { SantMapMarker } from '../../types'
 
@@ -53,12 +55,14 @@ export function SantMap() {
   const [pad, setPad] = useState('')
   const [sect, setSect] = useState('')
   const [locating, setLocating] = useState(false)
+  const [scope, setScope] = useTraditionScope()
+  const [sectScope, setSectScope] = useState<SectScopeMeta | null>(null)
 
   // Filters are read inside a map event handler that is registered once, so a
   // ref keeps it reading the CURRENT values. Without this the handler closes
   // over the first render's empty filters and panning silently resets them.
-  const filtersRef = useRef({ type, pad, sect })
-  filtersRef.current = { type, pad, sect }
+  const filtersRef = useRef({ type, pad, sect, ...traditionsParam(scope) })
+  filtersRef.current = { type, pad, sect, ...traditionsParam(scope) }
 
   const load = useCallback(async () => {
     const map = mapRef.current
@@ -75,6 +79,7 @@ export function SantMap() {
       })
       const markers: SantMapMarker[] = data.data ?? []
       setCount(markers.length)
+      setSectScope(data.meta?.sect_scope ?? null)
 
       const layer = layerRef.current
       if (!layer) return
@@ -125,7 +130,7 @@ export function SantMap() {
   useEffect(() => {
     if (mapRef.current) void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, pad, sect])
+  }, [type, pad, sect, scope])
 
   function useMyLocation() {
     if (!window.isSecureContext || !navigator.geolocation) {
@@ -170,11 +175,26 @@ export function SantMap() {
           <option value="">{t('sant.allPads')}</option>
           {PADS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-        <select className="form-input flex-1 min-w-[110px]" value={sect}
-          onChange={e => setSect(e.target.value)} aria-label={t('sant.sect')}>
-          <option value="">{t('sant.allSects')}</option>
-          {SECTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
+        {scope === 'all' && (
+          <select className="form-input flex-1 min-w-[110px]" value={sect}
+            onChange={e => setSect(e.target.value)} aria-label={t('sant.sect')}>
+            <option value="">{t('sant.allSects')}</option>
+            {SECTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        )}
+      </div>
+
+      <div className="px-3 pb-2 bg-white border-b border-slate-200">
+        <TraditionSwitch
+          meta={sectScope}
+          scope={scope}
+          onChange={next => {
+            setScope(next)
+            // Scoping back to one tradition drops a cross-tradition pick, or the
+            // two controls contradict each other and the map empties.
+            if (next === 'mine') setSect('')
+          }}
+        />
       </div>
 
       <div className="relative flex-1">

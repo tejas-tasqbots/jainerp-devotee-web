@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { CalendarDays, ChevronRight, MapPin, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
+import { TraditionSwitch } from '../../components/TraditionSwitch'
+import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import { EmptyState, SkeletonList } from '../../components/kit'
 import { santDisplayName } from '../../lib/ascetic'
@@ -27,9 +29,14 @@ export function ChaturmasPage() {
   const [city, setCity] = useState('')
   const [rows, setRows] = useState<ChaturmasEntry[]>([])
   const [loading, setLoading] = useState(true)
+  // The gazetteer is scoped to the devotee's tradition like every other
+  // discovery list, so it needs the same control — a chaturmas listing that
+  // silently omits half the ascetics is indistinguishable from a thin year.
+  const [scope, setScope] = useTraditionScope()
+  const [sectScope, setSectScope] = useState<SectScopeMeta | null>(null)
 
   useEffect(() => {
-    api.get('/sant/chaturmas/years')
+    api.get('/sant/chaturmas/years', { params: traditionsParam(scope) })
       .then(({ data }) => {
         const list: { year: number; count: number }[] = data.data ?? []
         setYears(list)
@@ -39,19 +46,22 @@ export function ChaturmasPage() {
         setYear(list[0]?.year ?? new Date().getFullYear())
       })
       .catch(() => { setYears([]); setYear(new Date().getFullYear()) })
-  }, [])
+  }, [scope])
 
   useEffect(() => {
     if (year == null) return
     const handle = setTimeout(() => {
       setLoading(true)
-      api.get('/sant/chaturmas', { params: { year, city } })
-        .then(({ data }) => setRows(data.data ?? []))
+      api.get('/sant/chaturmas', { params: { year, city, ...traditionsParam(scope) } })
+        .then(({ data }) => {
+          setRows(data.data ?? [])
+          setSectScope(data.meta?.sect_scope ?? null)
+        })
         .catch(() => setRows([]))
         .finally(() => setLoading(false))
     }, 350)
     return () => clearTimeout(handle)
-  }, [year, city])
+  }, [year, city, scope])
 
   /** Group into state → city → entries, preserving the API's ordering. */
   const grouped = useMemo(() => {
@@ -101,6 +111,8 @@ export function ChaturmasPage() {
             />
           </div>
         </div>
+
+        <TraditionSwitch meta={sectScope} scope={scope} onChange={setScope} />
 
         {loading ? (
           <SkeletonList rows={4} />
