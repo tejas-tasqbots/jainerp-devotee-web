@@ -122,6 +122,19 @@
     pointer-events: none;
   }
 
+  /* From lg the home header is a plain white page header, not the phone's dark
+     banner. A `lg:bg-none` utility on the element cannot reach ::after, which
+     is what paints the gold radial glow — so on desktop it bled through the
+     white background as a yellow wash in the top-right corner. The pseudo
+     element and the phone-only bottom rounding are cleared here instead. */
+  @media (min-width: 1024px) {
+    .hero-saffron::after { content: none; }
+    .hero-saffron {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
   /* ── Page header ────────────────────────────────────────────────────────── */
   .page-header {
     @apply flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 sticky top-0 z-20;

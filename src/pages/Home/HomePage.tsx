@@ -103,20 +103,22 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Saffron hero */}
-      <div className="hero-saffron relative px-4 pt-6 pb-20 text-white lg:pb-8">
+      <div className="hero-saffron relative px-4 pt-6 pb-20 text-white
+                      lg:bg-none lg:bg-white lg:px-8 lg:pt-7 lg:pb-6 lg:text-slate-900
+                      lg:border-b lg:border-slate-200">
         {/* z-30, not z-10: the content block below is a later sibling at z-10,
             so at equal z-index it painted over this header — and the language
             menu's own z-50 could not escape, because this row is the stacking
             context it lives in. Two of the three options were unclickable. */}
         <div className="flex items-start justify-between relative z-30">
           <div>
-            <p className="text-xs text-white/75">{greeting()} 🙏</p>
-            <h1 className="text-xl font-bold leading-tight">{user?.name || 'Welcome'}</h1>
+            <p className="text-xs text-white/75 lg:text-slate-500">{greeting()} 🙏</p>
+            <h1 className="text-xl font-bold leading-tight lg:text-2xl">{user?.name || 'Welcome'}</h1>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
-            <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors" aria-label={t('ui.notifications')}>
-              <Bell size={20} className="text-white" />
+            <button onClick={() => navigate('/notifications')} className="relative rounded-full bg-white/15 p-2 transition-colors hover:bg-white/25 lg:bg-slate-100 lg:hover:bg-slate-200" aria-label={t('ui.notifications')}>
+              <Bell size={20} className="text-white lg:text-slate-600" />
             </button>
           </div>
         </div>
@@ -126,7 +128,7 @@ export function HomePage() {
           columns: what you ACT on and the update stream in the main column,
           the temples you follow beside them — which is what the desktop width
           is actually good for. */}
-      <div className="relative z-10 -mt-14 px-4 pb-6 lg:mt-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6">
+      <div className="relative z-10 -mt-14 px-4 pb-6 lg:mt-0 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6 lg:px-8 lg:pt-6">
         <div className="space-y-5 lg:col-span-2">
         {/* Outstanding bolis nudge */}
         {outstanding > 0 && (
@@ -207,7 +209,11 @@ export function HomePage() {
 
         </div>
 
-        {/* Aside on desktop; simply the next block on a phone. */}
+        {/* Aside on desktop, next block on a phone. It carries the
+            things you BROWSE — the temples you follow and what is
+            coming up — so the main column stays the action stream.
+            With only "My temples" in here the right third of a
+            1400px page was empty. */}
         <div className="mt-5 space-y-5 lg:mt-0">
         {/* My temples strip */}
         <section>
@@ -243,9 +249,6 @@ export function HomePage() {
           </div>
         </section>
 
-        </div>
-
-        <div className="mt-5 space-y-5 lg:col-span-2 lg:mt-0">
         {/* Upcoming events */}
         {upcoming.length > 0 && (
           <section>
@@ -267,6 +270,9 @@ export function HomePage() {
           </section>
         )}
 
+        </div>
+
+        <div className="mt-5 space-y-5 lg:col-span-2 lg:mt-0">
         {/* Feed */}
         <section>
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2.5">{t('home.templeUpdates')}</h2>
