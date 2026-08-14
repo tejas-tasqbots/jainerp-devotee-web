@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   BedDouble, Bell, Building2, Calendar, CalendarDays, ChevronRight, Heart,
-  IndianRupee, MapPin, Plus, Sparkles, TrendingUp,
+  IndianRupee, MapPin, Plus, Sparkles,
 } from 'lucide-react'
 import { format } from 'date-fns'
-import { api, currentFY, fmtPaise } from '../../lib/api'
+import { api, fmtPaise } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '../../components/LanguageSwitcher'
 import { feedTypeStyle } from '../../lib/feedTypes'
-import type { Boli, FeedItem, TransactionSummary } from '../../types'
+import type { Boli, FeedItem } from '../../types'
 
 interface MyTemple {
   id?: string
@@ -33,7 +33,6 @@ export function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const [feed, setFeed] = useState<FeedItem[]>([])
-  const [summary, setSummary] = useState<TransactionSummary | null>(null)
   const [bolis, setBolis] = useState<Boli[]>([])
   const [temples, setTemples] = useState<MyTemple[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,14 +42,12 @@ export function HomePage() {
   async function loadAll() {
     const results = await Promise.allSettled([
       api.get('/me/feed'),
-      api.get('/me/transactions/summary', { params: { fy: currentFY() } }),
       api.get('/me/bolis', { params: { status: 'pledged,partially_paid' } }),
       api.get('/me/temples'),
     ])
     if (results[0].status === 'fulfilled') setFeed(results[0].value.data.data ?? [])
-    if (results[1].status === 'fulfilled') setSummary(results[1].value.data.data ?? null)
-    if (results[2].status === 'fulfilled') setBolis(results[2].value.data.data ?? [])
-    if (results[3].status === 'fulfilled') setTemples(results[3].value.data.data ?? [])
+    if (results[1].status === 'fulfilled') setBolis(results[1].value.data.data ?? [])
+    if (results[2].status === 'fulfilled') setTemples(results[2].value.data.data ?? [])
     setLoading(false)
   }
 
@@ -64,7 +61,7 @@ export function HomePage() {
     { label: t('home.quickTemples'), icon: Building2, color: 'bg-navy-700 text-white', path: '/temples' },
     // Finding a bed is its own errand, not a sub-task of browsing temples —
     // a devotee travelling to Palitana wants a dharamshala, not a directory.
-    { label: t('home.quickStays', 'Dharamshala'), icon: BedDouble, color: 'bg-brand-blue text-white', path: '/stays' },
+    { label: t('home.quickStays'), icon: BedDouble, color: 'bg-brand-blue text-white', path: '/stays' },
     { label: t('home.quickMaharaj'), icon: Sparkles, color: 'bg-brand-gold-dark text-white', path: '/sant' },
   ]
 
@@ -106,7 +103,7 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Saffron hero */}
-      <div className="hero-saffron px-4 pt-6 pb-20 text-white relative">
+      <div className="hero-saffron relative px-4 pt-6 pb-20 text-white lg:pb-8">
         {/* z-30, not z-10: the content block below is a later sibling at z-10,
             so at equal z-index it painted over this header — and the language
             menu's own z-50 could not escape, because this row is the stacking
@@ -125,43 +122,12 @@ export function HomePage() {
         </div>
       </div>
 
-      <div className="px-4 -mt-14 space-y-5 relative z-10 pb-6">
-        {/* Giving snapshot */}
-        <section
-          className="card p-4 text-white"
-          style={{ background: 'linear-gradient(135deg, #0D1B2E 0%, #1b2f4a 100%)' }}
-          onClick={() => navigate('/donations')}
-          role="button"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                <TrendingUp size={12} /> {t('home.myGiving')} — FY {summary?.fy ?? currentFY()}
-              </p>
-              {loading ? (
-                <div className="h-7 w-32 bg-white/10 rounded mt-1 animate-pulse" />
-              ) : (
-                <p className="text-2xl font-bold mt-0.5">₹{fmtPaise(summary?.total_paise ?? 0)}</p>
-              )}
-            </div>
-            <ChevronRight size={18} className="text-slate-500" />
-          </div>
-          <div className="flex gap-5 mt-2.5">
-            <div>
-              <p className="text-[11px] text-slate-400">{t('home.eligible80g')}</p>
-              <p className="text-sm font-semibold text-brand-gold">₹{fmtPaise(summary?.eligible_80g_paise ?? 0)}</p>
-            </div>
-            <div>
-              <p className="text-[11px] text-slate-400">{t('home.receiptsLabel')}</p>
-              <p className="text-sm font-semibold">{summary?.txn_count ?? 0}</p>
-            </div>
-            <div>
-              <p className="text-[11px] text-slate-400">{t('home.templesLabel')}</p>
-              <p className="text-sm font-semibold">{summary?.by_temple?.length ?? 0}</p>
-            </div>
-          </div>
-        </section>
-
+      {/* Below lg this is the phone stack, unchanged. From lg it becomes two
+          columns: what you ACT on and the update stream in the main column,
+          the temples you follow beside them — which is what the desktop width
+          is actually good for. */}
+      <div className="relative z-10 -mt-14 px-4 pb-6 lg:mt-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6">
+        <div className="space-y-5 lg:col-span-2">
         {/* Outstanding bolis nudge */}
         {outstanding > 0 && (
           <button
@@ -239,6 +205,10 @@ export function HomePage() {
           </div>
         </section>
 
+        </div>
+
+        {/* Aside on desktop; simply the next block on a phone. */}
+        <div className="mt-5 space-y-5 lg:mt-0">
         {/* My temples strip */}
         <section>
           <div className="flex items-center justify-between mb-2.5">
@@ -273,6 +243,9 @@ export function HomePage() {
           </div>
         </section>
 
+        </div>
+
+        <div className="mt-5 space-y-5 lg:col-span-2 lg:mt-0">
         {/* Upcoming events */}
         {upcoming.length > 0 && (
           <section>
@@ -345,6 +318,7 @@ export function HomePage() {
             </div>
           )}
         </section>
+        </div>
       </div>
     </div>
   )

@@ -16,7 +16,10 @@ export function BottomNav() {
     // safe-area inset on a phone, but its CONTENT is centred to the same
     // max-width as the app column — otherwise on a desktop the five tabs
     // spread across 1900px while the content sat in a 672px column above them.
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white bottom-nav-safe">
+    // `lg:hidden` — from lg up, navigation is the Sidebar. A tab bar pinned to
+    // the bottom of a 1400px window is a long way from the content and can only
+    // ever hold five destinations.
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white bottom-nav-safe lg:hidden">
       <div className="mx-auto flex w-full max-w-2xl items-end justify-around px-2 pt-1 pb-1">
         {tabs.map(({ to, icon: Icon, label, featured }) =>
           featured ? (

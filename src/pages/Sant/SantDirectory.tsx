@@ -197,7 +197,10 @@ export function SantDirectory() {
             ) : undefined}
           />
         ) : (
-          profiles.map(p => (
+          /* Two-up from lg: these are portrait cards in a directory, and one
+             per row across a laptop is mostly empty space. */
+          <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+          {profiles.map(p => (
             <button
               key={p.id}
               onClick={() => navigate(`/sant/${p.id}`)}
@@ -233,7 +236,8 @@ export function SantDirectory() {
                 <ChevronRight size={16} className="text-slate-300 flex-shrink-0" />
               </div>
             </button>
-          ))
+          ))}
+          </div>
         )}
       </div>
     </div>

@@ -151,7 +151,9 @@ export function TempleDirectory() {
             hint="Try a different name or city. Temples appear here once they join JainERP."
           />
         ) : (
-          <div className="space-y-3">
+          // Cards, not rows: a directory of temples reads better two-up on a
+          // laptop than as one 1000px-wide row each.
+          <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
             {temples.map(t => (
               <button
                 key={t.id}

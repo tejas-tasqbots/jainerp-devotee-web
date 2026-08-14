@@ -191,7 +191,7 @@ export function MyBookingsPage() {
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-3 pb-8">
+      <div className="px-4 py-4 pb-8 space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         {loading ? (

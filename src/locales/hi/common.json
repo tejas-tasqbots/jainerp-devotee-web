@@ -59,7 +59,8 @@
     "discover": "खोजें",
     "discoverMapHint": "देखें कौन आपके निकट है",
     "discoverChaturmasHint": "वर्ष अनुसार वर्षायोग",
-    "discoverEventsHint": "प्रवचन व कार्यक्रम"
+    "discoverEventsHint": "प्रवचन व कार्यक्रम",
+    "quickStays": "धर्मशाला"
   },
   "common": {
     "loading": "लोड हो रहा है...",

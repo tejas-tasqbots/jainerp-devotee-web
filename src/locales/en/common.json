@@ -59,7 +59,8 @@
     "discover": "Discover",
     "discoverMapHint": "See who is near you",
     "discoverChaturmasHint": "Varshayog by year",
-    "discoverEventsHint": "Pravachan & programmes"
+    "discoverEventsHint": "Pravachan & programmes",
+    "quickStays": "Dharamshala"
   },
   "common": {
     "loading": "Loading...",

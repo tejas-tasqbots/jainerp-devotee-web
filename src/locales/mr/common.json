@@ -59,7 +59,8 @@
     "discover": "शोधा",
     "discoverMapHint": "तुमच्या जवळ कोण आहे पहा",
     "discoverChaturmasHint": "वर्षानुसार वर्षायोग",
-    "discoverEventsHint": "प्रवचन व कार्यक्रम"
+    "discoverEventsHint": "प्रवचन व कार्यक्रम",
+    "quickStays": "धर्मशाळा"
   },
   "common": {
     "loading": "लोड होत आहे...",
