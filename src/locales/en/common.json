@@ -136,7 +136,12 @@
     "reportReviewNote": "Reports are reviewed by the Sant’s representative before they appear.",
     "reportThanks": "Thank you. Your report has been sent for confirmation.",
     "reportFailed": "Could not send your report. Please try again.",
-    "placeRequired": "Please enter the place where you saw them."
+    "placeRequired": "Please enter the place where you saw them.",
+    "discoverMapTitle": "Near you",
+    "layerSants": "Sadhu-Sadhvi",
+    "layerTemples": "Temples",
+    "templesShown": "{{count}} temples",
+    "viewTemple": "View temple"
   },
   "ui": {
     "goBack": "Go back",
@@ -197,6 +202,9 @@
     "cardUpiVia": "Card / UPI via Razorpay",
     "upiBankTransfer": "UPI / Bank Transfer",
     "payDirectUpload": "Pay directly, upload proof",
+    "payDirectVerified": "Pay the temple directly, then tell them what you sent",
+    "donateUnavailableTitle": "Not accepting online giving yet",
+    "donateUnavailableBody": "This temple has not published a verified bank account yet, so there is nowhere safe to send money. You can still give in person.",
     "amountReq": "Amount (₹) *",
     "amount": "Amount (₹)",
     "payTempleDirect": "Pay the temple directly",

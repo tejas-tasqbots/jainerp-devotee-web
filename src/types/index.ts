@@ -306,11 +306,16 @@ export interface TemplePaymentDetails {
   name: string
   accept_donor_requests: boolean
   upi_id?: string | null
-  upi_qr_cdn_url?: string | null
   bank_account_name?: string | null
   bank_account_no?: string | null
   bank_ifsc?: string | null
   bank_name?: string | null
+  /**
+   * False until a platform reviewer has approved the account the trust
+   * nominated, and false again the moment the trust edits it. Nothing about
+   * where to send money is shown to a devotee without this.
+   */
+  bank_verified?: boolean
   is_80g_registered?: boolean
 }
 

@@ -11,7 +11,14 @@ import { PADS, SECTS, ASCETIC_TYPES, santDisplayName } from '../../lib/ascetic'
 import type { SantMapMarker } from '../../types'
 
 /**
- * Discovery map — where the ascetics are, right now.
+ * Discovery map — where the ascetics are right now, and where the temples are.
+ *
+ * BOTH layers, because a map of one without the other answers half the
+ * question a devotee actually has ("where can I go, and who is there?"). Every
+ * trust has carried coordinates since migration 033 and the temple detail page
+ * has been drawing a pin from them all along; they simply never reached this
+ * map, so it opened on an empty country whenever no ascetic had published a
+ * location nearby.
  *
  * Loads by BOUNDING BOX and reloads on pan/zoom rather than fetching every
  * location once: the directory is national, and shipping every pin on first
@@ -25,19 +32,45 @@ import type { SantMapMarker } from '../../types'
 
 const PIN_NORMAL = '#0D1B2E'
 const PIN_CHATURMAS = '#D62828'
+const PIN_TEMPLE = '#B7791F'
 
-function pinIcon(chaturmas: boolean) {
-  const color = chaturmas ? PIN_CHATURMAS : PIN_NORMAL
+/**
+ * `iconAnchor` is not optional here: Leaflet derives the default anchor from
+ * `iconSize`, so a 0×0 icon anchors at its top-left and the CSS transform can
+ * only recentre against a zero-width box — every pin sat half a marker to the
+ * right of the place it was marking. Anchoring at the tip (13, 34) puts the
+ * point of the pin on the coordinate, which is what a pin means.
+ */
+function pinSvg(color: string, hollow: boolean) {
   return L.divIcon({
     className: '',
-    iconSize: [0, 0],
-    html: `<div style="transform:translate(-50%,-100%)">
-      <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
-        <path d="M13 0C5.8 0 0 5.8 0 13c0 9.2 13 21 13 21s13-11.8 13-21C26 5.8 20.2 0 13 0z" fill="${color}"/>
-        <circle cx="13" cy="12.5" r="5" fill="#fff"/>
-      </svg></div>`,
+    iconSize: [26, 34],
+    iconAnchor: [13, 34],
+    popupAnchor: [0, -30],
+    html: `<svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
+      <path d="M13 0C5.8 0 0 5.8 0 13c0 9.2 13 21 13 21s13-11.8 13-21C26 5.8 20.2 0 13 0z" fill="${color}"/>
+      ${hollow
+        ? `<circle cx="13" cy="12.5" r="5" fill="#fff"/>`
+        : `<rect x="8" y="9" width="10" height="8" fill="#fff"/><path d="M13 4l6 5H7z" fill="#fff"/>`}
+    </svg>`,
   })
 }
+
+const santIcon = (chaturmas: boolean) => pinSvg(chaturmas ? PIN_CHATURMAS : PIN_NORMAL, true)
+const templeIcon = () => pinSvg(PIN_TEMPLE, false)
+
+interface TempleMapMarker {
+  tenant_id: string
+  slug: string
+  name: string
+  city: string | null
+  state: string | null
+  lat: number | string
+  lng: number | string
+}
+
+/** Which pins are on the map. Both by default — the map is "what is near me". */
+type Layers = { sants: boolean; temples: boolean }
 
 /** India, at a zoom that shows the whole country. */
 const INDIA: [number, number] = [22.9734, 78.6569]
@@ -48,8 +81,11 @@ export function SantMap() {
   const elRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const layerRef = useRef<L.LayerGroup | null>(null)
+  const templeLayerRef = useRef<L.LayerGroup | null>(null)
   const [loading, setLoading] = useState(false)
   const [count, setCount] = useState(0)
+  const [templeCount, setTempleCount] = useState(0)
+  const [layers, setLayers] = useState<Layers>({ sants: true, temples: true })
   const [error, setError] = useState('')
   const [type, setType] = useState('')
   const [pad, setPad] = useState('')
@@ -63,74 +99,132 @@ export function SantMap() {
   // over the first render's empty filters and panning silently resets them.
   const filtersRef = useRef({ type, pad, sect, ...traditionsParam(scope) })
   filtersRef.current = { type, pad, sect, ...traditionsParam(scope) }
+  // Same reason: the layer toggles are read inside `moveend`.
+  const layersRef = useRef(layers)
+  layersRef.current = layers
+
+  /** Popup body. `textContent`, never `innerHTML` — every field here is user-entered. */
+  function popup(title: string, where: string, linkLabel: string, to: string) {
+    const el = document.createElement('div')
+    const h = document.createElement('strong')
+    h.textContent = title
+    const sub = document.createElement('div')
+    sub.textContent = where
+    sub.style.cssText = 'font-size:12px;color:#64748b;margin:2px 0 6px'
+    const btn = document.createElement('button')
+    btn.textContent = linkLabel
+    btn.style.cssText = 'font-size:12px;color:#D62828;text-decoration:underline;cursor:pointer'
+    btn.onclick = () => navigate(to)
+    el.append(h, sub, btn)
+    return el
+  }
 
   const load = useCallback(async () => {
     const map = mapRef.current
     if (!map) return
     const b = map.getBounds()
+    const bounds = { north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() }
+    const { sants: wantSants, temples: wantTemples } = layersRef.current
     setLoading(true)
     setError('')
-    try {
-      const { data } = await api.get('/sant/map', {
-        params: {
-          north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest(),
-          ...filtersRef.current,
-        },
-      })
-      const markers: SantMapMarker[] = data.data ?? []
-      setCount(markers.length)
-      setSectScope(data.meta?.sect_scope ?? null)
 
-      const layer = layerRef.current
-      if (!layer) return
-      layer.clearLayers()
-      for (const m of markers) {
-        const lat = Number(m.lat)
-        const lng = Number(m.lng)
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
-        const marker = L.marker([lat, lng], { icon: pinIcon(!!m.chaturmas) })
-        const where = [m.place, m.city, m.state].filter(Boolean).join(', ')
-        // textContent, not innerHTML: `name` and `place` are user-entered and
-        // would otherwise be an HTML injection straight into the popup.
-        const el = document.createElement('div')
-        const title = document.createElement('strong')
-        title.textContent = santDisplayName(m)
-        const sub = document.createElement('div')
-        sub.textContent = where
-        sub.style.cssText = 'font-size:12px;color:#64748b;margin:2px 0 6px'
-        const btn = document.createElement('button')
-        btn.textContent = t('sant.viewProfile')
-        btn.style.cssText = 'font-size:12px;color:#D62828;text-decoration:underline;cursor:pointer'
-        btn.onclick = () => navigate(`/sant/${m.sant_id}`)
-        el.append(title, sub, btn)
-        marker.bindPopup(el)
-        layer.addLayer(marker)
+    // One `Promise.allSettled`, not two awaits: the two layers are independent,
+    // and a failing sant fetch must not leave the temple pins unloaded (or the
+    // other way round) — that is the shape that makes a map look broken when
+    // only half of it is.
+    const [santRes, templeRes] = await Promise.allSettled([
+      wantSants
+        ? api.get('/sant/map', { params: { ...bounds, ...filtersRef.current } })
+        : Promise.resolve(null),
+      wantTemples
+        ? api.get('/temples/map', { params: { ...bounds, ...traditionsParam(scope) } })
+        : Promise.resolve(null),
+    ])
+
+    const santLayer = layerRef.current
+    if (santLayer) {
+      santLayer.clearLayers()
+      if (santRes.status === 'fulfilled' && santRes.value) {
+        const { data } = santRes.value
+        const markers: SantMapMarker[] = data.data ?? []
+        setCount(markers.length)
+        setSectScope(data.meta?.sect_scope ?? null)
+        for (const m of markers) {
+          const lat = Number(m.lat)
+          const lng = Number(m.lng)
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+          const marker = L.marker([lat, lng], { icon: santIcon(!!m.chaturmas) })
+          marker.bindPopup(popup(
+            santDisplayName(m),
+            [m.place, m.city, m.state].filter(Boolean).join(', '),
+            t('sant.viewProfile'),
+            `/sant/${m.sant_id}`,
+          ))
+          santLayer.addLayer(marker)
+        }
+      } else {
+        setCount(0)
       }
-    } catch {
-      setError(t('sant.mapError'))
-    } finally {
-      setLoading(false)
     }
-  }, [navigate, t])
+
+    const templeLayer = templeLayerRef.current
+    if (templeLayer) {
+      templeLayer.clearLayers()
+      if (templeRes.status === 'fulfilled' && templeRes.value) {
+        const markers: TempleMapMarker[] = templeRes.value.data.data ?? []
+        setTempleCount(markers.length)
+        for (const m of markers) {
+          const lat = Number(m.lat)
+          const lng = Number(m.lng)
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+          const marker = L.marker([lat, lng], { icon: templeIcon() })
+          marker.bindPopup(popup(
+            m.name,
+            [m.city, m.state].filter(Boolean).join(', '),
+            t('sant.viewTemple'),
+            `/temples/${m.slug}`,
+          ))
+          templeLayer.addLayer(marker)
+        }
+      } else {
+        setTempleCount(0)
+      }
+    }
+
+    const asked = [wantSants && santRes, wantTemples && templeRes].filter(Boolean)
+    if (asked.length && asked.every(r => (r as PromiseSettledResult<unknown>).status === 'rejected')) {
+      setError(t('sant.mapError'))
+    }
+    setLoading(false)
+  }, [navigate, scope, t])
 
   useEffect(() => {
     if (!elRef.current || mapRef.current) return
     const map = L.map(elRef.current, { attributionControl: false }).setView(INDIA, 5)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
     layerRef.current = L.layerGroup().addTo(map)
+    // Added second so temple pins draw above ascetic ones where they coincide
+    // — an ascetic is usually staying AT the temple, and the pin a devotee
+    // needs to tap for directions is the place.
+    templeLayerRef.current = L.layerGroup().addTo(map)
     mapRef.current = map
     // `moveend` covers pan AND zoom; binding both would double every fetch.
     map.on('moveend', () => { void load() })
     setTimeout(() => { map.invalidateSize(); void load() }, 0)
-    return () => { map.remove(); mapRef.current = null; layerRef.current = null }
+    return () => {
+      map.remove()
+      mapRef.current = null
+      layerRef.current = null
+      templeLayerRef.current = null
+    }
   }, [load])
 
-  // Refetch when a filter changes — the bounds have not moved, so `moveend`
-  // will not fire on its own.
+  // Refetch when a filter or layer changes — the bounds have not moved, so
+  // `moveend` will not fire on its own.
   useEffect(() => {
     if (mapRef.current) void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, pad, sect, scope])
+  }, [type, pad, sect, scope, layers])
 
   function useMyLocation() {
     if (!window.isSecureContext || !navigator.geolocation) {
@@ -151,7 +245,7 @@ export function SantMap() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <div className="page-header">
-        <h1 className="page-title">{t('sant.mapTitle')}</h1>
+        <h1 className="page-title">{t('sant.discoverMapTitle')}</h1>
         <button
           onClick={useMyLocation}
           disabled={locating}
@@ -164,7 +258,39 @@ export function SantMap() {
         </button>
       </div>
 
+      {/* Which pins are on the map. A devotee looking for a temple should not
+          have to read past ascetic filters that do not apply to it, so the
+          layer switch sits above them and the rank/pad/sect filters disappear
+          entirely when the ascetic layer is off. */}
+      <div className="px-3 pt-3 flex gap-2 bg-white">
+        {([
+          ['sants', t('sant.layerSants'), PIN_NORMAL],
+          ['temples', t('sant.layerTemples'), PIN_TEMPLE],
+        ] as const).map(([key, label, color]) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={layers[key]}
+            onClick={() => setLayers(l => (
+              // Never let both go off — an empty map with no way to read why is
+              // the failure this screen is being fixed for.
+              l[key] && !l[key === 'sants' ? 'temples' : 'sants'] ? l : { ...l, [key]: !l[key] }
+            ))}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              layers[key] ? 'border-slate-300 bg-slate-100 text-slate-700' : 'border-slate-200 text-slate-400'
+            }`}
+          >
+            <span
+              className="inline-block w-2.5 h-2.5 rounded-full"
+              style={{ background: layers[key] ? color : '#cbd5e1' }}
+            />
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div className="p-3 flex gap-2 flex-wrap bg-white border-b border-slate-200">
+        {layers.sants && <>
         <select className="form-input flex-1 min-w-[110px]" value={type}
           onChange={e => setType(e.target.value)} aria-label={t('sant.rank')}>
           <option value="">{t('sant.allRanks')}</option>
@@ -182,6 +308,7 @@ export function SantMap() {
             {SECTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         )}
+        </>}
       </div>
 
       <div className="px-3 pb-2 bg-white border-b border-slate-200">
@@ -204,16 +331,29 @@ export function SantMap() {
             ? <span className="flex items-center gap-1.5 text-slate-500">
                 <Loader2 size={12} className="animate-spin" />{t('ui.loading')}
               </span>
-            : <span className="text-slate-600">{t('sant.markersShown', { count })}</span>}
-          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-500">
-            <span className="flex items-center gap-1">
-              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: PIN_NORMAL }} />
-              {t('sant.currentlyAt')}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: PIN_CHATURMAS }} />
-              {t('ui.chaturmas')}
-            </span>
+            : <span className="text-slate-600">
+                {[
+                  layers.sants && t('sant.markersShown', { count }),
+                  layers.temples && t('sant.templesShown', { count: templeCount }),
+                ].filter(Boolean).join(' · ')}
+              </span>}
+          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-500 flex-wrap">
+            {layers.temples && (
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: PIN_TEMPLE }} />
+                {t('sant.layerTemples')}
+              </span>
+            )}
+            {layers.sants && <>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: PIN_NORMAL }} />
+                {t('sant.currentlyAt')}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: PIN_CHATURMAS }} />
+                {t('ui.chaturmas')}
+              </span>
+            </>}
           </div>
         </div>
         {error && (

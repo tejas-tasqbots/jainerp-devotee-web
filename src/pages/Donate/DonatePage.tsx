@@ -1,14 +1,29 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Building2, Camera, Check, Clock, Copy, CreditCard, Heart, Landmark, QrCode, Search, X } from 'lucide-react'
+import { Building2, Camera, Check, Clock, Copy, Heart, Landmark, QrCode, Search, ShieldCheck, X } from 'lucide-react'
 import QRCode from 'qrcode'
 import { api, apiError, parsePaise } from '../../lib/api'
-import { openRazorpayCheckout } from '../../lib/razorpay'
-import { useAuthStore } from '../../store/authStore'
 import type { Temple, TemplePaymentDetails } from '../../types'
 
+/**
+ * Give to a temple — by transferring to that temple's own verified account.
+ *
+ * THERE IS NO GATEWAY RAIL HERE, DELIBERATELY. This page used to lead with
+ * "Pay online — Card / UPI via Razorpay", which put a third party between the
+ * devotee and the trust and, worse, was not real: `POST /me/donate` returns a
+ * MOCK order (see donate.service.ts), so the button's own success path could
+ * not settle a rupee. Money now moves devotee → temple directly, and the
+ * devotee tells the temple what they sent so it can approve and issue the
+ * receipt (`POST /me/donation-requests`).
+ *
+ * The details shown are only ever the ones the platform VERIFIED — see
+ * `bank_verified` and superadmin's Donation Accounts queue. A trust whose
+ * account is unchecked, or that edited it after approval, shows nothing at all:
+ * being handed digits nobody has read is the failure this whole rail exists to
+ * prevent, and an unverified account is not better than no account.
+ */
+
 type Step = 'search' | 'form' | 'result'
-type PayMethod = 'online' | 'manual'
 
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/
 
@@ -60,7 +75,6 @@ export function DonatePage() {
   const [selectedTemple, setSelectedTemple] = useState<Temple | null>(null)
   const [payDetails, setPayDetails] = useState<TemplePaymentDetails | null>(null)
 
-  const [method, setMethod] = useState<PayMethod>('online')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('general')
   const [is80g, setIs80g] = useState(false)
@@ -70,11 +84,9 @@ export function DonatePage() {
   const [remarks, setRemarks] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
   const [result, setResult] = useState<any>(null)
-  const user = useAuthStore(s => s.user)
 
-  // Manual (bank/UPI transfer) request fields
+  // Transfer-details fields
   const [manualMode, setManualMode] = useState('upi')
   const [utr, setUtr] = useState('')
   const [paidAt, setPaidAt] = useState(() => new Date().toISOString().slice(0, 10))
@@ -137,9 +149,11 @@ export function DonatePage() {
     }).catch(() => {})
   }, [])
 
-  // Live UPI QR from the temple's UPI ID + typed amount (their uploaded QR wins).
+  // Live UPI QR, drawn here from the temple's UPI ID and the typed amount. The
+  // API deliberately no longer serves a hosted QR image: it was a second copy
+  // of the same payment address and went stale on its own.
   useEffect(() => {
-    if (method !== 'manual' || !payDetails?.upi_id || payDetails.upi_qr_cdn_url) { setQrDataUrl(null); return }
+    if (!payDetails?.upi_id) { setQrDataUrl(null); return }
     const paise = parsePaise(amount || '0')
     const uri = `upi://pay?pa=${encodeURIComponent(payDetails.upi_id)}&pn=${encodeURIComponent(payDetails.name)}` +
       (paise >= 100 ? `&am=${(paise / 100).toFixed(2)}` : '') +
@@ -147,7 +161,7 @@ export function DonatePage() {
     QRCode.toDataURL(uri, { width: 220, margin: 1 })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null))
-  }, [method, payDetails, amount])
+  }, [payDetails, amount])
 
   async function searchTemples() {
     setSuggestion(null)
@@ -198,8 +212,18 @@ export function DonatePage() {
     }
   }
 
-  const manualAvailable = !!payDetails?.accept_donor_requests && !!(payDetails?.upi_id || payDetails?.bank_account_no)
-  const can80g = method === 'manual' ? payDetails?.is_80g_registered === true : true
+  /**
+   * Can this devotee actually give to this temple right now?
+   *
+   * `bank_account_no` is only ever populated for a VERIFIED account — the API
+   * reads it from the nominated account and drops it the moment the recorded
+   * fingerprint stops matching. Requiring it (rather than "UPI id or account
+   * number", which is what this used to accept) is the point: a UPI handle
+   * typed into the profile of a trust nobody has checked is exactly the
+   * unreviewed payment address the verification queue was built to stop.
+   */
+  const canGive = !!payDetails?.accept_donor_requests && !!payDetails?.bank_account_no
+  const can80g = payDetails?.is_80g_registered === true
   const needsPanEntry = is80g && !panOnFile
 
   function validateManual(paise: number): string {
@@ -219,7 +243,7 @@ export function DonatePage() {
     const paise = parsePaise(amount)
     const problem = validateManual(paise)
     if (problem) { setError(problem); return }
-    setSubmitting(true); setError(''); setNotice('')
+    setSubmitting(true); setError('')
     try {
       const { data } = await api.post('/me/donation-requests', {
         tenant_id: selectedTemple!.id,
@@ -248,77 +272,16 @@ export function DonatePage() {
     }
   }
 
-  async function submitOnline() {
-    const paise = parsePaise(amount)
-    if (paise < 100) { setError('Minimum donation is ₹1'); return }
-    if (needsPanEntry && !PAN_REGEX.test(pan)) {
-      setError('A valid PAN (format ABCDE1234F) is required for an 80G donation')
-      return
-    }
-    setSubmitting(true); setError(''); setNotice('')
-    try {
-      // 1. Create the order on the backend. A newly typed PAN is saved onto
-      //    the profile there, so future 80G donations use the PAN on file.
-      const { data } = await api.post('/me/donate', {
-        tenant_id: selectedTemple!.id,
-        category,
-        amount_paise: paise,
-        is_80g: is80g,
-        pan: needsPanEntry ? pan : undefined,
-        remarks,
-      })
-      if (needsPanEntry) setPanOnFile(`${pan.slice(0, 2)}XXXXX${pan.slice(-3)}`)
-      const order = data.data
-      if (order.mock) {
-        setError(manualAvailable
-          ? 'Online payment is not available right now — you can still donate via UPI / bank transfer below.'
-          : 'Payment gateway is not configured on the server yet. Please try again later.')
-        setSubmitting(false)
-        return
-      }
-
-      // 2. Open the Razorpay Standard Checkout modal.
-      await openRazorpayCheckout({
-        order,
-        name: selectedTemple!.name,
-        description: `Donation — ${category}`,
-        prefill: {
-          name: user?.name ?? undefined,
-          email: user?.email,
-          contact: user?.mobile,
-        },
-        onSuccess: async (callback) => {
-          try {
-            // 3. Verify the signature server-side; the donation is recorded there.
-            const { data: v } = await api.post('/me/donate/verify', callback)
-            setResult({ ...order, ...v, paid: true })
-            setStep('result')
-          } catch (e) {
-            setError(apiError(e))
-          } finally {
-            setSubmitting(false)
-          }
-        },
-        onFailure: (msg) => { setError(msg); setSubmitting(false) },
-        onDismiss: () => { setNotice('Payment cancelled. You can try again.'); setSubmitting(false) },
-      })
-    } catch (e) {
-      setError(apiError(e))
-      setSubmitting(false)
-    }
-  }
-
   function resetAll() {
     setStep('search'); setSelectedTemple(null); setPayDetails(null); setResult(null)
-    setAmount(''); setError(''); setNotice(''); setUtr(''); setProof(null); setIs80g(false)
-    setMethod('online')
+    setAmount(''); setError(''); setUtr(''); setProof(null); setIs80g(false)
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="page-header">
         <h1 className="page-title">
-          {step === 'search' ? 'Donate to Temple' : step === 'form' ? selectedTemple?.name : result?.manual ? 'Request Submitted' : 'Donation Created'}
+          {step === 'search' ? 'Donate to Temple' : step === 'form' ? selectedTemple?.name : 'Request Submitted'}
         </h1>
         {step !== 'search' && (
           <button
@@ -394,27 +357,27 @@ export function DonatePage() {
               </div>
             </div>
 
-            {/* Payment method toggle */}
-            {manualAvailable && (
-              <div className="grid grid-cols-2 gap-2" data-testid="pay-method-toggle">
-                <button
-                  onClick={() => { setMethod('online'); setError('') }}
-                  className={`card p-3 text-left border-2 transition-colors ${method === 'online' ? 'border-brand-red bg-red-50' : 'border-slate-200'}`}
-                >
-                  <CreditCard size={16} className={method === 'online' ? 'text-brand-red' : 'text-slate-400'} />
-                  <p className="text-xs font-semibold mt-1 text-slate-800">{t('ui.payOnline')}</p>
-                  <p className="text-[10px] text-slate-500">{t('ui.cardUpiVia')}</p>
-                </button>
-                <button
-                  onClick={() => { setMethod('manual'); setError(''); if (is80g && payDetails?.is_80g_registered !== true) setIs80g(false) }}
-                  className={`card p-3 text-left border-2 transition-colors ${method === 'manual' ? 'border-brand-red bg-red-50' : 'border-slate-200'}`}
-                >
-                  <Landmark size={16} className={method === 'manual' ? 'text-brand-red' : 'text-slate-400'} />
-                  <p className="text-xs font-semibold mt-1 text-slate-800">{t('ui.upiBankTransfer')}</p>
-                  <p className="text-[10px] text-slate-500">{t('ui.payDirectUpload')}</p>
-                </button>
+            {/* No verified account → nothing to pay into, so offer no form at
+                all rather than an amount box that leads nowhere. `payDetails`
+                is null only while the request is in flight. */}
+            {payDetails && !canGive && (
+              <div className="card p-4 space-y-1" data-testid="no-verified-account">
+                <p className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                  <ShieldCheck size={15} className="text-slate-400" />
+                  {t('ui.donateUnavailableTitle')}
+                </p>
+                <p className="text-xs text-slate-500">{t('ui.donateUnavailableBody')}</p>
               </div>
             )}
+
+            {canGive && <>
+            <div className="card p-3 flex items-start gap-2" data-testid="pay-method-note">
+              <Landmark size={15} className="text-brand-red flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold text-slate-800">{t('ui.upiBankTransfer')}</p>
+                <p className="text-[11px] text-slate-500">{t('ui.payDirectVerified')}</p>
+              </div>
+            </div>
 
             <div>
               <label className="form-label">{t('ui.amountReq')}</label>
@@ -450,15 +413,15 @@ export function DonatePage() {
               </select>
             </div>
 
-            {/* Manual: temple payment details + proof */}
-            {method === 'manual' && payDetails && (
+            {/* The temple's own verified payment details */}
+            {payDetails && (
               <div className="card p-4 space-y-3" data-testid="bank-details-card">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
                   <QrCode size={13} />{t('ui.payTempleDirect')}</p>
-                {(payDetails.upi_qr_cdn_url || qrDataUrl) && (
+                {qrDataUrl && (
                   <div className="flex justify-center">
                     <img
-                      src={payDetails.upi_qr_cdn_url || qrDataUrl!}
+                      src={qrDataUrl}
                       alt="UPI QR"
                       className="w-44 h-44 rounded-lg border border-slate-200 object-contain bg-white"
                     />
@@ -495,8 +458,7 @@ export function DonatePage() {
               </div>
             )}
 
-            {method === 'manual' && (
-              <>
+            <>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="form-label">{t('ui.paidVia')}</label>
@@ -548,7 +510,6 @@ export function DonatePage() {
                   )}
                 </div>
               </>
-            )}
 
             {/* 80G — only when the temple can actually issue it */}
             {can80g ? (
@@ -569,7 +530,7 @@ export function DonatePage() {
                   )}
                 </label>
               </div>
-            ) : method === 'manual' && payDetails && (
+            ) : payDetails && (
               <p className="text-xs text-slate-400 card p-3">{t('ui.no80g')}</p>
             )}
 
@@ -592,9 +553,8 @@ export function DonatePage() {
               </div>
             )}
 
-            {/* Donor details for the receipt (manual flow) */}
-            {method === 'manual' && (
-              <div className="card p-4 space-y-3" data-testid="donor-details">
+            {/* Donor details for the receipt */}
+            <div className="card p-4 space-y-3" data-testid="donor-details">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                   Receipt details {is80g && <span className="text-brand-red normal-case font-medium">— required for the 80G receipt</span>}
                 </p>
@@ -622,7 +582,6 @@ export function DonatePage() {
                     onChange={e => setPincode(e.target.value.replace(/\D/g, ''))} />
                 </div>
               </div>
-            )}
 
             <div>
               <label className="form-label">{t('ui.remarksOpt')}</label>
@@ -636,36 +595,28 @@ export function DonatePage() {
             </div>
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
-            {notice && <p className="text-amber-600 text-sm">{notice}</p>}
 
             <button
-              onClick={method === 'manual' ? submitManual : submitOnline}
+              onClick={submitManual}
               disabled={submitting || !amount}
               className="btn-primary w-full justify-center py-3 text-base"
             >
               <Heart size={16} />
-              {submitting
-                ? 'Processing...'
-                : method === 'manual'
-                  ? `Submit for verification — ₹${amount || 0}`
-                  : `Donate ₹${amount || 0}`}
+              {submitting ? 'Processing...' : `Submit for verification — ₹${amount || 0}`}
             </button>
+            </>}
           </div>
         )}
 
         {/* Step 3: Result */}
         {step === 'result' && result && (
           <div className="text-center py-8 space-y-4">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${result.manual ? 'bg-amber-100' : 'bg-green-100'}`}>
-              {result.manual ? <Clock size={32} className="text-amber-600" /> : <Check size={32} className="text-green-600" />}
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto bg-amber-100">
+              <Clock size={32} className="text-amber-600" />
             </div>
-            <h2 className="text-lg font-bold text-slate-800">
-              {result.manual ? 'Sent for verification!' : 'Payment Successful!'}
-            </h2>
+            <h2 className="text-lg font-bold text-slate-800">Sent for verification!</h2>
             <p className="text-sm text-slate-500 px-4">
-              {result.manual
-                ? `${selectedTemple?.name} will verify your payment and issue the receipt. You'll get a notification here once it's approved.`
-                : 'Thank you for your donation. Your receipt will be available shortly.'}
+              {`${selectedTemple?.name} will verify your payment and issue the receipt. You'll get a notification here once it's approved.`}
             </p>
             <div className="card p-4 text-left space-y-2">
               <div className="flex justify-between text-sm">
@@ -673,15 +624,13 @@ export function DonatePage() {
                 <span className="font-medium">{selectedTemple?.name}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">{result.manual ? 'Request ID' : 'Order ID'}</span>
-                <span className="font-mono text-slate-700 text-xs">{result.manual ? result.id : result.razorpay_order_id}</span>
+                <span className="text-slate-500">Request ID</span>
+                <span className="font-mono text-slate-700 text-xs">{result.id}</span>
               </div>
-              {result.manual && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">{t('ui.status')}</span>
-                  <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>{t('ui.pendingApproval')}</span>
-                </div>
-              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">{t('ui.status')}</span>
+                <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>{t('ui.pendingApproval')}</span>
+              </div>
             </div>
             <button onClick={resetAll} className="btn-primary mx-auto">{t('ui.donateAgain')}</button>
           </div>

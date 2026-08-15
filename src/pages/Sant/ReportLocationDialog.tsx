@@ -114,25 +114,25 @@ export function ReportLocationDialog({
 
             <div className="space-y-2.5">
               <div>
-                <label className="label" htmlFor="rl-place">{t('sant.placeLabel')}</label>
+                <label className="form-label" htmlFor="rl-place">{t('sant.placeLabel')}</label>
                 <input id="rl-place" className="form-input" value={place}
                   onChange={e => setPlace(e.target.value)}
                   placeholder={t('sant.placePh')} />
               </div>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="label" htmlFor="rl-city">{t('ui.city')}</label>
+                  <label className="form-label" htmlFor="rl-city">{t('ui.city')}</label>
                   <input id="rl-city" className="form-input" value={city}
                     onChange={e => setCity(e.target.value)} />
                 </div>
                 <div className="flex-1">
-                  <label className="label" htmlFor="rl-state">{t('sant.state')}</label>
+                  <label className="form-label" htmlFor="rl-state">{t('sant.state')}</label>
                   <input id="rl-state" className="form-input" value={stateName}
                     onChange={e => setStateName(e.target.value)} />
                 </div>
               </div>
               <div>
-                <label className="label" htmlFor="rl-notes">{t('sant.notesLabel')}</label>
+                <label className="form-label" htmlFor="rl-notes">{t('sant.notesLabel')}</label>
                 <textarea id="rl-notes" className="form-input" rows={2} value={notes}
                   onChange={e => setNotes(e.target.value)}
                   placeholder={t('sant.notesPh')} />

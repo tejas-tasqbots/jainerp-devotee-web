@@ -136,7 +136,12 @@
     "reportReviewNote": "જાણ સંતના પ્રતિનિધિ દ્વારા ચકાસાય છે.",
     "reportThanks": "આભાર. તમારી જાણ પુષ્ટિ માટે મોકલી દેવાઈ છે.",
     "reportFailed": "તમારી જાણ મોકલી શકાઈ નહીં. ફરી પ્રયાસ કરો.",
-    "placeRequired": "કૃપા કરીને તમે જ્યાં જોયા તે સ્થળ દાખલ કરો."
+    "placeRequired": "કૃપા કરીને તમે જ્યાં જોયા તે સ્થળ દાખલ કરો.",
+    "discoverMapTitle": "તમારી નજીક",
+    "layerSants": "સાધુ-સાધ્વી",
+    "layerTemples": "મંદિરો",
+    "templesShown": "{{count}} મંદિરો",
+    "viewTemple": "મંદિર જુઓ"
   },
   "ui": {
     "goBack": "પાછળ જાઓ",
@@ -197,6 +202,9 @@
     "cardUpiVia": "Razorpay દ્વારા કાર્ડ / UPI",
     "upiBankTransfer": "UPI / બેંક ટ્રાન્સફર",
     "payDirectUpload": "સીધું ચૂકવો, પુરાવો અપલોડ કરો",
+    "payDirectVerified": "મંદિરને સીધું ચૂકવો, પછી તેમને જણાવો કે તમે શું મોકલ્યું",
+    "donateUnavailableTitle": "હજુ ઓનલાઇન દાન સ્વીકારતા નથી",
+    "donateUnavailableBody": "આ મંદિરે હજુ સુધી ચકાસાયેલ બેંક ખાતું પ્રકાશિત કર્યું નથી, તેથી પૈસા મોકલવા માટે કોઈ સુરક્ષિત સ્થળ નથી. તમે રૂબરૂ દાન કરી શકો છો.",
     "amountReq": "રકમ (₹) *",
     "amount": "રકમ (₹)",
     "payTempleDirect": "મંદિરને સીધું ચૂકવો",
