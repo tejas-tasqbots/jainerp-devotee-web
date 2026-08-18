@@ -20,6 +20,14 @@ api.interceptors.response.use(
     const original = err.config
     if (err.response?.status === 401 && !original._retry) {
       original._retry = true
+      // A deleted or disabled account can never be refreshed back into life,
+      // so don't try — clear the session and let the app route to sign-in.
+      // Without this the user sat through a doomed refresh round-trip before
+      // being logged out anyway.
+      if (err.response?.data?.error?.code === 'ACCOUNT_DELETED') {
+        useAuthStore.getState().logout()
+        return Promise.reject(err)
+      }
       try {
         const { refreshToken, deviceId, setTokens, logout } = useAuthStore.getState()
         if (!refreshToken) { logout(); return Promise.reject(err) }
