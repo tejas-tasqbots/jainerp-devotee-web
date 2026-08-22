@@ -73,6 +73,9 @@
     "sant": "Sant"
   },
   "sant": {
+    "nextPage": "Next",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "prevPage": "Previous",
     "allParamparas": "All paramparas",
     "allSanghs": "All sanghs",
     "parampara": "Parampara",

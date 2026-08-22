@@ -73,6 +73,9 @@
     "sant": "संत"
   },
   "sant": {
+    "nextPage": "आगे",
+    "pageOf": "पृष्ठ {{page}} / {{pages}}",
+    "prevPage": "पीछे",
     "allParamparas": "सभी परम्पराएँ",
     "allSanghs": "सभी संघ",
     "parampara": "परम्परा",

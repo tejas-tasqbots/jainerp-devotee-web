@@ -73,6 +73,9 @@
     "sant": "ಸಂತ"
   },
   "sant": {
+    "nextPage": "ಮುಂದೆ",
+    "pageOf": "ಪುಟ {{page}} / {{pages}}",
+    "prevPage": "ಹಿಂದೆ",
     "allParamparas": "ಎಲ್ಲಾ ಪರಂಪರೆಗಳು",
     "allSanghs": "ಎಲ್ಲಾ ಸಂಘಗಳು",
     "parampara": "ಪರಂಪರೆ",

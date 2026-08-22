@@ -19,6 +19,15 @@ import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../li
  * these columns was already stored and already returned by the list endpoint;
  * only the query parameters to narrow by them were missing.
  */
+/**
+ * Rows per page.
+ *
+ * The directory holds a few thousand ascetics; before this it fetched twenty
+ * and offered no way to reach the twenty-first, so 99% of the data was
+ * unreachable from the UI.
+ */
+const PAGE_SIZE = 20
+
 export function SantDirectory() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
@@ -61,6 +70,7 @@ export function SantDirectory() {
   const [profiles, setProfiles] = useState<MaharajProfile[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     api.get('/sant/directory/facets', { params: { ...traditionsParam(scope), status } })
@@ -72,14 +82,30 @@ export function SantDirectory() {
     const handle = setTimeout(load, 400)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, samuday, city, state, type, pad, sect, sanghId, parampara, status, sort, scope])
+  }, [query, samuday, city, state, type, pad, sect, sanghId, parampara, status, sort, scope, page])
+
+  /**
+   * Wrap a filter setter so changing it also goes back to page one.
+   *
+   * Without the reset, a devotee on page 7 who then picks a sangh with two
+   * members gets an empty list and no clue why — the filter is right, the page
+   * number is simply past the end of it.
+   *
+   * Done here rather than in an effect on purpose: `setPage` inside an effect
+   * body is a cascading render (react-hooks/set-state-in-effect), and the reset
+   * genuinely belongs to the event, not to a later reconciliation.
+   */
+  function onFilter<T>(set: (v: T) => void) {
+    return (v: T) => { setPage(1); set(v) }
+  }
 
   async function load() {
     setLoading(true)
     try {
       const { data } = await api.get('/sant', {
         params: {
-          q: query, samuday, city, state, type, pad, sect, status, sort, limit: 20,
+          q: query, samuday, city, state, type, pad, sect, status, sort,
+          page, limit: PAGE_SIZE,
           sangh_id: sanghId, parampara,
           ...traditionsParam(scope),
         },
@@ -99,8 +125,20 @@ export function SantDirectory() {
   const hasAnyFilter = activeCount > 0 || !!query
 
   function onScopeChange(next: 'mine' | 'all') {
+    setPage(1)
     setScope(next)
     if (next === 'mine') setSect('')
+  }
+
+  /**
+   * Back to the top when the page changes.
+   *
+   * Without it the next page loads with the viewport still at the bottom, so
+   * the reader lands mid-list on rows they have not seen and it reads as if
+   * nothing happened.
+   */
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   /** " (12)" for a facet that has a count, or nothing at all. */
@@ -111,6 +149,7 @@ export function SantDirectory() {
 
   function clearAll() {
     setQuery(''); setSamuday(''); setCity(''); setState('')
+    setPage(1)
     setType(''); setPad(''); setSect(''); setStatus(''); setSort('name')
     setSanghId(''); setParampara('')
   }
@@ -143,7 +182,7 @@ export function SantDirectory() {
             placeholder={t('ui.searchByName')}
             className="form-input pl-9"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => onFilter(setQuery)(e.target.value)}
           />
         </div>
 
@@ -162,7 +201,7 @@ export function SantDirectory() {
           <select
             className="form-input flex-1 text-xs"
             value={sort}
-            onChange={e => setSort(e.target.value)}
+            onChange={e => onFilter(setSort)(e.target.value)}
             aria-label={t('sant.sortBy')}
           >
             <option value="name">{t('sant.sortName')}</option>
@@ -177,7 +216,7 @@ export function SantDirectory() {
               {/* Facet-driven: only ranks that exist are offered, with counts, so
                   the picker can never promise results the list then fails to show. */}
               <select className="form-input flex-1 text-xs" value={type}
-                onChange={e => setType(e.target.value)} aria-label={t('sant.rank')}>
+                onChange={e => onFilter(setType)(e.target.value)} aria-label={t('sant.rank')}>
                 <option value="">{t('sant.allRanks')}</option>
                 {(facets?.types ?? []).map(o => (
                   <option key={o.value} value={o.value}>
@@ -186,7 +225,7 @@ export function SantDirectory() {
                 ))}
               </select>
               <select className="form-input flex-1 text-xs" value={pad}
-                onChange={e => setPad(e.target.value)} aria-label={t('sant.pad')}>
+                onChange={e => onFilter(setPad)(e.target.value)} aria-label={t('sant.pad')}>
                 <option value="">{t('sant.allPads')}</option>
                 {(facets?.pads ?? []).map(o => (
                   <option key={o.value} value={o.value}>
@@ -198,7 +237,7 @@ export function SantDirectory() {
             <div className="flex gap-2">
               {scope === 'all' && (
                 <select className="form-input flex-1 text-xs" value={sect}
-                  onChange={e => setSect(e.target.value)} aria-label={t('sant.sect')}>
+                  onChange={e => onFilter(setSect)(e.target.value)} aria-label={t('sant.sect')}>
                   <option value="">{t('sant.allSects')}</option>
                   {(facets?.sects ?? []).map(o => (
                     <option key={o.value} value={o.value}>
@@ -211,13 +250,13 @@ export function SantDirectory() {
                   NOT filtered by the current status — its whole job is to say
                   how many are on the other side of the switch. */}
               <select className="form-input flex-1 text-xs" value={status}
-                onChange={e => setStatus(e.target.value)} aria-label={t('sant.status')}>
+                onChange={e => onFilter(setStatus)(e.target.value)} aria-label={t('sant.status')}>
                 <option value="">{t('sant.statusLiving')}{statusCount('living')}</option>
                 <option value="samadhistha">{t('sant.statusSamadhistha')}{statusCount('samadhistha')}</option>
                 <option value="all">{t('sant.statusAll')}</option>
               </select>
               <select className="form-input flex-1 text-xs" value={state}
-                onChange={e => setState(e.target.value)} aria-label={t('sant.state')}>
+                onChange={e => onFilter(setState)(e.target.value)} aria-label={t('sant.state')}>
                 <option value="">{t('sant.allStates')}</option>
                 {(facets?.states ?? []).map(o => (
                   <option key={o.value} value={o.value}>{o.value} ({o.count})</option>
@@ -232,7 +271,7 @@ export function SantDirectory() {
                 indication of which filter emptied it. */}
             <div className="flex gap-2">
               <select className="form-input flex-1 text-xs" value={sanghId}
-                onChange={e => setSanghId(e.target.value)} aria-label={t('sant.sangh')}>
+                onChange={e => onFilter(setSanghId)(e.target.value)} aria-label={t('sant.sangh')}>
                 <option value="">{t('sant.allSanghs')}</option>
                 {(facets?.sanghs ?? []).map(o => (
                   <option key={o.value} value={o.value}>
@@ -242,7 +281,7 @@ export function SantDirectory() {
               </select>
               {(facets?.paramparas ?? []).length > 0 && (
                 <select className="form-input flex-1 text-xs" value={parampara}
-                  onChange={e => { setParampara(e.target.value); setSanghId('') }}
+                  onChange={e => { onFilter(setParampara)(e.target.value); setSanghId('') }}
                   aria-label={t('sant.parampara')}>
                   <option value="">{t('sant.allParamparas')}</option>
                   {(facets?.paramparas ?? []).map(o => (
@@ -253,13 +292,13 @@ export function SantDirectory() {
             </div>
             <div className="flex gap-2">
               <input type="text" placeholder={t('ui.samudayPh')} className="form-input flex-1 text-xs"
-                value={samuday} onChange={e => setSamuday(e.target.value)} />
+                value={samuday} onChange={e => onFilter(setSamuday)(e.target.value)} />
               {/* Facet-driven like the State beside it, NOT the geo lookup:
                   the geo list is every city in India, and a devotee picking one
                   that holds no ascetic gets an empty page. This offers only
                   cities that return something, with the count. */}
               <select className="form-input flex-1 text-xs" value={city}
-                onChange={e => setCity(e.target.value)} aria-label={t('ui.city')}>
+                onChange={e => onFilter(setCity)(e.target.value)} aria-label={t('ui.city')}>
                 <option value="">{t('sant.allCities')}</option>
                 {(facets?.cities ?? []).map(o => (
                   <option key={o.value} value={o.value}>{o.value} ({o.count})</option>
@@ -362,6 +401,28 @@ export function SantDirectory() {
               </div>
             </button>
           ))}
+          </div>
+        )}
+
+        {/* Prev / Next with the page number, matching the temple directory.
+            Rendered outside the loading branch so the control does not vanish
+            and re-appear on every page change — that jump is what makes a
+            paginated list feel broken even when it works. */}
+        {total > PAGE_SIZE && (
+          <div className="flex justify-between items-center pt-1">
+            <button
+              onClick={() => { setPage(p => Math.max(1, p - 1)); scrollToTop() }}
+              disabled={page === 1 || loading}
+              className="btn-secondary text-xs px-3 py-1.5"
+            >{t('sant.prevPage')}</button>
+            <span className="text-xs text-slate-400">
+              {t('sant.pageOf', { page, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) })}
+            </span>
+            <button
+              onClick={() => { setPage(p => p + 1); scrollToTop() }}
+              disabled={page * PAGE_SIZE >= total || loading}
+              className="btn-secondary text-xs px-3 py-1.5"
+            >{t('sant.nextPage')}</button>
           </div>
         )}
       </div>
