@@ -5,7 +5,7 @@ import { api } from '../../lib/api'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import { EmptyState, SkeletonList } from '../../components/kit'
 import { useTranslation } from 'react-i18next'
-import { asceticRank, padLabel, santDisplayName, sectLabel } from '../../lib/ascetic'
+import { altNameFor, asceticRank, padLabel, santDisplayName, sectLabel } from '../../lib/ascetic'
 import type { MaharajProfile, SantFacets } from '../../types'
 import { TraditionSwitch } from '../../components/TraditionSwitch'
 import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
@@ -20,7 +20,8 @@ import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../li
  * only the query parameters to narrow by them were missing.
  */
 export function SantDirectory() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [samuday, setSamuday] = useState('')
@@ -32,6 +33,16 @@ export function SantDirectory() {
   // "show me Shwetambar ascetics" and overrides the default scoping, which is
   // why the picker only appears once the devotee is browsing all traditions.
   const [sect, setSect] = useState('')
+  /**
+   * Living, samadhistha, or both.
+   *
+   * Empty means the API's default, which is `living` — a real directory is
+   * largely historical, and a devotee opening this screen is nearly always
+   * asking who they can take darshan of. The memorial records are a
+   * first-class view, not an archive: they are what a great many of these
+   * profiles exist to preserve.
+   */
+  const [status, setStatus] = useState('')
   const [scope, setScope] = useTraditionScope()
   const [sectScope, setSectScope] = useState<SectScopeMeta | null>(null)
   const [sort, setSort] = useState('name')
@@ -42,23 +53,23 @@ export function SantDirectory() {
   const [total, setTotal] = useState(0)
 
   useEffect(() => {
-    api.get('/sant/directory/facets', { params: traditionsParam(scope) })
+    api.get('/sant/directory/facets', { params: { ...traditionsParam(scope), status } })
       .then(({ data }) => setFacets(data.data ?? null))
       .catch(() => setFacets(null))
-  }, [scope])
+  }, [scope, status])
 
   useEffect(() => {
     const handle = setTimeout(load, 400)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, samuday, city, state, type, pad, sect, sort, scope])
+  }, [query, samuday, city, state, type, pad, sect, status, sort, scope])
 
   async function load() {
     setLoading(true)
     try {
       const { data } = await api.get('/sant', {
         params: {
-          q: query, samuday, city, state, type, pad, sect, sort, limit: 20,
+          q: query, samuday, city, state, type, pad, sect, status, sort, limit: 20,
           ...traditionsParam(scope),
         },
       })
@@ -72,7 +83,7 @@ export function SantDirectory() {
     }
   }
 
-  const activeCount = [samuday, city, state, type, pad, sect].filter(Boolean).length
+  const activeCount = [samuday, city, state, type, pad, sect, status].filter(Boolean).length
   const hasAnyFilter = activeCount > 0 || !!query
 
   function onScopeChange(next: 'mine' | 'all') {
@@ -80,9 +91,15 @@ export function SantDirectory() {
     if (next === 'mine') setSect('')
   }
 
+  /** " (12)" for a facet that has a count, or nothing at all. */
+  function statusCount(value: string): string {
+    const n = (facets?.statuses ?? []).find(o => o.value === value)?.count
+    return typeof n === 'number' ? ` (${n})` : ''
+  }
+
   function clearAll() {
     setQuery(''); setSamuday(''); setCity(''); setState('')
-    setType(''); setPad(''); setSect(''); setSort('name')
+    setType(''); setPad(''); setSect(''); setStatus(''); setSort('name')
   }
 
   return (
@@ -151,7 +168,7 @@ export function SantDirectory() {
                 <option value="">{t('sant.allRanks')}</option>
                 {(facets?.types ?? []).map(o => (
                   <option key={o.value} value={o.value}>
-                    {asceticRank(o.value)} ({o.count})
+                    {asceticRank(o.value, lang)} ({o.count})
                   </option>
                 ))}
               </select>
@@ -160,7 +177,7 @@ export function SantDirectory() {
                 <option value="">{t('sant.allPads')}</option>
                 {(facets?.pads ?? []).map(o => (
                   <option key={o.value} value={o.value}>
-                    {padLabel(o.value)} ({o.count})
+                    {padLabel(o.value, lang)} ({o.count})
                   </option>
                 ))}
               </select>
@@ -172,11 +189,20 @@ export function SantDirectory() {
                   <option value="">{t('sant.allSects')}</option>
                   {(facets?.sects ?? []).map(o => (
                     <option key={o.value} value={o.value}>
-                      {sectLabel(o.value)} ({o.count})
+                      {sectLabel(o.value, lang)} ({o.count})
                     </option>
                   ))}
                 </select>
               )}
+              {/* Counts come from the `statuses` facet, which is deliberately
+                  NOT filtered by the current status — its whole job is to say
+                  how many are on the other side of the switch. */}
+              <select className="form-input flex-1 text-xs" value={status}
+                onChange={e => setStatus(e.target.value)} aria-label={t('sant.status')}>
+                <option value="">{t('sant.statusLiving')}{statusCount('living')}</option>
+                <option value="samadhistha">{t('sant.statusSamadhistha')}{statusCount('samadhistha')}</option>
+                <option value="all">{t('sant.statusAll')}</option>
+              </select>
               <select className="form-input flex-1 text-xs" value={state}
                 onChange={e => setState(e.target.value)} aria-label={t('sant.state')}>
                 <option value="">{t('sant.allStates')}</option>
@@ -227,13 +253,20 @@ export function SantDirectory() {
               className="w-full card p-4 text-left hover:border-navy-300 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <PhotoAvatar name={p.name} photoUrl={p.photo_url} />
+                <PhotoAvatar name={santDisplayName(p, lang)} photoUrl={p.photo_url} />
                 <div className="flex-1 min-w-0">
                   {/* The post reads as part of the name — "Acharya Shri …" — so
                       it is prefixed here rather than shown as another badge. */}
                   <p className="font-semibold text-slate-800 text-sm truncate">
-                    {santDisplayName(p)}
+                    {santDisplayName(p, lang)}
                   </p>
+                  {/* The other script, when the profile carries one. A devotee
+                      who knows this ascetic by their Devanagari name and one who
+                      knows the transliteration are looking for the same person;
+                      showing both is what makes the row recognisable to either. */}
+                  {altNameFor(p, lang) && (
+                    <p className="text-xs text-slate-400 truncate">{altNameFor(p, lang)}</p>
+                  )}
                   <p className="text-xs text-slate-500">{p.samuday}</p>
                   <div className="flex items-center gap-3 mt-0.5">
                     {(p.current_city || p.city) && (
@@ -249,8 +282,14 @@ export function SantDirectory() {
                     {/* type_display is resolved server-side from ascetic.ts —
                         never render the raw rank enum ('muni') at the user. */}
                     <span className="badge badge-gold text-[9px]">
-                      {p.type_display ?? p.type}
+                      {(lang === 'hi' ? p.type_display_hi : p.type_display) ?? p.type}
                     </span>
+                    {/* A memorial stays in the directory — that record is why
+                        it is kept — but a row that looked identical to a living
+                        ascetic's would send devotees looking for darshan. */}
+                    {p.is_samadhistha && (
+                      <span className="badge badge-gray text-[9px]">{t('sant.statusSamadhisthaShort')}</span>
+                    )}
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-slate-300 flex-shrink-0" />

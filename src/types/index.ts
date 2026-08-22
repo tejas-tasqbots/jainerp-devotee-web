@@ -151,26 +151,52 @@ export interface StaySearchMeta {
 
 export interface MaharajProfile {
   id: string
+  /**
+   * The canonical display name — what every reader falls back to. Migration 044
+   * added the two per-script columns below; use `nameFor()` rather than reading
+   * any of the three directly, so a profile curated in one script still renders
+   * for a reader of the other.
+   */
   name: string
+  name_en?: string | null
+  name_hi?: string | null
   /**
    * Canonical ascetic RANK, not the honorific — 'maharaj'/'mataji' were never
    * valid values (see doc-v2/Glossary_And_Naming.md). Render `type_display`,
    * which the API resolves from ascetic.ts.
+   *
+   * The Shwetambar pair arrived with migration 040 and was missing from this
+   * union, so a Sadhvi's row was untypeable and fell through to the raw value.
    */
-  type: 'muni' | 'aryika' | 'kshullak' | 'kshullika' | 'ailak'
+  type: 'muni' | 'aryika' | 'kshullak' | 'kshullika' | 'ailak' | 'sadhu' | 'sadhvi'
   /** Honorific for display: "Maharaj Ji", "Mataji", "Ailak Ji", … */
   type_display?: string
+  /** The same in Devanagari. Both are sent; the client picks by locale. */
+  type_display_hi?: string
   /** The formal rank: "Muni Shri", "Aryika Shri", … */
   rank_display?: string
+  rank_display_hi?: string
   /**
-   * POST held (migration 039) — not the rank. An Acharya is still a Muni, which
-   * is why this is separate from `type`. 'none' is a real answer, not a missing one.
+   * POST held (migration 039, widened by 044) — not the rank. An Acharya is
+   * still a Muni, which is why this is separate from `type`. 'none' is a real
+   * answer, not a missing one.
    */
-  pad?: 'acharya' | 'elacharya' | 'upadhyaya' | 'ganini' | 'none'
+  pad?: 'acharya' | 'upadhyaya' | 'elacharya' | 'ganini' | 'bhattarak'
+      | 'panyas' | 'gani' | 'pravartak' | 'pravartini' | 'mahattara' | 'sadhvi_pramukha'
+      | 'none'
   /** "Acharya", "Upadhyaya", … Empty string when pad is 'none'. */
   pad_display?: string
+  pad_display_hi?: string
   sect?: 'digambar' | 'shwetambar'
   sect_display?: string
+  sect_display_hi?: string
+  /**
+   * Derived from `samadhi_date` by the API (migration 044). A samadhistha
+   * profile stays fully in the directory — the record is why it is kept — but
+   * has no representative and no current whereabouts, and the directory's
+   * `status` filter is built on this.
+   */
+  is_samadhistha?: boolean
   samuday: string
   /** Home/base city. */
   city?: string
@@ -360,12 +386,20 @@ export interface ChaturmasStay {
 export interface ChaturmasEntry extends ChaturmasStay {
   sant_id: string
   name: string
+  /** Both scripts (migration 044) — read them through nameFor(). */
+  name_en?: string | null
+  name_hi?: string | null
   type: string
   type_display?: string
+  type_display_hi?: string
   pad?: string
   pad_display?: string
+  pad_display_hi?: string
   sect?: string | null
   sect_display?: string
+  sect_display_hi?: string
+  /** A varshayog record is largely historical, so many of these are memorials. */
+  is_samadhistha?: boolean
   samuday?: string | null
   photo_url?: string | null
   has_photo?: boolean
@@ -433,6 +467,12 @@ export interface SantFacets {
   pads: { value: string; count: number }[]
   sects: { value: string; count: number }[]
   states: { value: string; count: number }[]
+  /**
+   * living / samadhistha counts. Unlike the others this facet deliberately
+   * IGNORES the current status filter — its whole job is to say how many are on
+   * the other side of it.
+   */
+  statuses?: { value: string; count: number }[]
 }
 
 /** Outcome of a devotee's location report. */

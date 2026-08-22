@@ -76,7 +76,8 @@ type Layers = { sants: boolean; temples: boolean }
 const INDIA: [number, number] = [22.9734, 78.6569]
 
 export function SantMap() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const navigate = useNavigate()
   const elRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
@@ -155,7 +156,7 @@ export function SantMap() {
           if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
           const marker = L.marker([lat, lng], { icon: santIcon(!!m.chaturmas) })
           marker.bindPopup(popup(
-            santDisplayName(m),
+            santDisplayName(m, lang),
             [m.place, m.city, m.state].filter(Boolean).join(', '),
             t('sant.viewProfile'),
             `/sant/${m.sant_id}`,

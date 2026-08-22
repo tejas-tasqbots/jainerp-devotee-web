@@ -10,11 +10,12 @@ import { api } from '../../lib/api'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import type { MaharajProfile } from '../../types'
 import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks'
-import { eventTypeLabel, santDisplayName } from '../../lib/ascetic'
+import { altNameFor, eventTypeLabel, nameFor, santDisplayName } from '../../lib/ascetic'
 import { ReportLocationDialog } from './ReportLocationDialog'
 
 export function SantDetails() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [profile, setProfile] = useState<MaharajProfile | null>(null)
@@ -85,7 +86,7 @@ export function SantDetails() {
         <button onClick={() => navigate(-1)} aria-label={t('ui.goBack')} className="p-1 -ml-1">
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
-        <h1 className="page-title flex-1 text-center truncate px-2">{profile.name}</h1>
+        <h1 className="page-title flex-1 text-center truncate px-2">{nameFor(profile, lang)}</h1>
         <div className="w-8" />
       </div>
 
@@ -93,7 +94,7 @@ export function SantDetails() {
       <div className="bg-gradient-to-b from-navy-900 to-navy-700 p-6 text-white">
         <div className="flex items-start gap-4">
           <PhotoAvatar
-            name={profile.name}
+            name={nameFor(profile, lang)}
             photoBase64={profile.photo_base64}
             photoUrl={profile.photo_url}
             className="w-20 h-20"
@@ -102,7 +103,13 @@ export function SantDetails() {
           />
           <div className="flex-1">
             {/* "Acharya Shri …" — the post reads as part of the name. */}
-            <h2 className="font-bold text-xl leading-tight">{santDisplayName(profile)}</h2>
+            <h2 className="font-bold text-xl leading-tight">{santDisplayName(profile, lang)}</h2>
+            {/* The other script. A devotee who knows this ascetic by their
+                Devanagari name should see it on the profile they landed on,
+                whichever language the app is set to. */}
+            {altNameFor(profile, lang) && (
+              <p className="text-white/70 text-base leading-tight">{altNameFor(profile, lang)}</p>
+            )}
             <p className="text-white/80 text-sm mt-0.5">{profile.samuday}</p>
             {profile.diksha_year && (
               <p className="text-white/60 text-xs mt-0.5">Diksha: {profile.diksha_year}</p>
@@ -110,10 +117,19 @@ export function SantDetails() {
             <div className="flex items-center gap-3 mt-2">
               {/* Honorific resolved server-side; the raw rank enum is never shown. */}
               <span className="badge bg-brand-gold text-navy-900">
-                {profile.type_display ?? profile.type}
+                {(lang === 'hi' ? profile.type_display_hi : profile.type_display) ?? profile.type}
               </span>
               {profile.sect_display && (
-                <span className="badge bg-white/20 text-white">{profile.sect_display}</span>
+                <span className="badge bg-white/20 text-white">
+                  {(lang === 'hi' ? profile.sect_display_hi : profile.sect_display) ?? profile.sect_display}
+                </span>
+              )}
+              {/* Kept in the directory on purpose — the record is the point —
+                  so the profile has to say plainly that this ascetic is no
+                  longer travelling, or a devotee reads the vihar history as
+                  current and sets out for darshan. */}
+              {profile.is_samadhistha && (
+                <span className="badge bg-white/20 text-white">{t('sant.statusSamadhisthaShort')}</span>
               )}
               {profile.followers_count !== undefined && (
                 <span className="flex items-center gap-1 text-xs text-white/80">
@@ -215,6 +231,24 @@ export function SantDetails() {
                   <Navigation size={14} />{t('ui.getDirections')}</a>
               </>
             )}
+          </div>
+        )}
+
+        {/* A memorial says so, once, in plain words.
+            The profile is deliberately kept and deliberately complete, so
+            without this a devotee reads the vihar history and the chaturmas
+            record as current and sets out for darshan. */}
+        {profile.is_samadhistha && (
+          <div className="card p-4 bg-slate-50 border-slate-200">
+            <p className="text-sm font-semibold text-slate-800">
+              {profile.samadhi_date
+                ? t('sant.samadhiOn', { date: new Date(profile.samadhi_date).toLocaleDateString() })
+                : t('sant.statusSamadhisthaShort')}
+            </p>
+            {profile.tithi_note && (
+              <p className="text-xs text-slate-500 mt-0.5">{profile.tithi_note}</p>
+            )}
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">{t('sant.samadhiNote')}</p>
           </div>
         )}
 
@@ -405,7 +439,7 @@ export function SantDetails() {
       {reporting && (
         <ReportLocationDialog
           santId={profile.id}
-          santName={profile.name}
+          santName={nameFor(profile, lang)}
           onClose={() => setReporting(false)}
         />
       )}

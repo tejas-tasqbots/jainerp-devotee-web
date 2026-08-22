@@ -20,6 +20,7 @@ import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../li
  */
 export function SantEventsPage() {
   const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const navigate = useNavigate()
   const [rows, setRows] = useState<SantEvent[]>([])
   const [city, setCity] = useState('')
@@ -116,7 +117,7 @@ export function SantEventsPage() {
                 <h2 className="text-sm font-semibold text-slate-700 mb-2">{formatDay(date)}</h2>
                 <div className="card divide-y divide-slate-100">
                   {events.map(e => {
-                    const pad = padLabel(e.sant_pad)
+                    const pad = padLabel(e.sant_pad, lang)
                     return (
                       <button
                         key={e.id}

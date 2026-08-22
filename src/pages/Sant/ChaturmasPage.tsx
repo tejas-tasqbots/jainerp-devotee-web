@@ -22,7 +22,8 @@ import type { ChaturmasEntry } from '../../types'
  * names is not how anyone looks for "who is near me this year".
  */
 export function ChaturmasPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language
   const navigate = useNavigate()
   const [years, setYears] = useState<{ year: number; count: number }[]>([])
   const [year, setYear] = useState<number | null>(null)
@@ -160,10 +161,13 @@ export function ChaturmasPage() {
                             />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-slate-800 truncate">
-                                {santDisplayName(e)}
+                                {santDisplayName(e, lang)}
                               </p>
                               <p className="text-xs text-slate-500 truncate">
-                                {[e.type_display, e.place].filter(Boolean).join(' · ')}
+                                {[
+                                  lang === 'hi' ? e.type_display_hi ?? e.type_display : e.type_display,
+                                  e.place,
+                                ].filter(Boolean).join(' · ')}
                               </p>
                             </div>
                             <ChevronRight size={16} className="text-slate-300 shrink-0" />
