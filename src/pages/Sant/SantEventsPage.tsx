@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronRight, Clock, MapPin, Search } from 'lucide-react'
+import { CalendarDays, ChevronRight, Clock, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
 import { StateSelect, CitySelect } from '../../components/GeoSelect'
