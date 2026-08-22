@@ -8,7 +8,7 @@ import { api } from '../../lib/api'
  * "I saw them here" — a devotee's location report.
  *
  * Deliberately does NOT change the location. It queues a proposal that the
- * Sant's own representative approves, the same path a mandir admin's proposal
+ * Sant's own sangh representative approves, the same path a mandir admin's proposal
  * takes (migration 016). The copy says so plainly: a devotee who thinks they
  * have edited a verified profile will be confused when nothing changes, and a
  * crowdsourced directory that silently discards contributions loses its
@@ -121,7 +121,7 @@ export function ReportLocationDialog({
                   placeholder={t('sant.placePh')} />
               </div>
               {/* Dropdowns, not free text. This report becomes a real
-                  `sant_locations` row the moment the representative approves
+                  `sant_locations` row the moment the sangh representative approves
                   it, and the devotee directory filters on that city — so a
                   typed "sagar" / "Saagar" / "Sagar " fragments the very column
                   the search depends on. State first, because the city list is

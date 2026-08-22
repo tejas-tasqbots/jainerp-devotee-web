@@ -73,6 +73,11 @@
     "sant": "Sant"
   },
   "sant": {
+    "allParamparas": "All paramparas",
+    "allSanghs": "All sanghs",
+    "parampara": "Parampara",
+    "sangh": "Sangh",
+    "sanghHead": "Head",
     "allCities": "All cities",
     "allEventTypes": "All event types",
     "allPads": "All posts",

@@ -256,7 +256,7 @@ export function SantDetails() {
             A devotee who has actually seen the Sant is the fastest source of a
             location update, and until now had no way to say so. This does NOT
             change the location — it queues a proposal the Sant's own
-            representative approves, exactly like a mandir's (migration 016). */}
+            sangh representative approves, exactly like a mandir's (migration 016). */}
         {/* Keyed on the state, not the date. Many samadhistha records carry no
             date at all (migration 045), and gating on the date offered every
             one of them a "report a sighting" button. */}

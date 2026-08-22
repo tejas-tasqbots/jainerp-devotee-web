@@ -29,6 +29,16 @@ export function SantDirectory() {
   const [state, setState] = useState('')
   const [type, setType] = useState('')
   const [pad, setPad] = useState('')
+  /**
+   * Sangh segregation (migration 047) — the group, and the lineage behind it.
+   *
+   * This is the one filter the city and state pickers cannot stand in for: the
+   * members of a single sangh are routinely in six states at once, so "show me
+   * Acharya Vidyasagarji's sangh" and "show me who is in Karnataka" are
+   * genuinely different questions.
+   */
+  const [sanghId, setSanghId] = useState('')
+  const [parampara, setParampara] = useState('')
   // An explicit sampradaya from the filter row. Distinct from `scope`: this is
   // "show me Shwetambar ascetics" and overrides the default scoping, which is
   // why the picker only appears once the devotee is browsing all traditions.
@@ -62,7 +72,7 @@ export function SantDirectory() {
     const handle = setTimeout(load, 400)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, samuday, city, state, type, pad, sect, status, sort, scope])
+  }, [query, samuday, city, state, type, pad, sect, sanghId, parampara, status, sort, scope])
 
   async function load() {
     setLoading(true)
@@ -70,6 +80,7 @@ export function SantDirectory() {
       const { data } = await api.get('/sant', {
         params: {
           q: query, samuday, city, state, type, pad, sect, status, sort, limit: 20,
+          sangh_id: sanghId, parampara,
           ...traditionsParam(scope),
         },
       })
@@ -83,7 +94,8 @@ export function SantDirectory() {
     }
   }
 
-  const activeCount = [samuday, city, state, type, pad, sect, status].filter(Boolean).length
+  const activeCount = [samuday, city, state, type, pad, sect, sanghId, parampara, status]
+    .filter(Boolean).length
   const hasAnyFilter = activeCount > 0 || !!query
 
   function onScopeChange(next: 'mine' | 'all') {
@@ -100,6 +112,7 @@ export function SantDirectory() {
   function clearAll() {
     setQuery(''); setSamuday(''); setCity(''); setState('')
     setType(''); setPad(''); setSect(''); setStatus(''); setSort('name')
+    setSanghId(''); setParampara('')
   }
 
   return (
@@ -211,6 +224,33 @@ export function SantDirectory() {
                 ))}
               </select>
             </div>
+            {/* Sangh sits above samuday because it is the coarser cut and the
+                one devotees reach for first — "who travels with this Acharya".
+                Picking a parampara clears the sangh: the two would otherwise
+                contradict each other the moment a sangh from another lineage
+                is still selected, and the list would come back empty with no
+                indication of which filter emptied it. */}
+            <div className="flex gap-2">
+              <select className="form-input flex-1 text-xs" value={sanghId}
+                onChange={e => setSanghId(e.target.value)} aria-label={t('sant.sangh')}>
+                <option value="">{t('sant.allSanghs')}</option>
+                {(facets?.sanghs ?? []).map(o => (
+                  <option key={o.value} value={o.value}>
+                    {(lang.startsWith('hi') && o.label_hi) || o.label} ({o.count})
+                  </option>
+                ))}
+              </select>
+              {(facets?.paramparas ?? []).length > 0 && (
+                <select className="form-input flex-1 text-xs" value={parampara}
+                  onChange={e => { setParampara(e.target.value); setSanghId('') }}
+                  aria-label={t('sant.parampara')}>
+                  <option value="">{t('sant.allParamparas')}</option>
+                  {(facets?.paramparas ?? []).map(o => (
+                    <option key={o.value} value={o.value}>{o.value} ({o.count})</option>
+                  ))}
+                </select>
+              )}
+            </div>
             <div className="flex gap-2">
               <input type="text" placeholder={t('ui.samudayPh')} className="form-input flex-1 text-xs"
                 value={samuday} onChange={e => setSamuday(e.target.value)} />
@@ -278,9 +318,17 @@ export function SantDirectory() {
                   )}
                   <p className="text-xs text-slate-500">{p.samuday}</p>
                   <div className="flex items-center gap-3 mt-0.5">
+                    {/* City and state come from the SAME place or neither
+                        does. Where they are now wins over where they are based,
+                        which is what a devotee asking "where can I take
+                        darshan" means — but the state must then be
+                        `current_state`, never the home `state` (migration 046). */}
                     {(p.current_city || p.city) && (
                       <span className="flex items-center gap-0.5 text-xs text-slate-400">
-                        <MapPin size={10} /> {p.current_city || p.city}
+                        <MapPin size={10} />{' '}
+                        {p.current_city
+                          ? [p.current_city, p.current_state].filter(Boolean).join(', ')
+                          : [p.city, p.state].filter(Boolean).join(', ')}
                       </span>
                     )}
                     {p.followers_count !== undefined && (
@@ -300,6 +348,15 @@ export function SantDirectory() {
                       <span className="badge badge-gray text-[9px]">{t('sant.statusSamadhisthaShort')}</span>
                     )}
                   </div>
+                  {/* The sangh, on its own line: it is long, and it is the
+                      thing that makes two ascetics in different cities
+                      recognisably part of one group. */}
+                  {p.sangh_name && (
+                    <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                      {(lang.startsWith('hi') && p.sangh_name_hi) || p.sangh_name}
+                      {p.is_sangh_head && ` · ${t('sant.sanghHead')}`}
+                    </p>
+                  )}
                 </div>
                 <ChevronRight size={16} className="text-slate-300 flex-shrink-0" />
               </div>

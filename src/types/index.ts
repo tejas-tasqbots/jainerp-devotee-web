@@ -194,7 +194,7 @@ export interface MaharajProfile {
    * Whether the ascetic has attained samadhi (migration 045). THIS, not
    * `samadhi_date`, is the state: most historical entries record the fact and
    * no date. A samadhistha profile stays fully in the directory — the record is
-   * why it is kept — but has no representative and no current whereabouts, and
+   * why it is kept — but has no sangh representative and no current whereabouts, and
    * the directory's `status` filter is built on this.
    */
   is_samadhistha?: boolean
@@ -208,6 +208,19 @@ export interface MaharajProfile {
    * instead is answering the wrong question.
    */
   current_city?: string | null
+  /**
+   * The state `current_city` is in — migration 046. Pair it with current_city
+   * and NEVER with `state`, which is the home state: that pairing rendered
+   * "Sangli, Jammu and Kashmir" for an ascetic based in J&K who is travelling
+   * in Maharashtra.
+   */
+  current_state?: string | null
+  /** Sangh membership (migration 047). */
+  sangh_id?: string | null
+  sangh_name?: string | null
+  sangh_name_hi?: string | null
+  /** One of this sangh's head ascetics. A sangh commonly has several. */
+  is_sangh_head?: boolean
   state?: string
   photo_url?: string
   /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */
@@ -479,6 +492,19 @@ export interface SantFacets {
    * the other side of it.
    */
   statuses?: { value: string; count: number }[]
+  /**
+   * Sanghs (migration 047) — the group an ascetic belongs to.
+   *
+   * The only facet whose `value` is an id rather than the label itself: two
+   * sanghs can be named for the same Acharya in different paramparas, so the
+   * filter matches on the id and the label is carried alongside it.
+   */
+  sanghs?: {
+    value: string; label: string; label_hi: string | null;
+    parampara: string | null; count: number
+  }[]
+  /** The lineage behind a sangh. Broader than any single sangh. */
+  paramparas?: { value: string; count: number }[]
 }
 
 /** Outcome of a devotee's location report. */

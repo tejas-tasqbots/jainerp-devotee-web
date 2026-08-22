@@ -73,6 +73,11 @@
     "sant": "संत"
   },
   "sant": {
+    "allParamparas": "सभी परम्पराएँ",
+    "allSanghs": "सभी संघ",
+    "parampara": "परम्परा",
+    "sangh": "संघ",
+    "sanghHead": "प्रमुख",
     "allCities": "सभी शहर",
     "allEventTypes": "सभी प्रकार",
     "allPads": "सभी पद",
