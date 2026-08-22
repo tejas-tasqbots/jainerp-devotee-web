@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { CalendarDays, ChevronRight, Clock, MapPin, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
+import { StateSelect, CitySelect } from '../../components/GeoSelect'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import { EmptyState, SkeletonList } from '../../components/kit'
 import { EVENT_TYPES, eventTypeLabel, padLabel } from '../../lib/ascetic'
@@ -24,6 +25,7 @@ export function SantEventsPage() {
   const navigate = useNavigate()
   const [rows, setRows] = useState<SantEvent[]>([])
   const [city, setCity] = useState('')
+  const [stateName, setStateName] = useState('')
   const [type, setType] = useState('')
   const [loading, setLoading] = useState(true)
   const [scope, setScope] = useTraditionScope()
@@ -32,7 +34,7 @@ export function SantEventsPage() {
   useEffect(() => {
     const handle = setTimeout(() => {
       setLoading(true)
-      api.get('/sant/events', { params: { city, type, ...traditionsParam(scope) } })
+      api.get('/sant/events', { params: { city, state: stateName, type, ...traditionsParam(scope) } })
         .then(({ data }) => {
           setRows(data.data ?? [])
           setSectScope(data.meta?.sect_scope ?? null)
@@ -41,7 +43,7 @@ export function SantEventsPage() {
         .finally(() => setLoading(false))
     }, 350)
     return () => clearTimeout(handle)
-  }, [city, type, scope])
+  }, [city, stateName, type, scope])
 
   const byDate = useMemo(() => {
     const map = new Map<string, SantEvent[]>()
@@ -74,16 +76,12 @@ export function SantEventsPage() {
 
       <div className="p-4 space-y-3">
         <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              className="form-input pl-9"
-              placeholder={t('ui.cityPh')}
-              value={city}
-              onChange={e => setCity(e.target.value)}
-            />
-          </div>
+          {/* State scopes the city list; both go to the API, which has always
+              accepted them and only ever received a typed city. */}
+          <StateSelect value={stateName} onChange={v => { setStateName(v); setCity('') }}
+            className="form-input flex-1 text-xs" />
+          <CitySelect state={stateName} value={city} onChange={setCity}
+            className="form-input flex-1 text-xs" />
           <select
             className="form-input flex-1"
             value={type}

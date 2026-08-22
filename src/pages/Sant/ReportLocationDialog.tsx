@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { StateSelect, CitySelect } from '../../components/GeoSelect'
 import { CheckCircle2, Loader2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
@@ -119,16 +120,20 @@ export function ReportLocationDialog({
                   onChange={e => setPlace(e.target.value)}
                   placeholder={t('sant.placePh')} />
               </div>
+              {/* Dropdowns, not free text. This report becomes a real
+                  `sant_locations` row the moment the representative approves
+                  it, and the devotee directory filters on that city — so a
+                  typed "sagar" / "Saagar" / "Sagar " fragments the very column
+                  the search depends on. State first, because the city list is
+                  fetched for the chosen state. */}
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="form-label" htmlFor="rl-city">{t('ui.city')}</label>
-                  <input id="rl-city" className="form-input" value={city}
-                    onChange={e => setCity(e.target.value)} />
+                  <label className="form-label">{t('sant.state')}</label>
+                  <StateSelect value={stateName} onChange={v => { setStateName(v); setCity('') }} />
                 </div>
                 <div className="flex-1">
-                  <label className="form-label" htmlFor="rl-state">{t('sant.state')}</label>
-                  <input id="rl-state" className="form-input" value={stateName}
-                    onChange={e => setStateName(e.target.value)} />
+                  <label className="form-label">{t('ui.city')}</label>
+                  <CitySelect state={stateName} value={city} onChange={setCity} />
                 </div>
               </div>
               <div>

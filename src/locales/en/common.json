@@ -73,6 +73,7 @@
     "sant": "Sant"
   },
   "sant": {
+    "allCities": "All cities",
     "allEventTypes": "All event types",
     "allPads": "All posts",
     "allRanks": "All ranks",

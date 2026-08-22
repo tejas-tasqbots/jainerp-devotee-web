@@ -468,6 +468,11 @@ export interface SantFacets {
   sects: { value: string; count: number }[]
   states: { value: string; count: number }[]
   /**
+   * Cities that actually hold an ascetic right now, counted on
+   * COALESCE(current_city, city) — "who is in Surat" means who is THERE.
+   */
+  cities?: { value: string; count: number }[]
+  /**
    * living / samadhistha counts. Unlike the others this facet deliberately
    * IGNORES the current status filter — its whole job is to say how many are on
    * the other side of it.

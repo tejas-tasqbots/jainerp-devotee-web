@@ -214,8 +214,17 @@ export function SantDirectory() {
             <div className="flex gap-2">
               <input type="text" placeholder={t('ui.samudayPh')} className="form-input flex-1 text-xs"
                 value={samuday} onChange={e => setSamuday(e.target.value)} />
-              <input type="text" placeholder={t('ui.cityPh')} className="form-input flex-1 text-xs"
-                value={city} onChange={e => setCity(e.target.value)} />
+              {/* Facet-driven like the State beside it, NOT the geo lookup:
+                  the geo list is every city in India, and a devotee picking one
+                  that holds no ascetic gets an empty page. This offers only
+                  cities that return something, with the count. */}
+              <select className="form-input flex-1 text-xs" value={city}
+                onChange={e => setCity(e.target.value)} aria-label={t('ui.city')}>
+                <option value="">{t('sant.allCities')}</option>
+                {(facets?.cities ?? []).map(o => (
+                  <option key={o.value} value={o.value}>{o.value} ({o.count})</option>
+                ))}
+              </select>
             </div>
             {hasAnyFilter && (
               <button className="btn-secondary w-full text-xs" onClick={clearAll}>

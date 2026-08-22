@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { CalendarDays, ChevronRight, MapPin, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
+import { StateSelect, CitySelect } from '../../components/GeoSelect'
 import { TraditionSwitch } from '../../components/TraditionSwitch'
 import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../lib/traditions'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
@@ -28,6 +29,7 @@ export function ChaturmasPage() {
   const [years, setYears] = useState<{ year: number; count: number }[]>([])
   const [year, setYear] = useState<number | null>(null)
   const [city, setCity] = useState('')
+  const [stateName, setStateName] = useState('')
   const [rows, setRows] = useState<ChaturmasEntry[]>([])
   const [loading, setLoading] = useState(true)
   // The gazetteer is scoped to the devotee's tradition like every other
@@ -53,7 +55,7 @@ export function ChaturmasPage() {
     if (year == null) return
     const handle = setTimeout(() => {
       setLoading(true)
-      api.get('/sant/chaturmas', { params: { year, city, ...traditionsParam(scope) } })
+      api.get('/sant/chaturmas', { params: { year, city, state: stateName, ...traditionsParam(scope) } })
         .then(({ data }) => {
           setRows(data.data ?? [])
           setSectScope(data.meta?.sect_scope ?? null)
@@ -62,7 +64,7 @@ export function ChaturmasPage() {
         .finally(() => setLoading(false))
     }, 350)
     return () => clearTimeout(handle)
-  }, [year, city, scope])
+  }, [year, city, stateName, scope])
 
   /** Group into state → city → entries, preserving the API's ordering. */
   const grouped = useMemo(() => {
@@ -101,16 +103,17 @@ export function ChaturmasPage() {
               </option>
             ))}
           </select>
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              className="form-input pl-9"
-              placeholder={t('ui.cityPh')}
-              value={city}
-              onChange={e => setCity(e.target.value)}
-            />
-          </div>
+        </div>
+
+        {/* The varshayog list is ordered state, then city — the printed
+            chaturmas gazetteers read that way — so state is the filter people
+            actually reach for, and it scopes the city list to a few dozen
+            names instead of every city in India. */}
+        <div className="flex gap-2">
+          <StateSelect value={stateName} onChange={v => { setStateName(v); setCity('') }}
+            className="form-input flex-1 text-xs" />
+          <CitySelect state={stateName} value={city} onChange={setCity}
+            className="form-input flex-1 text-xs" />
         </div>
 
         <TraditionSwitch meta={sectScope} scope={scope} onChange={setScope} />
