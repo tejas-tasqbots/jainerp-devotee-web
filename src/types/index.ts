@@ -191,10 +191,11 @@ export interface MaharajProfile {
   sect_display?: string
   sect_display_hi?: string
   /**
-   * Derived from `samadhi_date` by the API (migration 044). A samadhistha
-   * profile stays fully in the directory — the record is why it is kept — but
-   * has no representative and no current whereabouts, and the directory's
-   * `status` filter is built on this.
+   * Whether the ascetic has attained samadhi (migration 045). THIS, not
+   * `samadhi_date`, is the state: most historical entries record the fact and
+   * no date. A samadhistha profile stays fully in the directory — the record is
+   * why it is kept — but has no representative and no current whereabouts, and
+   * the directory's `status` filter is built on this.
    */
   is_samadhistha?: boolean
   samuday: string

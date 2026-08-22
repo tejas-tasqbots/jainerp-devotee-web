@@ -257,7 +257,10 @@ export function SantDetails() {
             location update, and until now had no way to say so. This does NOT
             change the location — it queues a proposal the Sant's own
             representative approves, exactly like a mandir's (migration 016). */}
-        {!profile.samadhi_date && (
+        {/* Keyed on the state, not the date. Many samadhistha records carry no
+            date at all (migration 045), and gating on the date offered every
+            one of them a "report a sighting" button. */}
+        {!profile.is_samadhistha && (
           <button
             onClick={() => setReporting(true)}
             className="w-full card p-3 flex items-center justify-center gap-2 text-sm
