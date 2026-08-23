@@ -73,6 +73,7 @@
     "sant": "संत"
   },
   "sant": {
+    "sortSeniority": "दीक्षा ज्येष्ठता",
     "nextPage": "पुढे",
     "pageOf": "पृष्ठ {{page}} / {{pages}}",
     "prevPage": "मागे",

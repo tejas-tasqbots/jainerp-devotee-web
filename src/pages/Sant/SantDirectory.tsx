@@ -204,6 +204,9 @@ export function SantDirectory() {
             onChange={e => onFilter(setSort)(e.target.value)}
             aria-label={t('sant.sortBy')}
           >
+            {/* Seniority sits first: it is the order the tradition itself
+                uses, and the one a devotee reading a sangh expects. */}
+            <option value="seniority">{t('sant.sortSeniority')}</option>
             <option value="name">{t('sant.sortName')}</option>
             <option value="followers">{t('sant.sortFollowers')}</option>
             <option value="recent">{t('sant.sortRecent')}</option>

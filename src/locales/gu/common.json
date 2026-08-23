@@ -73,6 +73,7 @@
     "sant": "સંત"
   },
   "sant": {
+    "sortSeniority": "દીક્ષા વરિષ્ઠતા",
     "nextPage": "આગળ",
     "pageOf": "પૃષ્ઠ {{page}} / {{pages}}",
     "prevPage": "પાછળ",

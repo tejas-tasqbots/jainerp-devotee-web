@@ -73,6 +73,7 @@
     "sant": "ಸಂತ"
   },
   "sant": {
+    "sortSeniority": "ದೀಕ್ಷಾ ಹಿರಿತನ",
     "nextPage": "ಮುಂದೆ",
     "pageOf": "ಪುಟ {{page}} / {{pages}}",
     "prevPage": "ಹಿಂದೆ",

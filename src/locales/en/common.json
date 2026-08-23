@@ -73,6 +73,7 @@
     "sant": "Sant"
   },
   "sant": {
+    "sortSeniority": "Seniority (by diksha)",
     "nextPage": "Next",
     "pageOf": "Page {{page}} of {{pages}}",
     "prevPage": "Previous",
