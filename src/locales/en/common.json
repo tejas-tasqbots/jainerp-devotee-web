@@ -73,6 +73,8 @@
     "sant": "Sant"
   },
   "sant": {
+    "dikshaShort": "Diksha {{year}}",
+    "sanghOthers": "{{count}} others in this sangh",
     "sortSeniority": "Seniority (by diksha)",
     "nextPage": "Next",
     "pageOf": "Page {{page}} of {{pages}}",

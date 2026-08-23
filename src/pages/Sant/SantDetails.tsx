@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  ArrowLeft, Bell, BellOff, Calendar, CalendarDays, Cake, Clock,
+  ArrowLeft, Bell, BellOff, Calendar, CalendarDays, Cake, ChevronRight, Clock,
   MapPin, Megaphone, Navigation, Send, Users,
 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -182,6 +182,59 @@ export function SantDetails() {
               {/* A conferred title, never the canonical rank shown in the header. */}
               <Fact label="Titles" value={profile.honours} />
             </dl>
+          </div>
+        )}
+
+        {/* The sangh, and who else is in it.
+            `sangh` has been on the API response since migration 047 and nothing
+            rendered it — a column written and never read, which reads as data
+            loss rather than as a missing feature. This is the question the
+            sangh model exists to answer: who travels with this Acharya. */}
+        {profile.sangh && (
+          <div className="card p-4">
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              {t('sant.sangh')}
+            </h3>
+            <p className="text-sm font-medium text-slate-800">
+              {(lang.startsWith('hi') && profile.sangh.name_hi) || profile.sangh.name_en}
+            </p>
+            {profile.sangh.parampara && (
+              <p className="text-xs text-slate-500 mt-0.5">{profile.sangh.parampara}</p>
+            )}
+            {!!profile.sangh.members?.length && (
+              <>
+                <p className="text-[11px] text-slate-400 mt-3 mb-1">
+                  {t('sant.sanghOthers', { count: profile.sangh.members.length })}
+                </p>
+                <ul className="divide-y divide-slate-100">
+                  {profile.sangh.members.map(mem => (
+                    <li key={mem.id}>
+                      <button
+                        className="w-full text-left py-2 flex items-center gap-2 hover:bg-slate-50 rounded"
+                        onClick={() => navigate(`/sant/${mem.id}`)}
+                      >
+                        <span className="flex-1 min-w-0">
+                          <span className="block text-sm text-slate-800 truncate">
+                            {(lang.startsWith('hi') && mem.name_hi) || mem.name_en || mem.name}
+                          </span>
+                          {/* Where they are NOW, paired with its own state — the
+                              two halves must come from the same place. */}
+                          {mem.current_city && (
+                            <span className="block text-[11px] text-slate-400">
+                              {[mem.current_city, mem.current_state].filter(Boolean).join(', ')}
+                            </span>
+                          )}
+                        </span>
+                        {mem.is_sangh_head && (
+                          <span className="badge badge-gold text-[9px]">{t('sant.sanghHead')}</span>
+                        )}
+                        <ChevronRight size={14} className="text-slate-300 flex-shrink-0" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         )}
 

@@ -73,6 +73,8 @@
     "sant": "ಸಂತ"
   },
   "sant": {
+    "dikshaShort": "ದೀಕ್ಷೆ {{year}}",
+    "sanghOthers": "ಈ ಸಂಘದಲ್ಲಿ {{count}} ಇತರರು",
     "sortSeniority": "ದೀಕ್ಷಾ ಹಿರಿತನ",
     "nextPage": "ಮುಂದೆ",
     "pageOf": "ಪುಟ {{page}} / {{pages}}",

@@ -221,6 +221,31 @@ export interface MaharajProfile {
   sangh_name_hi?: string | null
   /** One of this sangh's head ascetics. A sangh commonly has several. */
   is_sangh_head?: boolean
+  /**
+   * The sangh itself, with its other members — sent by `GET /sant/:id` only,
+   * never by the list. This answers "who else travels with this Acharya",
+   * which is the question the sangh model exists for.
+   */
+  sangh?: {
+    id: string
+    name_en: string
+    name_hi: string | null
+    parampara: string | null
+    sect: string | null
+    about: string | null
+    members: Array<{
+      id: string
+      name: string
+      name_en: string | null
+      name_hi: string | null
+      type: string
+      pad: string | null
+      is_sangh_head: boolean
+      current_city: string | null
+      current_state: string | null
+      photo_url: string | null
+    }>
+  } | null
   state?: string
   photo_url?: string
   /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */

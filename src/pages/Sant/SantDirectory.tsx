@@ -373,6 +373,14 @@ export function SantDirectory() {
                           : [p.city, p.state].filter(Boolean).join(', ')}
                       </span>
                     )}
+                    {/* The diksha year earns its place once the list can be
+                        sorted by seniority: an order whose key is invisible
+                        reads as no order at all. */}
+                    {p.diksha_year && (
+                      <span className="text-xs text-slate-400 tabular-nums">
+                        {t('sant.dikshaShort', { year: p.diksha_year })}
+                      </span>
+                    )}
                     {p.followers_count !== undefined && (
                       <span className="flex items-center gap-0.5 text-xs text-slate-400">
                         <Users size={10} /> {p.followers_count}

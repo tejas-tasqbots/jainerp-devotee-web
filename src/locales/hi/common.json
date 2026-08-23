@@ -73,6 +73,8 @@
     "sant": "संत"
   },
   "sant": {
+    "dikshaShort": "दीक्षा {{year}}",
+    "sanghOthers": "इस संघ में {{count}} अन्य",
     "sortSeniority": "दीक्षा वरिष्ठता",
     "nextPage": "आगे",
     "pageOf": "पृष्ठ {{page}} / {{pages}}",
