@@ -13,6 +13,54 @@ import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks
 import { altNameFor, eventTypeLabel, nameFor, santDisplayName } from '../../lib/ascetic'
 import { ReportLocationDialog } from './ReportLocationDialog'
 
+/**
+ * The life, in both scripts.
+ *
+ * `bio_hi` and `bio_en` are written independently by the source, not
+ * translated from one another, and on most pages the Hindi is the fuller of
+ * the two. So neither is a fallback for the other: the reader's own language
+ * leads, and the other is one tap away rather than stacked underneath — which
+ * would double the length of every profile for no one's benefit.
+ */
+function BiographyText({ hi, en, lang, t }: {
+  hi?: string | null; en?: string | null; lang: string;
+  t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+  const prefersHi = lang.startsWith('hi')
+    || lang.startsWith('mr') || lang.startsWith('gu') || lang.startsWith('kn')
+  const [showOther, setShowOther] = useState(false)
+
+  const primary = prefersHi ? (hi || en) : (en || hi)
+  const other = prefersHi ? (hi && en ? en : null) : (en && hi ? hi : null)
+  const otherIsHi = !prefersHi
+
+  if (!primary) return null
+  return (
+    <>
+      <p className={`text-sm text-slate-700 whitespace-pre-line ${prefersHi ? 'leading-relaxed' : ''}`}>
+        {primary}
+      </p>
+      {other && (
+        <>
+          <button
+            className="text-xs text-brand-red mt-2"
+            onClick={() => setShowOther(v => !v)}
+          >
+            {showOther
+              ? t('sant.hideOtherLanguage')
+              : t(otherIsHi ? 'sant.readInHindi' : 'sant.readInEnglish')}
+          </button>
+          {showOther && (
+            <p className="text-sm text-slate-600 whitespace-pre-line mt-2 pt-2 border-t border-slate-100 leading-relaxed">
+              {other}
+            </p>
+          )}
+        </>
+      )}
+    </>
+  )
+}
+
 export function SantDetails() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
@@ -171,6 +219,56 @@ export function SantDetails() {
         )}
 
         {/* Life and study */}
+        {/* The life, in the reader's own script.
+            bio_hi and bio_en are independently written, not translations, so
+            both are offered and the reader's language decides which leads. On
+            most source pages the Hindi is the fuller of the two, which is why
+            it is not treated as a fallback. */}
+        {(profile.bio_hi || profile.bio_en) && (
+          <div className="card p-4">
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              {t('sant.theLife')}
+            </h3>
+            <BiographyText hi={profile.bio_hi} en={profile.bio_en} lang={lang} t={t} />
+            {profile.source_credit && (
+              <p className="text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-100">
+                {profile.source_credit}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* The diksha stages. An ascetic may take kshullak, then ailak, then
+            muni — different dates, places and sometimes different gurus. This
+            progression is the substance of a religious life and the single
+            `diksha_year` in the header cannot show it. */}
+        {!!profile.diksha_stages?.length && (
+          <div className="card p-4">
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              {t('sant.dikshaPath')}
+            </h3>
+            <ol className="relative border-l border-slate-200 ml-1.5">
+              {profile.diksha_stages.map((s, i) => (
+                <li key={`${s.stage}-${i}`} className="ml-4 pb-3 last:pb-0">
+                  <span className="absolute -left-1 w-2 h-2 rounded-full bg-slate-300 mt-1.5" />
+                  <p className="text-sm text-slate-800">
+                    {t(`sant.stage_${s.stage}`, { defaultValue: s.stage })}
+                    {(s.taken_on || s.taken_year) && (
+                      <span className="text-slate-400 tabular-nums">
+                        {' · '}{s.taken_on ? String(s.taken_on).slice(0, 10) : s.taken_year}
+                      </span>
+                    )}
+                  </p>
+                  {s.place && <p className="text-xs text-slate-500">{s.place}</p>}
+                  {s.guru_name && (
+                    <p className="text-xs text-slate-400">{t('sant.byGuru', { guru: s.guru_name })}</p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
         {(profile.lineage || profile.diksha_place || profile.education || profile.honours) && (
           <div className="card p-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{t('ui.lifeStudy')}</h3>
@@ -181,6 +279,16 @@ export function SantDetails() {
               <Fact label="Study" value={profile.education} />
               {/* A conferred title, never the canonical rank shown in the header. */}
               <Fact label="Titles" value={profile.honours} />
+              <Fact label={t('sant.nameBeforeDiksha')} value={profile.name_before_diksha} />
+              <Fact label={t('sant.father')} value={profile.fathers_name} />
+              <Fact label={t('sant.mother')} value={profile.mothers_name} />
+              {/* Vikram Samvat, shown as recorded. It is deliberately never
+                  converted: a Samvat year read as Gregorian is ~57 years out. */}
+              <Fact label={t('sant.birthDateIndian')} value={profile.birth_date_indian} />
+              <Fact label={t('sant.brahmacharya')} value={profile.brahmacharya_year} />
+              <Fact label={t('sant.acharyaPad')}
+                value={profile.acharya_pad_date ? String(profile.acharya_pad_date).slice(0, 10) : null} />
+              <Fact label={t('sant.familyInitiated')} value={profile.family_initiated} />
             </dl>
           </div>
         )}

@@ -215,6 +215,42 @@ export interface MaharajProfile {
    * in Maharashtra.
    */
   current_state?: string | null
+  // ── migration 048: the rest of what a profile page is for ──────────────
+  /** The life in Hindi and in English. NOT translations of each other. */
+  bio_hi?: string | null
+  bio_en?: string | null
+  sangh_text?: string | null
+  chaturmas_text?: string | null
+  updates_text?: string | null
+  name_before_diksha?: string | null
+  fathers_name?: string | null
+  mothers_name?: string | null
+  family_initiated?: string | null
+  /** Vikram Samvat, as recorded. Never converted — it would be ~57 years out. */
+  birth_date_indian?: string | null
+  brahmacharya_year?: number | null
+  brahmacharya_place?: string | null
+  brahmacharya_guru?: string | null
+  acharya_pad_date?: string | null
+  acharya_pad_place?: string | null
+  acharya_pad_by?: string | null
+  sallekhana_place?: string | null
+  cover_url?: string | null
+  gallery_urls?: string[] | null
+  source_references?: string | null
+  source_credit?: string | null
+  /**
+   * The stages of initiation, earliest first. An ascetic may take kshullak,
+   * then ailak, then muni — `diksha_date` holds only the first.
+   */
+  diksha_stages?: Array<{
+    stage: string
+    taken_on: string | null
+    taken_year: number | null
+    place: string | null
+    guru_name: string | null
+  }>
+
   /** Sangh membership (migration 047). */
   sangh_id?: string | null
   sangh_name?: string | null
