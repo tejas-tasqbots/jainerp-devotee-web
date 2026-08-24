@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  ArrowLeft, Bell, BellOff, Calendar, CalendarDays, Cake, ChevronRight, Clock,
-  MapPin, Megaphone, Navigation, Send, Users,
+  ArrowLeft, Bell, BellOff, BookMarked, BookOpen, Cake, Calendar, CalendarDays, ChevronRight, Clock, ExternalLink, MapPin, Megaphone, Navigation, Send, Users,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
+import { kindLabel } from '../../lib/library'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import type { MaharajProfile } from '../../types'
 import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks'
@@ -343,6 +343,92 @@ export function SantDetails() {
                 </ul>
               </>
             )}
+          </div>
+        )}
+
+        {/*
+          Texts filed under this ascetic (migration 053) — their own
+          compositions, their pravachans, and the sansmarans written about them.
+          Distinct from `publications`, which is a curator-entered bibliography
+          of printed books: these are readable here and now, which is why they
+          link into the reader rather than out to a publisher.
+        */}
+        {!!profile.texts?.length && (
+          <div className="card p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <BookOpen size={15} className="text-amber-700" />
+              <h2 className="text-sm font-semibold text-navy-900">{t('library.byThisSant')}</h2>
+            </div>
+            <div className="space-y-1.5">
+              {profile.texts.map(x => (
+                <button
+                  key={x.id}
+                  onClick={() => navigate(`/library/${x.slug}`)}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm text-navy-900">
+                      {(lang.startsWith('hi') && x.title_hi) || x.title}
+                    </span>
+                    <span className="block text-[11px] text-slate-400">
+                      {[kindLabel(t, x.kind), x.particulars].filter(Boolean).join(' · ')}
+                    </span>
+                  </span>
+                  <ChevronRight size={15} className="flex-none text-slate-300" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/*
+          Books linked to this ascetic (migration 056), in two blocks and never
+          one. "Books by" is a claim of authorship; "books about" is a
+          biography somebody else wrote. Merging them would put another
+          author's work under this ascetic's name.
+
+          These leave the app: the files are published at the source, not held
+          here, so each is an anchor with the external-link mark.
+        */}
+        {(!!profile.granths?.by?.length || !!profile.granths?.about?.length) && (
+          <div className="card space-y-3 p-4">
+            {([['by', profile.granths?.by], ['about', profile.granths?.about]] as const)
+              .filter(([, list]) => list && list.length > 0)
+              .map(([rel, list]) => (
+                <div key={rel}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <BookMarked size={15} className="text-rose-700" />
+                    <h2 className="text-sm font-semibold text-navy-900">
+                      {t(rel === 'by' ? 'library.booksBySant' : 'library.booksAboutSant')}
+                      <span className="ml-1.5 text-xs font-normal text-slate-400">{list!.length}</span>
+                    </h2>
+                  </div>
+                  <div className="space-y-1">
+                    {list!.slice(0, 12).map(b => (
+                      <a
+                        key={b.id}
+                        href={b.download_url ?? '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
+                      >
+                        <span className="min-w-0 flex-1 truncate text-sm text-navy-900">
+                          {(lang.startsWith('hi') && b.title_hi) || b.title}
+                        </span>
+                        <ExternalLink size={14} className="flex-none text-slate-300" />
+                      </a>
+                    ))}
+                  </div>
+                  {list!.length > 12 && (
+                    <button
+                      onClick={() => navigate(`/library?tab=books&sant=${profile.id}`)}
+                      className="mt-1 px-2 text-[11px] text-brand-red underline underline-offset-2"
+                    >
+                      {t('library.countBooks', { count: list!.length })}
+                    </button>
+                  )}
+                </div>
+              ))}
           </div>
         )}
 

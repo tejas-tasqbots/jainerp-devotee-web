@@ -313,6 +313,25 @@ export interface MaharajProfile {
     year?: number | null; publisher?: string | null; description?: string | null
     url?: string | null; has_cover?: boolean
   }[]
+  /**
+   * Texts filed under this ascetic (migration 053) — readable in the library,
+   * unlike `publications`, which is a curator-entered bibliography of printed
+   * books that may not exist here at all.
+   */
+  texts?: {
+    id: string; slug: string; title: string; title_hi: string | null
+    kind: string; script: string; particulars: string | null
+    body_length: number | string
+  }[]
+  /**
+   * Books linked to this ascetic (migration 056), kept apart by what the link
+   * claims: `by` is authorship, `about` is a biography written of them. A
+   * profile that lists the second under the first makes a false claim.
+   */
+  granths?: {
+    by: { id: string; title: string; title_hi: string | null; download_url: string | null }[]
+    about: { id: string; title: string; title_hi: string | null; download_url: string | null }[]
+  }
   languages?: string[]
   verified: boolean
   followers_count?: number
@@ -585,4 +604,99 @@ export interface SantLocationReport {
   sant_name: string
   sant_type?: string
   photo_url?: string | null
+}
+
+// ── the library (migrations 053–055) ────────────────────────────────────────
+
+/**
+ * A text as the LIST returns it.
+ *
+ * No `body`: 20 texts averaging 4 KB is most of a megabyte a page on a mobile
+ * connection, for text nobody has opened. The list carries a one-line preview
+ * and the length so a card can say how long the read is.
+ */
+export interface LibraryText {
+  id: string
+  slug: string
+  title: string
+  title_hi: string | null
+  /** Genre — one of the closed list in migration 053. */
+  kind: string
+  /** Script of the body: hi | en | both. */
+  script: string
+  author: string | null
+  language: string | null
+  particulars: string | null
+  text_type: string | null
+  body_length: number | string
+  preview: string | null
+  /**
+   * A serialised work — "Muni Aahar Procedure" is one document published as
+   * fourteen posts. The list collapses those to ONE row: `series` is the work's
+   * name and `part_count` how many parts matched the current filters.
+   * Null on a standalone text, which is most of them.
+   */
+  series: string | null
+  part: number | null
+  part_count: number
+  sant_id: string | null
+  sant_name: string | null
+  sant_name_hi: string | null
+  category_slugs: string[]
+}
+
+/** A text as the DETAIL returns it — the only shape that carries the body. */
+export interface LibraryTextDetail extends Omit<LibraryText, 'preview' | 'category_slugs'> {
+  /**
+   * Plain text with its line breaks intact. A stotra is poetry: render it in a
+   * `whitespace-pre-wrap` block and never collapse the whitespace.
+   */
+  body: string
+  excerpt: string | null
+  rhythm: string | null
+  contributed_by: string | null
+  reference_url: string | null
+  credit: string | null
+  source: string | null
+  source_url: string | null
+  published_at: string | null
+  categories: { slug: string; name: string }[]
+  /** The other parts of a serialised work, in order. Empty for a standalone. */
+  parts: { id: string; slug: string; title: string; part: number | null; body_length: number | string }[]
+  related: { id: string; slug: string; title: string; kind: string; particulars: string | null }[]
+}
+
+/** Counts behind each filter control, each counted under every filter but itself. */
+export interface LibraryFacets {
+  kinds: { value: string; count: number | string }[]
+  categories: { value: string; label: string; count: number | string }[]
+  scripts: { value: string; count: number | string }[]
+  authors: { value: string; count: number | string }[]
+}
+
+/**
+ * A book in the granth catalogue (migrations 056/057).
+ *
+ * Metadata only. `download_url` points at the SOURCE — these scans are not
+ * hosted by us — so a row opens externally rather than into a reader.
+ */
+export interface Granth {
+  id: string
+  title: string
+  title_hi: string | null
+  author: string | null
+  language: string | null
+  shelf: string | null
+  sant_id: string | null
+  /** 'by' = the linked ascetic wrote it; 'about' = it was written about them. */
+  sant_relation: 'by' | 'about' | null
+  sant_name: string | null
+  sant_name_hi: string | null
+  preview_url: string | null
+  download_url: string | null
+}
+
+export interface GranthFacets {
+  shelves: { value: string; count: number | string }[]
+  authors: { value: string; count: number | string }[]
 }

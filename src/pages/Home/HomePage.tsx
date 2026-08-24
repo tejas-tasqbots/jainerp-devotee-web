@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  BedDouble, Bell, Building2, Calendar, CalendarDays, ChevronRight, Heart,
-  IndianRupee, MapPin, Plus, Sparkles,
+  BedDouble, Bell, BookOpen, Building2, Calendar, CalendarDays, ChevronRight, Heart, IndianRupee, MapPin, Plus, Sparkles,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { api, fmtPaise } from '../../lib/api'
@@ -89,6 +88,16 @@ export function HomePage() {
       icon: Sparkles,
       color: 'bg-brand-gold-light text-brand-gold-dark',
       path: '/sant-events',
+    },
+    // The library belongs here and not in the icon row above: it is a place to
+    // browse, and it is the one destination a devotee is likely to open EVERY
+    // day rather than when they happen to have an errand.
+    {
+      label: t('titles.library'),
+      hint: t('home.discoverLibraryHint'),
+      icon: BookOpen,
+      color: 'bg-amber-50 text-amber-700',
+      path: '/library',
     },
   ]
 
@@ -183,7 +192,7 @@ export function HomePage() {
           <h2 className="mb-2.5 text-sm font-semibold uppercase tracking-wider text-slate-500">
             {t('home.discover')}
           </h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {discover.map(d => (
               <button
                 key={d.path}

@@ -1,5 +1,5 @@
 import {
-  BedDouble, Building2, CalendarDays, Heart, Home, IndianRupee, MapPin,
+  BedDouble, BookOpen, Building2, CalendarDays, Heart, Home, IndianRupee, MapPin,
   Sparkles, User,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
@@ -37,6 +37,12 @@ export function Sidebar() {
       items: [
         { to: '/temples', icon: Building2, label: t('home.quickTemples') },
         { to: '/stays', icon: BedDouble, label: t('home.quickStays') },
+      ],
+    },
+    {
+      heading: t('titles.library'),
+      items: [
+        { to: '/library', icon: BookOpen, label: t('library.browse') },
       ],
     },
     {

@@ -4,6 +4,8 @@ import { BolisList } from './pages/Bolis/BolisList'
 import { DonatePage } from './pages/Donate/DonatePage'
 import { DonationsList } from './pages/Donations/DonationsList'
 import { HomePage } from './pages/Home/HomePage'
+import { LibraryPage } from './pages/Library/LibraryPage'
+import { TextPage } from './pages/Library/TextPage'
 import { LoginPage } from './pages/Login/LoginPage'
 import { SantDetails } from './pages/Sant/SantDetails'
 import { SantDirectory } from './pages/Sant/SantDirectory'
@@ -78,6 +80,8 @@ export default function App() {
             <Route path="/temples/:slug/book" element={<RoomBookingPage />} />
             <Route path="/bookings" element={<MyBookingsPage />} />
             <Route path="/bookings/:slug/:id" element={<BookingTicketPage />} />
+            <Route path="/library" element={<LibraryPage />} />
+            <Route path="/library/:slug" element={<TextPage />} />
             <Route path="/sant" element={<SantDirectory />} />
             {/* Declared before /sant/:id — a param route matches anything, so
                 these would otherwise resolve as a profile with id="map". */}
