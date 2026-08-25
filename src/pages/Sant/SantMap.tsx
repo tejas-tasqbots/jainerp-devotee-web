@@ -201,8 +201,16 @@ export function SantMap() {
 
   useEffect(() => {
     if (!elRef.current || mapRef.current) return
-    const map = L.map(elRef.current, { attributionControl: false }).setView(INDIA, 5)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
+    const map = L.map(elRef.current).setView(INDIA, 5)
+    // ATTRIBUTION IS NOT OPTIONAL. The tiles are OpenStreetMap's and the
+    // coordinates behind the pins are geocoded from OSM too, so both the ODbL
+    // and OSM's tile usage policy require the credit. It had been switched off
+    // with `attributionControl: false`, which is the one setting on this map
+    // that is a licence question rather than a design one.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+    }).addTo(map)
     layerRef.current = L.layerGroup().addTo(map)
     // Added second so temple pins draw above ascetic ones where they coincide
     // — an ascetic is usually staying AT the temple, and the pin a devotee
