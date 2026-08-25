@@ -265,7 +265,8 @@
     "discipleCount_other": "{{count}} शिष्य",
     "collapse": "संक्षिप्त करें",
     "expand": "विस्तार करें",
-    "readFullLife": "पूरा जीवन-परिचय पढ़ें"
+    "readFullLife": "पूरा जीवन-परिचय पढ़ें",
+    "showAllYears": "सभी {{count}} वर्ष दिखाएँ"
   },
   "titles": {
     "completeProfile": "अपनी प्रोफ़ाइल पूरी करें",

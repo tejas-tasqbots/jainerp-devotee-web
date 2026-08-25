@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BiographyBlocks } from './BiographyBlocks'
+import { ChaturmasYears } from './ChaturmasYears'
 import { ParamparaTree } from './ParamparaTree'
 import { SanghTree } from './SanghTree'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -199,7 +200,9 @@ export function SantDetails() {
               {profile.is_samadhistha && (
                 <span className="badge bg-white/20 text-white">{t('sant.statusSamadhisthaShort')}</span>
               )}
-              {profile.followers_count !== undefined && (
+              {/* Not shown for a samadhistha ascetic: nobody can follow one,
+                  so "0 followers" reads as neglect rather than as the rule. */}
+              {profile.followers_count !== undefined && !profile.is_samadhistha && (
                 <span className="flex items-center gap-1 text-xs text-white/80">
                   <Users size={12} /> {profile.followers_count} {profile.followers_count === 1 ? 'follower' : 'followers'}
                 </span>
@@ -208,18 +211,26 @@ export function SantDetails() {
           </div>
         </div>
 
-        <button
-          onClick={toggleFollow}
-          disabled={toggling}
-          className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-            following
-              ? 'bg-white/20 text-white hover:bg-white/30'
-              : 'bg-white text-navy-800 hover:bg-navy-50'
-          }`}
-        >
-          {following ? <BellOff size={16} /> : <Bell size={16} />}
-          {following ? 'Unfollow' : 'Follow for Updates'}
-        </button>
+        {/* Following delivers updates — a location, a vihar plan, the next
+            chaturmas. An ascetic who has attained samadhi will never generate
+            another, so the button is a subscription to silence and is not
+            offered. The profile remains, and remains worth reading: that is
+            what a historical directory is for. The API refuses it too, so an
+            older build cannot create one. */}
+        {!profile.is_samadhistha && (
+          <button
+            onClick={toggleFollow}
+            disabled={toggling}
+            className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+              following
+                ? 'bg-white/20 text-white hover:bg-white/30'
+                : 'bg-white text-navy-800 hover:bg-navy-50'
+            }`}
+          >
+            {following ? <BellOff size={16} /> : <Bell size={16} />}
+            {following ? 'Unfollow' : 'Follow for Updates'}
+          </button>
+        )}
       </div>
 
       <div className="p-4 space-y-4">
@@ -358,9 +369,18 @@ export function SantDetails() {
             <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
               {t('sant.chaturmasText')}
             </h3>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-              {profile.chaturmas_text}
-            </p>
+            {/* 53 years of varshayog were arriving as one line. The source's
+                own header ("Serial No-Year -Place Name") says it is a table;
+                94 profiles carry three or more years and get one. */}
+            {profile.chaturmas_years?.length
+              ? <ChaturmasYears entries={profile.chaturmas_years} />
+              : profile.chaturmas_blocks?.length
+                ? <BiographyBlocks blocks={profile.chaturmas_blocks} />
+                : (
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                    {profile.chaturmas_text}
+                  </p>
+                )}
           </div>
         )}
 
@@ -369,9 +389,13 @@ export function SantDetails() {
             <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
               {t('sant.updatesText')}
             </h3>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-              {profile.updates_text}
-            </p>
+            {profile.updates_blocks?.length
+              ? <BiographyBlocks blocks={profile.updates_blocks} />
+              : (
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                  {profile.updates_text}
+                </p>
+              )}
           </div>
         )}
 

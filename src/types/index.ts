@@ -280,6 +280,10 @@ export interface MaharajProfile {
   /** The life, parsed into paragraphs/list/provenance. Null = render the raw string. */
   bio_blocks?: BioBlock[] | null
   bio_blocks_hi?: BioBlock[] | null
+  /** The varshayog table recovered from `chaturmas_text`; null = render prose. */
+  chaturmas_years?: ChaturmasEntry[] | null
+  chaturmas_blocks?: BioBlock[] | null
+  updates_blocks?: BioBlock[] | null
   state?: string
   photo_url?: string
   /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */
@@ -772,3 +776,6 @@ export interface BioBlock {
   t: 'para' | 'item' | 'meta' | 'rule'
   spans?: BioSpan[]
 }
+
+/** One monsoon: the year, and where it was spent. */
+export interface ChaturmasEntry { year: number; place: string }

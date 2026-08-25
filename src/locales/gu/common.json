@@ -265,7 +265,8 @@
     "discipleCount_other": "{{count}} શિષ્યો",
     "collapse": "સંકેલો",
     "expand": "વિસ્તારો",
-    "readFullLife": "સંપૂર્ણ જીવન વાંચો"
+    "readFullLife": "સંપૂર્ણ જીવન વાંચો",
+    "showAllYears": "બધા {{count}} વર્ષ બતાવો"
   },
   "titles": {
     "completeProfile": "તમારી પ્રોફાઇલ પૂર્ણ કરો",
