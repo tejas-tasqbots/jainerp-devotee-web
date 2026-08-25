@@ -344,7 +344,15 @@ export function SantDirectory() {
               className="w-full card p-4 text-left hover:border-navy-300 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <PhotoAvatar name={santDisplayName(p, lang)} photoUrl={p.photo_url} />
+                {/* The inline avatar leads. Since 065 the list carries a
+                    128px thumbnail (~5 KB), so the directory renders without
+                    a round-trip to another site's server; photo_url is the
+                    fallback for profiles seeded since. */}
+                <PhotoAvatar
+                  name={santDisplayName(p, lang)}
+                  photoBase64={p.photo_base64}
+                  photoUrl={p.photo_url}
+                />
                 <div className="flex-1 min-w-0">
                   {/* The post reads as part of the name — "Acharya Shri …" — so
                       it is prefixed here rather than shown as another badge. */}
