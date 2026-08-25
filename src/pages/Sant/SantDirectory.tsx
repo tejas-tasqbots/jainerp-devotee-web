@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Bell, CalendarDays, ChevronRight, Map, MapPin, Search, SlidersHorizontal, Users } from 'lucide-react'
 import { api } from '../../lib/api'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
@@ -32,7 +32,16 @@ export function SantDirectory() {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
   const navigate = useNavigate()
-  const [query, setQuery] = useState('')
+  /**
+   * The search term lives in the URL, as it does on the library shelf.
+   *
+   * It did not, so /sant?q=Vidyasagarji opened the full directory with an
+   * empty box — a shared or bookmarked search silently became "everything".
+   * Only `q` is synced: it is the part people send each other, and putting
+   * nine filter states in the URL is a different decision from this one.
+   */
+  const [params, setParams] = useSearchParams()
+  const [query, setQuery] = useState(params.get('q') ?? '')
   const [samuday, setSamuday] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
@@ -70,6 +79,17 @@ export function SantDirectory() {
   const [profiles, setProfiles] = useState<MaharajProfile[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
+  useEffect(() => {
+    const next = new URLSearchParams(params)
+    if (query) next.set('q', query)
+    else next.delete('q')
+    if (next.toString() !== params.toString()) setParams(next, { replace: true })
+    // `params` is deliberately not a dependency: it changes identity on
+    // every render and would loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query])
+  // Matches the `living` default is hiding, when a name was searched.
+  const [hiddenByStatus, setHiddenByStatus] = useState(0)
   const [page, setPage] = useState(1)
 
   useEffect(() => {
@@ -112,6 +132,7 @@ export function SantDirectory() {
       })
       setProfiles(data.data ?? [])
       setTotal(data.meta?.total ?? 0)
+      setHiddenByStatus(data.meta?.hidden_by_status ?? 0)
       setSectScope(data.meta?.sect_scope ?? null)
     } catch {
       setProfiles([])
@@ -319,6 +340,20 @@ export function SantDirectory() {
         <TraditionSwitch meta={sectScope} scope={scope} onChange={onScopeChange} />
 
         <p className="text-xs text-slate-400">{t('sant.profileCount', { count: total })}</p>
+
+        {/* The directory defaults to LIVING ascetics, which is right for "who
+            can I take darshan of" and wrong for a name search: typing
+            "Vidyasagarji" returned two minor ascetics and not Acharya Shri 108
+            Vidyasagarji Maharaj, with nothing on screen to say he was there.
+            Only shown when a search actually hid something. */}
+        {hiddenByStatus > 0 && (
+          <button
+            onClick={() => { setStatus('all'); setPage(1) }}
+            className="mt-1 text-left text-xs font-medium text-brand-red hover:opacity-80"
+          >
+            {t('sant.alsoSamadhistha', { count: hiddenByStatus })}
+          </button>
+        )}
 
         {loading ? (
           <SkeletonList rows={4} />

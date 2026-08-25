@@ -163,11 +163,50 @@ export function santDisplayName(
   return alreadyPrefixed(name, pad) ? name : `${pad} ${name}`
 }
 
-/** Case- and space-insensitive "does this name already open with that word?". */
+/**
+ * Spellings the source uses for a post, which are the SAME word.
+ *
+ * The directory is scraped, and it does not spell these consistently:
+ * "Aacharya" appears 324 times against 2,205 for "Acharya", and "Achayra",
+ * "Aaryika", "Ayrika", "Ganani" and "Gadni" all occur. The same list is
+ * documented at length in superadmin-api's `importNameKey`, where each entry
+ * was paid for by a duplicated profile.
+ */
+const PAD_VARIANTS: Record<string, string[]> = {
+  acharya: ['aacharya', 'achayra', 'aachary'],
+  upadhyaya: ['upadhyay', 'upadhyaay'],
+  ganini: ['ganani', 'gadni'],
+  aryika: ['aaryika', 'ayrika'],
+}
+
+/**
+ * "Does this name already open with that post?"
+ *
+ * An exact match is not enough, and both extra rules come from real rows:
+ *
+ *   · A SPELLING VARIANT is the same word. 95 profiles are stored as
+ *     "Aacharya Shri 108 …" with `pad = acharya`, and an exact comparison
+ *     prefixed them into "Acharya Aacharya Shri 108 …". 15 more read
+ *     "Upadhyaya Upadhyay …".
+ *
+ *   · A COMPOUND TITLE already contains the post. 138 read "Acharyatulya
+ *     Shri 108 …" ("equal to an acharya") and 7 "Balacharya …"; prefixing a
+ *     bare "Acharya" onto either is wrong, not merely redundant.
+ *
+ * What must KEEP prefixing: `pad = ganini` on a name starting "Aryika". Those
+ * are different words and "Ganini Aryika Shri 105 …" is the correct full form,
+ * so neither rule fires on it — deliberately.
+ */
 function alreadyPrefixed(name: string, pad: string): boolean {
   const n = name.trim().toLowerCase().replace(/\s+/g, ' ')
   const p = pad.trim().toLowerCase().replace(/\s+/g, ' ')
-  return !!p && (n === p || n.startsWith(`${p} `))
+  if (!p) return false
+  if (n === p || n.startsWith(`${p} `)) return true
+
+  const first = n.split(' ')[0] ?? ''
+  if (PAD_VARIANTS[p]?.includes(first)) return true
+  // "Acharyatulya" / "Balacharya" / "Aacharya" all end in the post itself.
+  return first.length > p.length && first.endsWith(p)
 }
 
 export const EVENT_TYPES = [

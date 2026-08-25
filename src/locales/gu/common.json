@@ -268,7 +268,8 @@
     "collapse": "સંકેલો",
     "expand": "વિસ્તારો",
     "readFullLife": "સંપૂર્ણ જીવન વાંચો",
-    "showAllYears": "બધા {{count}} વર્ષ બતાવો"
+    "showAllYears": "બધા {{count}} વર્ષ બતાવો",
+    "alsoSamadhistha": "{{count}} વધુ મળ્યા, જેમણે સમાધિ પ્રાપ્ત કરી — બતાવો"
   },
   "titles": {
     "completeProfile": "તમારી પ્રોફાઇલ પૂર્ણ કરો",

@@ -268,7 +268,8 @@
     "collapse": "संक्षिप्त करा",
     "expand": "विस्तृत करा",
     "readFullLife": "संपूर्ण जीवन वाचा",
-    "showAllYears": "सर्व {{count}} वर्षे दाखवा"
+    "showAllYears": "सर्व {{count}} वर्षे दाखवा",
+    "alsoSamadhistha": "{{count}} आणखी जुळले, ज्यांनी समाधी घेतली — दाखवा"
   },
   "titles": {
     "completeProfile": "तुमचे प्रोफाइल पूर्ण करा",

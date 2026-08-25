@@ -268,7 +268,8 @@
     "collapse": "ಮುಚ್ಚು",
     "expand": "ವಿಸ್ತರಿಸು",
     "readFullLife": "ಪೂರ್ಣ ಜೀವನ ಓದಿ",
-    "showAllYears": "ಎಲ್ಲಾ {{count}} ವರ್ಷ ತೋರಿಸು"
+    "showAllYears": "ಎಲ್ಲಾ {{count}} ವರ್ಷ ತೋರಿಸು",
+    "alsoSamadhistha": "{{count}} ಇನ್ನಷ್ಟು ಹೊಂದಿಕೆ, ಸಮಾಧಿ ಹೊಂದಿದವರು — ತೋರಿಸಿ"
   },
   "titles": {
     "completeProfile": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ",

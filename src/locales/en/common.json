@@ -268,7 +268,8 @@
     "collapse": "Collapse",
     "expand": "Expand",
     "readFullLife": "Read the full life",
-    "showAllYears": "Show all {{count}} years"
+    "showAllYears": "Show all {{count}} years",
+    "alsoSamadhistha": "{{count}} more match, who have attained samadhi — show them"
   },
   "titles": {
     "completeProfile": "Complete Your Profile",
