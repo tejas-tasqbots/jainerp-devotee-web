@@ -246,8 +246,11 @@ export function TextPage() {
                       ? 'border-transparent bg-navy-900 text-white'
                       : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                   }`}
+                  // The verse range stays reachable on hover: the position
+                  // says where you are, the title says what is in it.
+                  title={x.title}
                 >
-                  {t('library.part', { n: x.part ?? '?' })}
+                  {t('library.part', { n: x.part_no })}
                 </button>
               ))}
             </div>

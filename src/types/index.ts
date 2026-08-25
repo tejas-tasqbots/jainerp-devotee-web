@@ -269,19 +269,14 @@ export interface MaharajProfile {
     parampara: string | null
     sect: string | null
     about: string | null
-    members: Array<{
-      id: string
-      name: string
-      name_en: string | null
-      name_hi: string | null
-      type: string
-      pad: string | null
-      is_sangh_head: boolean
-      current_city: string | null
-      current_state: string | null
-      photo_url: string | null
-    }>
+    members: SanghMember[]
   } | null
+  /**
+   * The teacher-lineage parsed out of `sangh_text`, or null when the source
+   * wrote prose instead of a numbered list (1,098 of 2,407 profiles). Null
+   * means "render the paragraph", not "something failed".
+   */
+  parampara?: ParamparaNode[] | null
   state?: string
   photo_url?: string
   /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */
@@ -689,7 +684,13 @@ export interface LibraryTextDetail extends Omit<LibraryText, 'preview' | 'catego
   published_at: string | null
   categories: { slug: string; name: string }[]
   /** The other parts of a serialised work, in order. Empty for a standalone. */
-  parts: { id: string; slug: string; title: string; part: number | null; body_length: number | string }[]
+  /**
+   * `part_no` is the position in the series (1..N) and is what a chip is
+   * labelled with. `part` is the starting verse the source wrote into the
+   * title, which is why chips once read "Part 8, Part 15, Part 22".
+   */
+  parts: { id: string; slug: string; title: string; part: number | null;
+    part_no: number; body_length: number | string }[]
   related: { id: string; slug: string; title: string; kind: string; particulars: string | null }[]
 }
 
@@ -726,4 +727,36 @@ export interface Granth {
 export interface GranthFacets {
   shelves: { value: string; count: number | string }[]
   authors: { value: string; count: number | string }[]
+}
+
+/** One ascetic in a sangh, as the profile endpoint sends them. */
+export interface SanghMember {
+  id: string
+  name: string
+  name_en: string | null
+  name_hi: string | null
+  type: string
+  pad: string | null
+  is_sangh_head: boolean
+  guru_name?: string | null
+  /**
+   * The member's guru, when that guru is also in this sangh — resolved by the
+   * API by name key, since `guru_name` is free text. Null for the 54% whose
+   * guru is genuinely outside the group; they render at the top level.
+   */
+  guru_id?: string | null
+  current_city: string | null
+  current_state: string | null
+  photo_url: string | null
+}
+
+/** One generation in a parsed teacher-lineage. */
+export interface ParamparaNode {
+  /** 1 for the first chain; incremented where the source restarts at 1. */
+  group: number
+  /** `[3, 1, 1]` for "3.1.1"; its length is the depth. */
+  path: number[]
+  depth: number
+  name: string
+  year: number | null
 }

@@ -258,7 +258,13 @@
     "viewProfile": "प्रोफाइल पहा",
     "viewSource": "स्रोत पहा",
     "viewTemple": "मंदिर पहा",
-    "year": "वर्ष"
+    "year": "वर्ष",
+    "showLess": "कमी दाखवा",
+    "showAllGenerations": "सर्व {{count}} पिढ्या दाखवा",
+    "discipleCount_one": "{{count}} शिष्य",
+    "discipleCount_other": "{{count}} शिष्य",
+    "collapse": "संक्षिप्त करा",
+    "expand": "विस्तृत करा"
   },
   "titles": {
     "completeProfile": "तुमचे प्रोफाइल पूर्ण करा",

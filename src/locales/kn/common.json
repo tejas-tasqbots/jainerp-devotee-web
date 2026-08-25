@@ -258,7 +258,13 @@
     "viewProfile": "ಪ್ರೊಫೈಲ್ ನೋಡಿ",
     "viewSource": "ಮೂಲ ನೋಡಿ",
     "viewTemple": "ದೇವಸ್ಥಾನ ನೋಡಿ",
-    "year": "ವರ್ಷ"
+    "year": "ವರ್ಷ",
+    "showLess": "ಕಡಿಮೆ ತೋರಿಸು",
+    "showAllGenerations": "ಎಲ್ಲಾ {{count}} ತಲೆಮಾರುಗಳನ್ನು ತೋರಿಸು",
+    "discipleCount_one": "{{count}} ಶಿಷ್ಯ",
+    "discipleCount_other": "{{count}} ಶಿಷ್ಯರು",
+    "collapse": "ಮುಚ್ಚು",
+    "expand": "ವಿಸ್ತರಿಸು"
   },
   "titles": {
     "completeProfile": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ",

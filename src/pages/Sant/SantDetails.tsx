@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ParamparaTree } from './ParamparaTree'
+import { SanghTree } from './SanghTree'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft, Bell, BellOff, BookMarked, BookOpen, Cake, Calendar, CalendarDays, ChevronRight, Clock, ExternalLink, MapPin, Megaphone, Navigation, Send, Users,
@@ -315,12 +317,17 @@ export function SantDetails() {
             <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
               {t('sant.paramparaText')}
             </h3>
-            {/* The source writes this as a numbered lineage on one line. Kept
-                verbatim, wrapped, rather than parsed into a list we would then
-                have to be right about. */}
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-              {profile.sangh_text}
-            </p>
+            {/* Drawn as the descent it describes when the source numbered it
+                (1,309 of 2,407 profiles), and kept verbatim when it wrote
+                prose. The paragraph is not a fallback for a failed parse so
+                much as the right rendering for text that is not a list. */}
+            {profile.parampara?.length
+              ? <ParamparaTree nodes={profile.parampara} />
+              : (
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                  {profile.sangh_text}
+                </p>
+              )}
           </div>
         )}
 
@@ -415,33 +422,7 @@ export function SantDetails() {
                 <p className="text-[11px] text-slate-400 mt-3 mb-1">
                   {t('sant.sanghOthers', { count: profile.sangh.members.length })}
                 </p>
-                <ul className="divide-y divide-slate-100">
-                  {profile.sangh.members.map(mem => (
-                    <li key={mem.id}>
-                      <button
-                        className="w-full text-left py-2 flex items-center gap-2 hover:bg-slate-50 rounded"
-                        onClick={() => navigate(`/sant/${mem.id}`)}
-                      >
-                        <span className="flex-1 min-w-0">
-                          <span className="block text-sm text-slate-800 truncate">
-                            {(lang.startsWith('hi') && mem.name_hi) || mem.name_en || mem.name}
-                          </span>
-                          {/* Where they are NOW, paired with its own state — the
-                              two halves must come from the same place. */}
-                          {mem.current_city && (
-                            <span className="block text-[11px] text-slate-400">
-                              {[mem.current_city, mem.current_state].filter(Boolean).join(', ')}
-                            </span>
-                          )}
-                        </span>
-                        {mem.is_sangh_head && (
-                          <span className="badge badge-gold text-[9px]">{t('sant.sanghHead')}</span>
-                        )}
-                        <ChevronRight size={14} className="text-slate-300 flex-shrink-0" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                <SanghTree members={profile.sangh.members} />
               </>
             )}
           </div>

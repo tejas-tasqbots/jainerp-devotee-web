@@ -258,7 +258,13 @@
     "viewProfile": "View profile",
     "viewSource": "View source",
     "viewTemple": "View temple",
-    "year": "Year"
+    "year": "Year",
+    "showLess": "Show less",
+    "showAllGenerations": "Show all {{count}} generations",
+    "discipleCount_one": "{{count}} disciple",
+    "discipleCount_other": "{{count}} disciples",
+    "collapse": "Collapse",
+    "expand": "Expand"
   },
   "titles": {
     "completeProfile": "Complete Your Profile",

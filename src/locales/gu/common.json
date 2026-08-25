@@ -258,7 +258,13 @@
     "viewProfile": "પ્રોફાઇલ જુઓ",
     "viewSource": "સ્રોત જુઓ",
     "viewTemple": "મંદિર જુઓ",
-    "year": "વર્ષ"
+    "year": "વર્ષ",
+    "showLess": "ઓછું બતાવો",
+    "showAllGenerations": "બધી {{count}} પેઢીઓ બતાવો",
+    "discipleCount_one": "{{count}} શિષ્ય",
+    "discipleCount_other": "{{count}} શિષ્યો",
+    "collapse": "સંકેલો",
+    "expand": "વિસ્તારો"
   },
   "titles": {
     "completeProfile": "તમારી પ્રોફાઇલ પૂર્ણ કરો",
