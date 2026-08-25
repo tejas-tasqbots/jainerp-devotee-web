@@ -332,6 +332,8 @@ export interface MaharajProfile {
     by: { id: string; title: string; title_hi: string | null; download_url: string | null }[]
     about: { id: string; title: string; title_hi: string | null; download_url: string | null }[]
   }
+  /** The wiki page this profile was collated from, for a reader to check. */
+  source_url?: string | null
   languages?: string[]
   verified: boolean
   followers_count?: number

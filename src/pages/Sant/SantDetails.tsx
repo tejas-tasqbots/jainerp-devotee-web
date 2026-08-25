@@ -269,7 +269,8 @@ export function SantDetails() {
           </div>
         )}
 
-        {(profile.lineage || profile.diksha_place || profile.education || profile.honours) && (
+        {(profile.lineage || profile.diksha_place || profile.education || profile.honours
+          || profile.brahmacharya_place || profile.acharya_pad_place || profile.sallekhana_place) && (
           <div className="card p-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{t('ui.lifeStudy')}</h3>
             <dl className="divide-y divide-slate-100">
@@ -286,10 +287,110 @@ export function SantDetails() {
                   converted: a Samvat year read as Gregorian is ~57 years out. */}
               <Fact label={t('sant.birthDateIndian')} value={profile.birth_date_indian} />
               <Fact label={t('sant.brahmacharya')} value={profile.brahmacharya_year} />
+              {/* 460 profiles record where the brahmacharya vrat was taken and
+                  449 from whom. Both were seeded by 048, returned by the API
+                  and rendered nowhere. */}
+              <Fact label={t('sant.brahmacharyaPlace')} value={profile.brahmacharya_place} />
+              <Fact label={t('sant.brahmacharyaGuru')} value={profile.brahmacharya_guru} />
               <Fact label={t('sant.acharyaPad')}
                 value={profile.acharya_pad_date ? String(profile.acharya_pad_date).slice(0, 10) : null} />
+              <Fact label={t('sant.acharyaPadPlace')} value={profile.acharya_pad_place} />
+              <Fact label={t('sant.acharyaPadBy')} value={profile.acharya_pad_by} />
+              {/* Where sallekhana was observed. Only meaningful on a memorial,
+                  and it is the fact those profiles exist to record. */}
+              <Fact label={t('sant.sallekhanaPlace')} value={profile.sallekhana_place} />
               <Fact label={t('sant.familyInitiated')} value={profile.family_initiated} />
             </dl>
+          </div>
+        )}
+
+        {/*
+          Everything below was seeded by 048, returned by the API, and rendered
+          by nothing. A column written and never read reads as data loss, not as
+          a missing feature — 2,407 profiles carry their parampara in
+          `sangh_text` and a devotee opening the page saw none of it.
+        */}
+        {!!profile.sangh_text && (
+          <div className="card p-4">
+            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {t('sant.paramparaText')}
+            </h3>
+            {/* The source writes this as a numbered lineage on one line. Kept
+                verbatim, wrapped, rather than parsed into a list we would then
+                have to be right about. */}
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              {profile.sangh_text}
+            </p>
+          </div>
+        )}
+
+        {!!profile.chaturmas_text && (
+          <div className="card p-4">
+            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {t('sant.chaturmasText')}
+            </h3>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              {profile.chaturmas_text}
+            </p>
+          </div>
+        )}
+
+        {!!profile.updates_text && (
+          <div className="card p-4">
+            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {t('sant.updatesText')}
+            </h3>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              {profile.updates_text}
+            </p>
+          </div>
+        )}
+
+        {/* Photographs. 1,408 profiles carry a gallery and the page showed one
+            avatar at most. Lazy, because a gallery can run to a dozen images. */}
+        {!!profile.gallery_urls?.length && (
+          <div className="card p-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {t('sant.photographs')}
+            </h3>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              {profile.gallery_urls.map((u, i) => (
+                <a key={i} href={u} target="_blank" rel="noopener noreferrer" className="flex-none">
+                  <img
+                    src={u}
+                    alt=""
+                    loading="lazy"
+                    className="h-40 w-auto rounded-lg border border-slate-200 object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Provenance, stated rather than buried: 1,154 profiles name the
+            sources their facts came from, and a devotee is entitled to check. */}
+        {(profile.source_references || profile.source_credit) && (
+          <div className="card p-4">
+            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {t('sant.sources')}
+            </h3>
+            {profile.source_references && (
+              <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-600">
+                {profile.source_references}
+              </p>
+            )}
+            {profile.source_credit && (
+              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+                {profile.source_credit}
+              </p>
+            )}
+            {profile.source_url && (
+              <a href={profile.source_url} target="_blank" rel="noopener noreferrer"
+                className="mt-1.5 inline-block text-[11px] text-brand-red underline underline-offset-2">
+                {t('sant.viewSource')}
+              </a>
+            )}
           </div>
         )}
 
