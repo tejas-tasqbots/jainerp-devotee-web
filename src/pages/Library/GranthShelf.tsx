@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { BookMarked, ExternalLink, Search, SlidersHorizontal, X } from 'lucide-react'
+import { BookMarked, BookOpen, ExternalLink, Search, SlidersHorizontal, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
 import { EmptyState, SkeletonList } from '../../components/kit'
 import type { Granth, GranthFacets } from '../../types'
+import { GranthReader } from './GranthReader'
 
 /**
  * The granth shelf — several thousand Digambar Jain books.
@@ -51,6 +52,9 @@ export function GranthShelf() {
   // Adjusted during render rather than in an effect, so a query arriving from
   // the back button never paints the stale text first.
   const [lastQuery, setLastQuery] = useState(query)
+  // The book being read in place, or null. Not a route: the shelf's
+  // scroll position and filters are the thing a reader comes back to.
+  const [reading, setReading] = useState<Granth | null>(null)
   if (query !== lastQuery) { setLastQuery(query); setDraft(query) }
 
   function setFilter(next: Record<string, string>) {
@@ -219,12 +223,22 @@ export function GranthShelf() {
               // entitled to the browser's own affordances — long-press, open in
               // a new tab, copy the link. `noopener` because the target is not
               // ours to trust with `window.opener`.
-              <a
+              // A BUTTON when the book can be read here, an anchor when it
+              // cannot. The distinction is deliberate: an anchor promises the
+              // browser's own affordances (long-press, open in a new tab) and
+              // must keep that promise, so it is only used where the row really
+              // does leave the app.
+              <RowTag
                 key={g.id}
-                href={g.download_url ?? '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="card block p-3 transition-colors hover:border-slate-300"
+                {...(g.reader_url
+                  ? { as: 'button' as const, onClick: () => setReading(g) }
+                  : {
+                    as: 'a' as const,
+                    href: g.download_url ?? '#',
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  })}
+                className="card block w-full p-3 text-left transition-colors hover:border-slate-300"
               >
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-rose-50 text-rose-700">
@@ -250,9 +264,11 @@ export function GranthShelf() {
                       )}
                     </p>
                   </div>
-                  <ExternalLink size={15} className="mt-1 flex-none text-slate-300" />
+                  {g.reader_url
+                    ? <BookOpen size={15} className="mt-1 flex-none text-slate-300" />
+                    : <ExternalLink size={15} className="mt-1 flex-none text-slate-300" />}
                 </div>
-              </a>
+              </RowTag>
             ))}
           </div>
         )}
@@ -274,6 +290,34 @@ export function GranthShelf() {
           </div>
         )}
       </div>
+
+      {reading?.reader_url && (
+        <GranthReader
+          title={reading.title}
+          readerUrl={reading.reader_url}
+          sourceUrl={reading.download_url}
+          onClose={() => setReading(null)}
+        />
+      )}
     </>
   )
+}
+
+/**
+ * A row that is an `<a>` when it leaves the app and a `<button>` when it does
+ * not. Written out rather than always using an anchor with a click handler:
+ * an anchor advertises long-press, "open in a new tab" and a copyable URL, and
+ * a row that opens a modal can honour none of those.
+ */
+function RowTag(
+  props:
+    | ({ as: 'a' } & React.AnchorHTMLAttributes<HTMLAnchorElement>)
+    | ({ as: 'button' } & React.ButtonHTMLAttributes<HTMLButtonElement>),
+) {
+  if (props.as === 'a') {
+    const { as: _a, ...rest } = props
+    return <a {...rest} />
+  }
+  const { as: _b, ...rest } = props
+  return <button type="button" {...rest} />
 }

@@ -729,6 +729,12 @@ export interface Granth {
   sant_name_hi: string | null
   preview_url: string | null
   download_url: string | null
+  /**
+   * Drive's own embed URL, derived by the API from the file id inside
+   * `download_url`. Null when the row carries no Drive id, and the shelf
+   * then links out to the source as it always did.
+   */
+  reader_url?: string | null
 }
 
 export interface GranthFacets {

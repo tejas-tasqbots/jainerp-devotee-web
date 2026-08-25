@@ -12,7 +12,8 @@
     "paid": "paid",
     "payAtCounter": "Online payment isn't set up for this temple yet — please pay at the counter.",
     "payNow": "Pay Now",
-    "save": "Save"
+    "save": "Save",
+    "close": "Close"
   },
   "feed": {
     "donation": "Donation",
@@ -113,7 +114,8 @@
     },
     "transcribedBy": "Transcribed by",
     "type": "Type",
-    "viewSource": "View source"
+    "viewSource": "View source",
+    "openAtSource": "Open at source"
   },
   "login": {
     "back": "Back",
