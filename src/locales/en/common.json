@@ -264,7 +264,8 @@
     "discipleCount_one": "{{count}} disciple",
     "discipleCount_other": "{{count}} disciples",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "readFullLife": "Read the full life"
   },
   "titles": {
     "completeProfile": "Complete Your Profile",

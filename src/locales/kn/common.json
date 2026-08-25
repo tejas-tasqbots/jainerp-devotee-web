@@ -264,7 +264,8 @@
     "discipleCount_one": "{{count}} ಶಿಷ್ಯ",
     "discipleCount_other": "{{count}} ಶಿಷ್ಯರು",
     "collapse": "ಮುಚ್ಚು",
-    "expand": "ವಿಸ್ತರಿಸು"
+    "expand": "ವಿಸ್ತರಿಸು",
+    "readFullLife": "ಪೂರ್ಣ ಜೀವನ ಓದಿ"
   },
   "titles": {
     "completeProfile": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ",

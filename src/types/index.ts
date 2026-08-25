@@ -277,6 +277,9 @@ export interface MaharajProfile {
    * means "render the paragraph", not "something failed".
    */
   parampara?: ParamparaNode[] | null
+  /** The life, parsed into paragraphs/list/provenance. Null = render the raw string. */
+  bio_blocks?: BioBlock[] | null
+  bio_blocks_hi?: BioBlock[] | null
   state?: string
   photo_url?: string
   /** Inline photo — detail endpoint only; lists send `has_photo` instead (see Images_And_Photos.md §6.3). */
@@ -759,4 +762,13 @@ export interface ParamparaNode {
   depth: number
   name: string
   year: number | null
+}
+
+/** One run inside a biography; `href` makes it a link. */
+export interface BioSpan { s: string; href?: string }
+
+/** One block of a parsed biography. */
+export interface BioBlock {
+  t: 'para' | 'item' | 'meta' | 'rule'
+  spans?: BioSpan[]
 }

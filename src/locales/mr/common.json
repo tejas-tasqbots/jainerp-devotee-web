@@ -264,7 +264,8 @@
     "discipleCount_one": "{{count}} शिष्य",
     "discipleCount_other": "{{count}} शिष्य",
     "collapse": "संक्षिप्त करा",
-    "expand": "विस्तृत करा"
+    "expand": "विस्तृत करा",
+    "readFullLife": "संपूर्ण जीवन वाचा"
   },
   "titles": {
     "completeProfile": "तुमचे प्रोफाइल पूर्ण करा",

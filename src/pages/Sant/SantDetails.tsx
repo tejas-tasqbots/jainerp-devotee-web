@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BiographyBlocks } from './BiographyBlocks'
 import { ParamparaTree } from './ParamparaTree'
 import { SanghTree } from './SanghTree'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -10,7 +11,7 @@ import { format } from 'date-fns'
 import { api } from '../../lib/api'
 import { kindLabel } from '../../lib/library'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
-import type { MaharajProfile } from '../../types'
+import type { BioBlock, MaharajProfile } from '../../types'
 import { Fact, ProfileLinks, Publications } from '../../components/ProfileBlocks'
 import { altNameFor, eventTypeLabel, nameFor, santDisplayName } from '../../lib/ascetic'
 import { ReportLocationDialog } from './ReportLocationDialog'
@@ -24,8 +25,10 @@ import { ReportLocationDialog } from './ReportLocationDialog'
  * leads, and the other is one tap away rather than stacked underneath — which
  * would double the length of every profile for no one's benefit.
  */
-function BiographyText({ hi, en, lang, t }: {
-  hi?: string | null; en?: string | null; lang: string;
+function BiographyText({ hi, en, hiBlocks, enBlocks, lang, t }: {
+  hi?: string | null; en?: string | null;
+  hiBlocks?: BioBlock[] | null; enBlocks?: BioBlock[] | null;
+  lang: string;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
   const prefersHi = lang.startsWith('hi')
@@ -34,14 +37,23 @@ function BiographyText({ hi, en, lang, t }: {
 
   const primary = prefersHi ? (hi || en) : (en || hi)
   const other = prefersHi ? (hi && en ? en : null) : (en && hi ? hi : null)
+  // Blocks for whichever text won. Falls back to the raw string only if the
+  // API sent none — an older cached response, or a bio added since.
+  const primaryBlocks = prefersHi ? (hiBlocks || enBlocks) : (enBlocks || hiBlocks)
+  const otherBlocks = prefersHi ? (hiBlocks && enBlocks ? enBlocks : null)
+    : (enBlocks && hiBlocks ? hiBlocks : null)
   const otherIsHi = !prefersHi
 
   if (!primary) return null
   return (
     <>
-      <p className={`text-sm text-slate-700 whitespace-pre-line ${prefersHi ? 'leading-relaxed' : ''}`}>
-        {primary}
-      </p>
+      {primaryBlocks?.length
+        ? <BiographyBlocks blocks={primaryBlocks} />
+        : (
+          <p className={`text-sm text-slate-700 whitespace-pre-line ${prefersHi ? 'leading-relaxed' : ''}`}>
+            {primary}
+          </p>
+        )}
       {other && (
         <>
           <button
@@ -53,9 +65,15 @@ function BiographyText({ hi, en, lang, t }: {
               : t(otherIsHi ? 'sant.readInHindi' : 'sant.readInEnglish')}
           </button>
           {showOther && (
-            <p className="text-sm text-slate-600 whitespace-pre-line mt-2 pt-2 border-t border-slate-100 leading-relaxed">
-              {other}
-            </p>
+            <div className="mt-2 border-t border-slate-100 pt-2">
+              {otherBlocks?.length ? (
+                <BiographyBlocks blocks={otherBlocks} />
+              ) : (
+                <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">
+                  {other}
+                </p>
+              )}
+            </div>
           )}
         </>
       )}
@@ -231,7 +249,11 @@ export function SantDetails() {
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               {t('sant.theLife')}
             </h3>
-            <BiographyText hi={profile.bio_hi} en={profile.bio_en} lang={lang} t={t} />
+            <BiographyText
+              hi={profile.bio_hi} en={profile.bio_en}
+              hiBlocks={profile.bio_blocks_hi} enBlocks={profile.bio_blocks}
+              lang={lang} t={t}
+            />
             {profile.source_credit && (
               <p className="text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-100">
                 {profile.source_credit}
