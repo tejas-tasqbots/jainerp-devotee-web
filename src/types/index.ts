@@ -645,6 +645,26 @@ export interface LibraryText {
   category_slugs: string[]
 }
 
+/** One inline run. `href` present means it is a real link. */
+export interface TextSpan { s: string; href?: string }
+
+/**
+ * One block of a text (migration 059).
+ *
+ * Deliberately NOT HTML: the API sends a small closed set of blocks and the
+ * client builds its own widgets, so a scraped source can produce a bad link but
+ * never a script. `verse` is the only block whose whitespace is significant.
+ */
+export interface TextBlock {
+  t: 'heading' | 'prose' | 'verse' | 'item' | 'audio' | 'image'
+  spans?: TextSpan[]
+  text?: string
+  /** Source URL. A `mirror` may appear later; prefer it when it does. */
+  url?: string
+  mirror?: string
+  caption?: string | null
+}
+
 /** A text as the DETAIL returns it — the only shape that carries the body. */
 export interface LibraryTextDetail extends Omit<LibraryText, 'preview' | 'category_slugs'> {
   /**
@@ -652,6 +672,11 @@ export interface LibraryTextDetail extends Omit<LibraryText, 'preview' | 'catego
    * `whitespace-pre-wrap` block and never collapse the whitespace.
    */
   body: string
+  /**
+   * The same content as ordered blocks — recitations, yantras and links intact.
+   * Null on a text scraped before 059; render `body` when it is.
+   */
+  body_blocks: TextBlock[] | null
   excerpt: string | null
   rhythm: string | null
   contributed_by: string | null

@@ -68,6 +68,7 @@
     "emptySubtitle": "પૂજા, સ્તોત્ર અને પાઠ અહીં દેખાશે.",
     "emptyTitle": "હજુ કંઈ નથી",
     "hostedAtSource": "ગ્રંથ digjainwiki.org પર ખૂલશે, જ્યાં તે પ્રકાશિત છે.",
+    "illustration": "ચિત્ર",
     "kind": {
       "aarti": "આરતી",
       "article": "લેખ",
@@ -88,6 +89,7 @@
     "partCount_one": "{{count}} ભાગ",
     "partCount_other": "{{count}} ભાગ",
     "readNext": "આગળ વાંચો",
+    "recitation": "પાઠ શ્રવણ",
     "reference": "સંદર્ભ",
     "rhythm": "રાગ",
     "script": {

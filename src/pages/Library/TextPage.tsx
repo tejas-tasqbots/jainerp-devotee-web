@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../lib/api'
 import { ErrorPanel, SkeletonList } from '../../components/kit'
 import { KIND_ICON, kindLabel } from '../../lib/library'
+import { TextBlocks } from './TextBlocks'
 import type { LibraryTextDetail } from '../../types'
 
 /**
@@ -180,11 +181,18 @@ export function TextPage() {
           collides them. Serif for the body, sans for the chrome: this is a
           reading surface, not an interface.
         */}
-        <article
-          lang={text.script === 'en' ? 'en' : 'hi'}
-          className={`card whitespace-pre-wrap p-5 font-serif leading-loose text-navy-900 ${SIZES[size]}`}
-        >
-          {text.body}
+        <article lang={text.script === 'en' ? 'en' : 'hi'} className="card p-5">
+          {text.body_blocks?.length ? (
+            // Blocks: the recitation is a player, the yantra is an image and a
+            // link is a link. See TextBlocks.
+            <TextBlocks blocks={text.body_blocks} size={SIZES[size]} />
+          ) : (
+            // A text scraped before 059 has no blocks. `whitespace-pre-wrap`
+            // still matters here — it is verse either way.
+            <div className={`whitespace-pre-wrap font-serif leading-loose text-navy-900 ${SIZES[size]}`}>
+              {text.body}
+            </div>
+          )}
         </article>
 
         {/* Provenance, stated rather than buried. This is somebody else's

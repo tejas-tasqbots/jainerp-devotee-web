@@ -68,6 +68,7 @@
     "emptySubtitle": "पूजा, स्तोत्र आणि पाठ इथे दिसतील.",
     "emptyTitle": "अजून काही नाही",
     "hostedAtSource": "ग्रंथ digjainwiki.org वर उघडतील, जिथे ते प्रकाशित आहेत.",
+    "illustration": "चित्र",
     "kind": {
       "aarti": "आरती",
       "article": "लेख",
@@ -88,6 +89,7 @@
     "partCount_one": "{{count}} भाग",
     "partCount_other": "{{count}} भाग",
     "readNext": "पुढे वाचा",
+    "recitation": "पाठ श्रवण",
     "reference": "संदर्भ",
     "rhythm": "राग",
     "script": {

@@ -68,6 +68,7 @@
     "emptySubtitle": "Pujas, stotras and paath will appear here.",
     "emptyTitle": "Nothing here yet",
     "hostedAtSource": "Books open at digjainwiki.org, where they are published.",
+    "illustration": "Illustration",
     "kind": {
       "aarti": "Aarti",
       "article": "Article",
@@ -88,6 +89,7 @@
     "partCount_one": "{{count}} part",
     "partCount_other": "{{count}} parts",
     "readNext": "Read next",
+    "recitation": "Recitation",
     "reference": "Reference",
     "rhythm": "Rhythm",
     "script": {

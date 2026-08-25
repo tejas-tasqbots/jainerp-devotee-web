@@ -68,6 +68,7 @@
     "emptySubtitle": "ಪೂಜೆ, ಸ್ತೋತ್ರ ಮತ್ತು ಪಾಠಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
     "emptyTitle": "ಇನ್ನೂ ಏನೂ ಇಲ್ಲ",
     "hostedAtSource": "ಗ್ರಂಥಗಳು digjainwiki.org ನಲ್ಲಿ ತೆರೆಯುತ್ತವೆ, ಅಲ್ಲಿ ಅವು ಪ್ರಕಟವಾಗಿವೆ.",
+    "illustration": "ಚಿತ್ರ",
     "kind": {
       "aarti": "ಆರತಿ",
       "article": "ಲೇಖನ",
@@ -88,6 +89,7 @@
     "partCount_one": "{{count}} ಭಾಗ",
     "partCount_other": "{{count}} ಭಾಗಗಳು",
     "readNext": "ಮುಂದೆ ಓದಿ",
+    "recitation": "ಪಠಣ",
     "reference": "ಉಲ್ಲೇಖ",
     "rhythm": "ರಾಗ",
     "script": {
