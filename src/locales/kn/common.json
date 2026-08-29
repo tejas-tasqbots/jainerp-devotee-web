@@ -115,7 +115,9 @@
     "transcribedBy": "ಪ್ರಸ್ತುತಪಡಿಸಿದವರು",
     "type": "ಪ್ರಕಾರ",
     "viewSource": "ಮೂಲ ನೋಡಿ",
-    "openAtSource": "ಮೂಲದಲ್ಲಿ ತೆರೆಯಿರಿ"
+    "openAtSource": "ಮೂಲದಲ್ಲಿ ತೆರೆಯಿರಿ",
+    "download": "ಡೌನ್‌ಲೋಡ್",
+    "creditSource": "ಸ್ಕ್ಯಾನ್‌ಗಳು digjainwiki.org ಮತ್ತು ಅದರ ಕೊಡುಗೆದಾರರ ಸೌಜನ್ಯದಿಂದ."
   },
   "login": {
     "back": "ಹಿಂದೆ",

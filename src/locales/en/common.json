@@ -115,7 +115,9 @@
     "transcribedBy": "Transcribed by",
     "type": "Type",
     "viewSource": "View source",
-    "openAtSource": "Open at source"
+    "openAtSource": "Open at source",
+    "download": "Download",
+    "creditSource": "Scans courtesy of digjainwiki.org and its contributors."
   },
   "login": {
     "back": "Back",

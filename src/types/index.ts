@@ -331,8 +331,8 @@ export interface MaharajProfile {
    * profile that lists the second under the first makes a false claim.
    */
   granths?: {
-    by: { id: string; title: string; title_hi: string | null; download_url: string | null }[]
-    about: { id: string; title: string; title_hi: string | null; download_url: string | null }[]
+    by: SantGranthLink[]
+    about: SantGranthLink[]
   }
   /** The wiki page this profile was collated from, for a reader to check. */
   source_url?: string | null
@@ -710,10 +710,12 @@ export interface LibraryFacets {
 }
 
 /**
- * A book in the granth catalogue (migrations 056/057).
+ * A book in the granth catalogue (migrations 056/057, mirrored by 075/076).
  *
- * Metadata only. `download_url` points at the SOURCE — these scans are not
- * hosted by us — so a row opens externally rather than into a reader.
+ * `mirrored` decides how a row behaves. True and both URLs are ours, so the
+ * book reads and saves without leaving our origin. False and it is still one of
+ * the source's — the mirror fills in book by book, and a client must handle
+ * both for as long as that is running.
  */
 export interface Granth {
   id: string
@@ -727,14 +729,36 @@ export interface Granth {
   sant_relation: 'by' | 'about' | null
   sant_name: string | null
   sant_name_hi: string | null
-  preview_url: string | null
+  /**
+   * Where the book downloads from. Ours when `mirrored`, the source's when not.
+   * The API never sends the source's `preview_url` — it carries the library
+   * owner's Google account id.
+   */
   download_url: string | null
   /**
-   * Drive's own embed URL, derived by the API from the file id inside
-   * `download_url`. Null when the row carries no Drive id, and the shelf
-   * then links out to the source as it always did.
+   * What the reader opens: our own PDF when mirrored, otherwise Drive's embed
+   * derived from the file id. Null for a row with neither, and the shelf then
+   * links out instead of offering to read.
    */
   reader_url?: string | null
+  /** True when both URLs above are served by us rather than by a third party. */
+  mirrored?: boolean
+}
+
+/**
+ * A granth as it appears on an ascetic's profile — the catalogue fields the
+ * profile shows, plus the same URL trio the full {@link Granth} carries. A
+ * projection of that type rather than a separate thing: the two must agree
+ * about `mirrored`, or the profile would open a book differently from the
+ * shelf.
+ */
+export interface SantGranthLink {
+  id: string
+  title: string
+  title_hi: string | null
+  download_url: string | null
+  reader_url?: string | null
+  mirrored?: boolean
 }
 
 export interface GranthFacets {

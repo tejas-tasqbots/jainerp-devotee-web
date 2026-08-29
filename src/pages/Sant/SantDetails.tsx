@@ -533,9 +533,13 @@ export function SantDetails() {
                   </div>
                   <div className="space-y-1">
                     {list!.slice(0, 12).map(b => (
+                      // A mirrored book is ours and opens in a new tab on our
+                      // own origin; an un-mirrored one still leaves for the
+                      // source. `noopener` either way — it costs nothing and
+                      // the habit should not depend on who the host is.
                       <a
                         key={b.id}
-                        href={b.download_url ?? '#'}
+                        href={b.reader_url ?? b.download_url ?? '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-slate-50"
@@ -543,7 +547,9 @@ export function SantDetails() {
                         <span className="min-w-0 flex-1 truncate text-sm text-navy-900">
                           {(lang.startsWith('hi') && b.title_hi) || b.title}
                         </span>
-                        <ExternalLink size={14} className="flex-none text-slate-300" />
+                        {b.mirrored
+                          ? <BookOpen size={14} className="flex-none text-slate-300" />
+                          : <ExternalLink size={14} className="flex-none text-slate-300" />}
                       </a>
                     ))}
                   </div>

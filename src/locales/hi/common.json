@@ -115,7 +115,9 @@
     "transcribedBy": "प्रस्तुतकर्ता",
     "type": "प्रकार",
     "viewSource": "स्रोत देखें",
-    "openAtSource": "स्रोत पर खोलें"
+    "openAtSource": "स्रोत पर खोलें",
+    "download": "डाउनलोड",
+    "creditSource": "स्कैन digjainwiki.org और उसके योगदानकर्ताओं के सौजन्य से।"
   },
   "login": {
     "back": "वापस",

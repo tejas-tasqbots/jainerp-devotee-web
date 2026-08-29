@@ -273,10 +273,17 @@ export function GranthShelf() {
           </div>
         )}
 
-        {/* Said once, at the foot of the shelf rather than on every row. */}
+        {/* Said once, at the foot of the shelf rather than on every row.
+            Which sentence depends on where the books on THIS page actually come
+            from: while the mirror is filling in, a shelf can hold both, and
+            promising "opens at source" for a book we now serve ourselves would
+            be as wrong as the reverse. Credit for the scans is kept either way
+            — it is owed to the contributors whether or not we hold the file. */}
         {rows.length > 0 && (
           <p className="pt-1 text-center text-[11px] text-slate-400">
-            {t('library.hostedAtSource')}
+            {rows.every(g => g.mirrored)
+              ? t('library.creditSource')
+              : t('library.hostedAtSource')}
           </p>
         )}
 
@@ -295,7 +302,8 @@ export function GranthShelf() {
         <GranthReader
           title={reading.title}
           readerUrl={reading.reader_url}
-          sourceUrl={reading.download_url}
+          downloadUrl={reading.download_url}
+          mirrored={reading.mirrored}
           onClose={() => setReading(null)}
         />
       )}
