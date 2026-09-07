@@ -165,6 +165,16 @@ export function DonationsList() {
   }
   const pendingCount = requests.filter(r => r.status === 'pending').length
   const temples80g = (summary?.by_temple ?? []).filter(t => t.eligible_80g_paise > 0)
+  /**
+   * Does 80G exist for this devotee at all this year?
+   *
+   * A donation is only ever marked 80G-eligible when the temple holds an 80G
+   * registration number (mandir-api's decide80gEligibility refuses otherwise),
+   * so a zero here means none of this devotee's temples can issue one. That is
+   * the signal every 80G control on this screen is gated on — no separate
+   * per-temple lookup is needed, and none would be affordable.
+   */
+  const has80g = (summary?.eligible_80g_paise ?? 0) > 0 || temples80g.length > 0
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -182,10 +192,18 @@ export function DonationsList() {
           <p className="text-xs text-slate-400 mb-1">Total Donated — FY {summary.fy}</p>
           <p className="text-2xl font-bold text-white">₹{fmtPaise(summary.total_paise)}</p>
           <div className="flex gap-4 mt-2">
-            <div>
-              <p className="text-xs text-slate-400">80G Eligible</p>
-              <p className="text-sm font-semibold text-brand-gold">₹{fmtPaise(summary.eligible_80g_paise)}</p>
-            </div>
+            {/* Shown only when there IS an 80G-eligible total.
+                A devotee whose temples hold no 80G approval was shown a
+                permanent "80G Eligible ₹0.00" — which reads as a deduction
+                they have lost rather than one that was never available, and
+                sends them to the temple office to ask about it. Nothing on
+                this screen should mention 80G unless 80G exists. */}
+            {summary.eligible_80g_paise > 0 && (
+              <div>
+                <p className="text-xs text-slate-400">80G Eligible</p>
+                <p className="text-sm font-semibold text-brand-gold">₹{fmtPaise(summary.eligible_80g_paise)}</p>
+              </div>
+            )}
             <div>
               <p className="text-xs text-slate-400">{t('ui.transactions')}</p>
               <p className="text-sm font-semibold text-white">{summary.txn_count}</p>
@@ -278,14 +296,20 @@ export function DonationsList() {
               <option value="amount_desc">{t('ui.sortHighest', { defaultValue: 'Highest amount' })}</option>
               <option value="amount_asc">{t('ui.sortLowest', { defaultValue: 'Lowest amount' })}</option>
             </select>
-            <label className="flex items-center gap-1.5 text-sm text-slate-600 px-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={only80g}
-                onChange={e => { setOnly80g(e.target.checked); setPage(1) }}
-              />
-              {t('ui.only80g', { defaultValue: '80G eligible only' })}
-            </label>
+            {/* Same rule as the tile: a filter that can only ever return an
+                empty list is not a filter, it is a dead control. `has80g` is
+                the year's total, not the current page's, so ticking it while
+                a narrower filter is applied still behaves. */}
+            {has80g && (
+              <label className="flex items-center gap-1.5 text-sm text-slate-600 px-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={only80g}
+                  onChange={e => { setOnly80g(e.target.checked); setPage(1) }}
+                />
+                {t('ui.only80g', { defaultValue: '80G eligible only' })}
+              </label>
+            )}
           </div>
 
           {/* What the CURRENT filter adds up to — the summary card above is

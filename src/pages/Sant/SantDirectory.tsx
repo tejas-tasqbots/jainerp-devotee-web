@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Bell, CalendarDays, ChevronRight, Map, MapPin, Search, SlidersHorizontal, Users } from 'lucide-react'
+import { BadgeCheck, Bell, CalendarDays, ChevronRight, Map, MapPin, Search, SlidersHorizontal, Users } from 'lucide-react'
 import { api } from '../../lib/api'
 import { PhotoAvatar } from '../../components/PhotoAvatar'
 import { EmptyState, SkeletonList } from '../../components/kit'
@@ -27,6 +27,38 @@ import { traditionsParam, useTraditionScope, type SectScopeMeta } from '../../li
  * unreachable from the UI.
  */
 const PAGE_SIZE = 20
+
+/**
+ * Which display names appear more than once in this result page.
+ *
+ * ── THE PROBLEM THIS SOLVES ─────────────────────────────────────────────────
+ * Digambara ascetics take their names from a shared pool, so the directory is
+ * full of genuine repeats: 437 pairs of profiles share a name AND a rank, and
+ * only 15 of those pairs turned out to be one record entered twice (migration
+ * 078 §3 merged exactly those). The other 422 are different people — and the
+ * list rendered them as four identical rows, same name, same honorific,
+ * nothing to choose between them. It read as a bug in the data.
+ *
+ * So the fix is not to merge. It is to SHOW what distinguishes them, and only
+ * on the rows where something needs distinguishing: adding a guru line to every
+ * row in the directory would be noise on the 90% of names that appear once.
+ *
+ * Computed over the loaded page rather than server-side because that is the
+ * scope the reader can see. Two same-named ascetics on different pages of the
+ * results are not confusable — they are never on screen together.
+ */
+function repeatedNames(rows: Array<Record<string, unknown>>, lang: string): Set<string> {
+  // A plain object, not a Map: this module imports `Map` from lucide-react as
+  // an ICON, so `new Map()` here resolves to a React component and fails to
+  // compile with "target lacks a construct signature" — a confusing error a
+  // long way from its cause.
+  const seen: Record<string, number> = {};
+  for (const row of rows) {
+    const name = santDisplayName(row as never, lang);
+    seen[name] = (seen[name] ?? 0) + 1;
+  }
+  return new Set(Object.keys(seen).filter((name) => seen[name] > 1));
+}
 
 export function SantDirectory() {
   const { t, i18n } = useTranslation()
@@ -372,7 +404,7 @@ export function SantDirectory() {
           /* Two-up from lg: these are portrait cards in a directory, and one
              per row across a laptop is mostly empty space. */
           <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
-          {profiles.map(p => (
+          {(() => { const repeated = repeatedNames(profiles as never, lang); return profiles.map(p => (
             <button
               key={p.id}
               onClick={() => navigate(`/sant/${p.id}`)}
@@ -400,6 +432,15 @@ export function SantDirectory() {
                       showing both is what makes the row recognisable to either. */}
                   {altNameFor(p, lang) && (
                     <p className="text-xs text-slate-400 truncate">{altNameFor(p, lang)}</p>
+                  )}
+                  {/* Only when this exact name appears more than once on the
+                      page — see repeatedNames. The guru is the discriminator
+                      the tradition itself uses, and it is what the Super Admin
+                      duplicates report ranks on. */}
+                  {repeated.has(santDisplayName(p, lang)) && p.guru_name && (
+                    <p className="truncate text-[11px] text-slate-400">
+                      {t('sant.byGuru', { guru: p.guru_name })}
+                    </p>
                   )}
                   <p className="text-xs text-slate-500">{p.samuday}</p>
                   <div className="flex items-center gap-3 mt-0.5">
@@ -434,6 +475,18 @@ export function SantDirectory() {
                     <span className="badge badge-gold text-[9px]">
                       {(lang === 'hi' ? p.type_display_hi : p.type_display) ?? p.type}
                     </span>
+                    {/* The tick, on the list as well as the profile: with four
+                        same-named Munis in front of them, "which of these has
+                        anyone actually checked" is the question a devotee has,
+                        and making them open all four to find out is the same
+                        as not answering it. */}
+                    {p.verification_state === 'verified' && (
+                      <BadgeCheck
+                        size={12}
+                        className="text-sky-500"
+                        aria-label={t('sant.verified')}
+                      />
+                    )}
                     {/* A memorial stays in the directory — that record is why
                         it is kept — but a row that looked identical to a living
                         ascetic's would send devotees looking for darshan. */}
@@ -454,7 +507,7 @@ export function SantDirectory() {
                 <ChevronRight size={16} className="text-slate-300 flex-shrink-0" />
               </div>
             </button>
-          ))}
+          )); })()}
           </div>
         )}
 

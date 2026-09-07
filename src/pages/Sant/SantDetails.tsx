@@ -2,11 +2,9 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BiographyBlocks } from './BiographyBlocks'
 import { ChaturmasYears } from './ChaturmasYears'
-import { ParamparaTree } from './ParamparaTree'
-import { SanghTree } from './SanghTree'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  ArrowLeft, Bell, BellOff, BookMarked, BookOpen, Cake, Calendar, CalendarDays, ChevronRight, Clock, ExternalLink, MapPin, Megaphone, Navigation, Send, Users,
+  ArrowLeft, Bell, BellOff, BadgeCheck, BookMarked, BookOpen, Cake, Calendar, CalendarDays, ChevronRight, Clock, ExternalLink, Info, MapPin, Megaphone, Navigation, Send, Users,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
@@ -200,6 +198,23 @@ export function SantDetails() {
               {profile.is_samadhistha && (
                 <span className="badge bg-white/20 text-white">{t('sant.statusSamadhisthaShort')}</span>
               )}
+              {/* The blue tick.
+                  Drawn from `verification_state`, NOT from `verified`. The two
+                  were the same column until migration 078 and meant different
+                  things: `verified` is whether this profile is published at
+                  all, and it was set on ~3,000 profiles scraped from public
+                  directories so the directory could go live. Only a Super
+                  Admin who has read the record against a source sets
+                  verification_state, and only that draws a tick. */}
+              {profile.verification_state === 'verified' && (
+                <span
+                  className="flex items-center gap-1 text-xs font-semibold text-sky-200"
+                  title={t('sant.verifiedTooltip')}
+                >
+                  <BadgeCheck size={14} aria-hidden="true" />
+                  {t('sant.verified')}
+                </span>
+              )}
               {/* Not shown for a samadhistha ascetic: nobody can follow one,
                   so "0 followers" reads as neglect rather than as the rule. */}
               {profile.followers_count !== undefined && !profile.is_samadhistha && (
@@ -234,6 +249,27 @@ export function SantDetails() {
       </div>
 
       <div className="p-4 space-y-4">
+        {/* ── THE UNVERIFIED NOTICE ─────────────────────────────────────────
+            Most of this directory was collated from public Digambar sources —
+            digjainwiki.org, thejainreligion.in, a shishya-gan sheet — and has
+            never been read by anyone here. Publishing it was a deliberate
+            decision (migration 050); presenting it as checked was not.
+
+            Placed FIRST, above the links and the life, because a reader
+            decides how much to trust a page in its first few lines, and a
+            disclaimer under the fold is a disclaimer nobody sees. */}
+        {profile.verification_state !== 'verified' && (
+          <div className="card flex gap-2.5 border-amber-200 bg-amber-50 p-3">
+            <Info size={16} className="mt-0.5 flex-none text-amber-600" aria-hidden="true" />
+            <div>
+              <p className="text-xs font-semibold text-amber-900">{t('sant.unverifiedTitle')}</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-amber-800">
+                {t('sant.unverifiedBody')}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Links — the first thing a devotee looks for after the name. */}
         <ProfileLinks links={profile.links} />
 
@@ -265,11 +301,6 @@ export function SantDetails() {
               hiBlocks={profile.bio_blocks_hi} enBlocks={profile.bio_blocks}
               lang={lang} t={t}
             />
-            {profile.source_credit && (
-              <p className="text-[11px] text-slate-400 mt-3 pt-2 border-t border-slate-100">
-                {profile.source_credit}
-              </p>
-            )}
           </div>
         )}
 
@@ -304,12 +335,13 @@ export function SantDetails() {
           </div>
         )}
 
-        {(profile.lineage || profile.diksha_place || profile.education || profile.honours
+        {/* `lineage` is no longer rendered, or returned — see the removal note
+            further down. The condition drops with it. */}
+        {(profile.diksha_place || profile.education || profile.honours
           || profile.brahmacharya_place || profile.acharya_pad_place || profile.sallekhana_place) && (
           <div className="card p-4">
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{t('ui.lifeStudy')}</h3>
             <dl className="divide-y divide-slate-100">
-              <Fact label="Lineage" value={profile.lineage} />
               <Fact label="Diksha place" value={profile.diksha_place} />
               <Fact label="Diksha year" value={profile.diksha_year} />
               <Fact label="Study" value={profile.education} />
@@ -339,31 +371,6 @@ export function SantDetails() {
           </div>
         )}
 
-        {/*
-          Everything below was seeded by 048, returned by the API, and rendered
-          by nothing. A column written and never read reads as data loss, not as
-          a missing feature — 2,407 profiles carry their parampara in
-          `sangh_text` and a devotee opening the page saw none of it.
-        */}
-        {!!profile.sangh_text && (
-          <div className="card p-4">
-            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              {t('sant.paramparaText')}
-            </h3>
-            {/* Drawn as the descent it describes when the source numbered it
-                (1,309 of 2,407 profiles), and kept verbatim when it wrote
-                prose. The paragraph is not a fallback for a failed parse so
-                much as the right rendering for text that is not a list. */}
-            {profile.parampara?.length
-              ? <ParamparaTree nodes={profile.parampara} />
-              : (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                  {profile.sangh_text}
-                </p>
-              )}
-          </div>
-        )}
-
         {!!profile.chaturmas_text && (
           <div className="card p-4">
             <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -381,21 +388,6 @@ export function SantDetails() {
                     {profile.chaturmas_text}
                   </p>
                 )}
-          </div>
-        )}
-
-        {!!profile.updates_text && (
-          <div className="card p-4">
-            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              {t('sant.updatesText')}
-            </h3>
-            {profile.updates_blocks?.length
-              ? <BiographyBlocks blocks={profile.updates_blocks} />
-              : (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                  {profile.updates_text}
-                </p>
-              )}
           </div>
         )}
 
@@ -421,58 +413,33 @@ export function SantDetails() {
           </div>
         )}
 
-        {/* Provenance, stated rather than buried: 1,154 profiles name the
-            sources their facts came from, and a devotee is entitled to check. */}
-        {(profile.source_references || profile.source_credit) && (
-          <div className="card p-4">
-            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              {t('sant.sources')}
-            </h3>
-            {profile.source_references && (
-              <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-600">
-                {profile.source_references}
-              </p>
-            )}
-            {profile.source_credit && (
-              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
-                {profile.source_credit}
-              </p>
-            )}
-            {profile.source_url && (
-              <a href={profile.source_url} target="_blank" rel="noopener noreferrer"
-                className="mt-1.5 inline-block text-[11px] text-brand-red underline underline-offset-2">
-                {t('sant.viewSource')}
-              </a>
-            )}
-          </div>
-        )}
+        {/* ── FOUR SECTIONS WERE REMOVED FROM THIS PAGE (2026-09) ──────────
+            On the founder's instruction, and each for its own reason:
 
-        {/* The sangh, and who else is in it.
-            `sangh` has been on the API response since migration 047 and nothing
-            rendered it — a column written and never read, which reads as data
-            loss rather than as a missing feature. This is the question the
-            sangh model exists to answer: who travels with this Acharya. */}
-        {profile.sangh && (
-          <div className="card p-4">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              {t('sant.sangh')}
-            </h3>
-            <p className="text-sm font-medium text-slate-800">
-              {(lang.startsWith('hi') && profile.sangh.name_hi) || profile.sangh.name_en}
-            </p>
-            {profile.sangh.parampara && (
-              <p className="text-xs text-slate-500 mt-0.5">{profile.sangh.parampara}</p>
-            )}
-            {!!profile.sangh.members?.length && (
-              <>
-                <p className="text-[11px] text-slate-400 mt-3 mb-1">
-                  {t('sant.sanghOthers', { count: profile.sangh.members.length })}
-                </p>
-                <SanghTree members={profile.sangh.members} />
-              </>
-            )}
-          </div>
-        )}
+            PARAMPARA / SANGH_TEXT and the SANGH card. A devotee's sant page
+            shows the ascetic, not the org chart around them. Between them the
+            two cards could run to fifty other names and pushed the life, the
+            locations and the events below the fold. The sangh is still a
+            filter on the directory, still curated in the Super Admin console,
+            and still returned to a sangh representative in their own app.
+
+            UPDATES. `updates_text` was a scrape of digjainwiki's news column.
+            On 26 of the 153 profiles that had one, the scraped "text" was a
+            WordPress shortcode — [useyourdrive mode="carousel" dir="…"] —
+            shown to devotees verbatim, because the plugin never ran on the
+            page we read and its text content IS the shortcode. Migration 078
+            §4 strips those from the stored data; the section went because what
+            remained was an undated, unattributed news feed.
+
+            SOURCES. The provenance block (source_references, source_credit,
+            source_url) belongs to whoever curates the record, not to the
+            person reading it. What a devotee actually needs from provenance is
+            "has anyone checked this?", and that is now the notice at the top of
+            this page and the tick beside the name.
+
+            None of it was deleted. Every column is still on `sant_profiles`
+            and still visible in the console; devotee-api simply stopped
+            selecting them (see MaharajService.getById). */}
 
         {/*
           Texts filed under this ascetic (migration 053) — their own

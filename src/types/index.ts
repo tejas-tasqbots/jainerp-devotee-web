@@ -337,7 +337,29 @@ export interface MaharajProfile {
   /** The wiki page this profile was collated from, for a reader to check. */
   source_url?: string | null
   languages?: string[]
+  /**
+   * Whether this profile is PUBLISHED. Not the blue tick.
+   *
+   * The devotee API only ever returns published profiles, so this is always
+   * true here and is kept because older code reads it. What a reader wants to
+   * know is `verification_state`.
+   */
   verified: boolean
+  /**
+   * Whether a Super Admin has read this record against a source.
+   *
+   * The two were one column until migration 078. `verified` was set on ~3,000
+   * profiles scraped from public Digambar directories so the directory could go
+   * live, which had the side effect of asserting that every scraped name, date
+   * and guru had been checked — none had. This is the checked one, and it is
+   * the only thing that draws a tick or suppresses the "collected from public
+   * sources" notice.
+   *
+   * Optional because a client can be newer than the API it is talking to; an
+   * absent value is treated as unverified, which is the safe direction.
+   */
+  verification_state?: 'unverified' | 'verified'
+  data_verified_at?: string | null
   followers_count?: number
   is_following?: boolean
   current_location?: {

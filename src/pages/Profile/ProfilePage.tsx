@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
+import { LANGS, setLanguage } from '../../lib/i18n'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BedDouble, Bell, Building2, CheckCircle, ChevronRight, Link, LogOut, Save, XCircle } from 'lucide-react'
+import { BedDouble, Bell, Building2, Check, CheckCircle, ChevronRight, Languages, Link, LogOut, Save, XCircle } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { StateSelect, CitySelect, CountrySelect } from '../../components/GeoSelect'
@@ -16,7 +17,7 @@ interface TempleInvite {
 }
 
 export function ProfilePage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
 
@@ -307,6 +308,46 @@ export function ProfilePage() {
               </div>
             </div>
           )}
+
+          {/* ── LANGUAGE ────────────────────────────────────────────────────
+              The app has shipped Hindi, Marathi, Gujarati and Kannada from the
+              start, and the ONLY ways to reach them were the pill on the
+              sign-in card and a small unlabelled globe in the Home header.
+              Both are icon-only, and neither is where anyone looks: a devotee
+              who wanted the app in Marathi went to their profile, found
+              nothing, and concluded the app was English-only.
+
+              So it is stated here, as a labelled row, in the place every other
+              app puts it. The Home pill stays — it is the fast path once you
+              know it exists. */}
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Languages size={15} className="text-slate-400" />
+              <h3 className="text-sm font-semibold text-slate-700">{t('common.language')}</h3>
+            </div>
+            {/* Each language named in itself: someone who cannot read the
+                CURRENT language still has to be able to find their own. */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {LANGS.map(l => {
+                const active = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0] === l.code
+                return (
+                  <button
+                    key={l.code}
+                    onClick={() => setLanguage(l.code)}
+                    aria-pressed={active}
+                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-sm transition-colors ${
+                      active
+                        ? 'border-brand-red bg-red-50 font-semibold text-brand-red'
+                        : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <span>{l.label}</span>
+                    {active && <Check size={14} aria-hidden="true" />}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {/* Room bookings are not donations, so they never appear under My
               Donations — before this link there was no route back to a ticket
