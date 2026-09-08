@@ -135,7 +135,7 @@ export function TempleDetails() {
               {(temple.facilities.dharamshala?.rooms ?? 0) > 0 && (
                 <li className="flex items-center gap-2">
                   <BedDouble size={14} className="text-slate-400" />
-                  Dharamshala — {temple.facilities.dharamshala!.rooms} rooms
+                  Accommodation — {temple.facilities.dharamshala!.rooms} rooms
                   {(temple.facilities.dharamshala!.halls ?? 0) > 0 &&
                     ` · ${temple.facilities.dharamshala!.halls} halls`}
                 </li>

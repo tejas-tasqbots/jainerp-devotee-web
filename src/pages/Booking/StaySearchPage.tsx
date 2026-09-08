@@ -254,7 +254,9 @@ export function StaySearchPage() {
         {/* ── results ────────────────────────────────────────────────── */}
         {meta && stays && stays.length > 0 && (
           <p className="text-xs text-slate-500">
-            {meta.total} dharamshala{meta.total === 1 ? '' : 's'}
+            {/* "place(s) to stay", not "accommodation(s)": accommodation is a
+                mass noun in British English and cannot take a count. */}
+            {meta.total} place{meta.total === 1 ? '' : 's'} to stay
             {meta.nights ? ` · ${meta.nights} night${meta.nights === 1 ? '' : 's'} · ${meta.persons} guest${meta.persons === 1 ? '' : 's'}` : ''}
             {meta.near ? ' · nearest first' : ''}
           </p>

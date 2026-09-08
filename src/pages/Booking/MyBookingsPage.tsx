@@ -227,7 +227,7 @@ export function MyBookingsPage() {
               })}
               action={
                 <button onClick={() => navigate('/stays')} className="btn-primary px-6 py-2">
-                  {t('ui.findAStay', { defaultValue: 'Find a dharamshala' })}
+                  {t('ui.findAStay', { defaultValue: 'Find accommodation' })}
                 </button>
               }
             />
