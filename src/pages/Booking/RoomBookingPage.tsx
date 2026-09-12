@@ -10,7 +10,6 @@ interface RoomQuote {
   room_id: string
   room_number: string
   name: string | null
-  room_type: string | null
   capacity_persons: number
   tariff_per_night_paise: number
   nights: number
@@ -22,21 +21,6 @@ interface RoomQuote {
 
 const isoDay = (offset: number) =>
   new Date(Date.now() + offset * 86400000 + 330 * 60000).toISOString().slice(0, 10)
-
-/**
- * `ac_double` → `AC double`. The column is free text holding whatever the
- * temple's staff typed, so it reached the devotee raw — `capitalize` on
- * `ac_double` renders "Ac_double", underscore and all. Only the ac/non-ac
- * fragments are special-cased; the rest stays in the temple's own words.
- */
-function roomTypeLabel(raw: string) {
-  return raw
-    .replace(/_/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .map(w => (w.toLowerCase() === 'ac' ? 'AC' : /^non-?ac$/i.test(w) ? 'non-AC' : w.toLowerCase()))
-    .join(' ')
-}
 
 /**
  * Search → hold → pay → ticket, the way a hotel or bus booking already works.
@@ -208,9 +192,11 @@ export function RoomBookingPage() {
                 <p className="text-sm font-semibold text-slate-800">
                   Room {room.room_number}{room.name ? ` · ${room.name}` : ''}
                 </p>
+                {/* No `room_type` here. No temple screen writes that column, so
+                    it is `non_ac` for every room — "Room 101 · AC Deluxe" sat
+                    above "sleeps 3 · non-AC". The name above is the room's type. */}
                 <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
                   <Users size={12} /> sleeps {room.capacity_persons}
-                  {room.room_type && <span>· {roomTypeLabel(room.room_type)}</span>}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   ₹{fmtPaise(room.tariff_per_night_paise)} × {room.nights} night{room.nights > 1 ? 's' : ''}
