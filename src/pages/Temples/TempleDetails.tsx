@@ -165,7 +165,9 @@ export function TempleDetails() {
           </div>
         )}
 
-        {(temple.main_deity || temple.founded_year || temple.darshan_timings ||
+        {/* `!!`: with nothing else set, an EMPTY languages list made this
+            expression 0, and React printed a lone "0" above the Donate button. */}
+        {!!(temple.main_deity || temple.founded_year || temple.darshan_timings ||
           temple.profile_languages?.length) && (
           <div className="card p-4">
             <dl className="divide-y divide-slate-100">
