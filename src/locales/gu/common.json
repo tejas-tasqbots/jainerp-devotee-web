@@ -133,7 +133,14 @@
     "sendOtp": "OTP મોકલો",
     "sendingOtp": "OTP મોકલી રહ્યા છીએ...",
     "verifyOtp": "OTP ચકાસો",
-    "verifying": "ચકાસી રહ્યા છીએ..."
+    "verifying": "ચકાસી રહ્યા છીએ...",
+    "noCode": "કોડ મળ્યો નથી?",
+    "resend": "OTP ફરી મોકલો",
+    "resendIn": "{{seconds}} સેકન્ડમાં ફરી મોકલો",
+    "resending": "મોકલી રહ્યા છીએ...",
+    "otpResent": "નવો OTP મોકલવામાં આવ્યો છે.",
+    "otpResentVia": "{{channel}} દ્વારા નવો OTP મોકલવામાં આવ્યો છે.",
+    "resendFailed": "OTP ફરી મોકલી શકાયો નથી. કૃપા કરીને ફરી પ્રયાસ કરો."
   },
   "nav": {
     "donate": "દાન કરો",
@@ -448,6 +455,10 @@
     "viewReceipt": "રસીદ જુઓ",
     "whatTrustRuns": "આ ટ્રસ્ટ શું ચલાવે છે",
     "within": "અંદર",
-    "yourBooking": "તમારું બુકિંગ"
+    "yourBooking": "તમારું બુકિંગ",
+    "share": "શેર કરો",
+    "downloadPdf": "PDF",
+    "preparingPdf": "તૈયાર થઈ રહ્યું છે…",
+    "receiptPdfFailed": "PDF તૈયાર થઈ શકી નથી. કૃપા કરીને ફરી પ્રયાસ કરો."
   }
 }

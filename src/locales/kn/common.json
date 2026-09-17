@@ -133,7 +133,14 @@
     "sendOtp": "OTP ಕಳುಹಿಸಿ",
     "sendingOtp": "OTP ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...",
     "verifyOtp": "OTP ಪರಿಶೀಲಿಸಿ",
-    "verifying": "ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."
+    "verifying": "ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...",
+    "noCode": "ಕೋಡ್ ಬರಲಿಲ್ಲವೇ?",
+    "resend": "OTP ಮತ್ತೆ ಕಳುಹಿಸಿ",
+    "resendIn": "{{seconds}} ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಕಳುಹಿಸಿ",
+    "resending": "ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...",
+    "otpResent": "ಹೊಸ OTP ಕಳುಹಿಸಲಾಗಿದೆ.",
+    "otpResentVia": "{{channel}} ಮೂಲಕ ಹೊಸ OTP ಕಳುಹಿಸಲಾಗಿದೆ.",
+    "resendFailed": "OTP ಮತ್ತೆ ಕಳುಹಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
   },
   "nav": {
     "donate": "ದಾನ ಮಾಡಿ",
@@ -448,6 +455,10 @@
     "viewReceipt": "ರಸೀದಿ ನೋಡಿ",
     "whatTrustRuns": "ಈ ಟ್ರಸ್ಟ್ ಏನನ್ನು ನಡೆಸುತ್ತದೆ",
     "within": "ಒಳಗೆ",
-    "yourBooking": "ನಿಮ್ಮ ಬುಕಿಂಗ್"
+    "yourBooking": "ನಿಮ್ಮ ಬುಕಿಂಗ್",
+    "share": "ಹಂಚಿಕೊಳ್ಳಿ",
+    "downloadPdf": "PDF",
+    "preparingPdf": "ಸಿದ್ಧವಾಗುತ್ತಿದೆ…",
+    "receiptPdfFailed": "PDF ಸಿದ್ಧಪಡಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
   }
 }

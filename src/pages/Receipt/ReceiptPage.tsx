@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Download, FileText } from 'lucide-react'
+import { ArrowLeft, Download, FileText, Share2 } from 'lucide-react'
 import { api, apiError } from '../../lib/api'
 
 /**
@@ -15,40 +15,62 @@ export function ReceiptPage() {
   const { t } = useTranslation()
   const { tenantId, donationId } = useParams()
   const navigate = useNavigate()
-  const iframeRef = useRef<HTMLIFrameElement>(null)
   const [html, setHtml] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  // No PDF-generation library on this app (mandir-web has one, but it's a
-  // separate frontend and can't be imported here) — the receipt HTML already
-  // has print styling built in, so we hand it to the browser's own print/save
-  // dialog, which can save as PDF everywhere.
-  //
-  // Desktop: printing the embedded iframe works reliably. Mobile browsers,
-  // though, ignore programmatic print() on an iframe (that's why Download did
-  // nothing on phones), so there we open the receipt as a standalone document
-  // in a new tab where the native Share → Print / Save as PDF is available.
-  function downloadReceipt() {
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-    if (isMobile && html) {
-      const blob = new Blob([html], { type: 'text/html' })
-      const url = URL.createObjectURL(blob)
-      const win = window.open(url, '_blank')
-      if (win) {
-        // Trigger the OS print/share sheet once the standalone doc has painted.
-        win.addEventListener('load', () => setTimeout(() => win.print(), 300))
-      } else {
-        // Popup blocked — navigate this tab to the raw receipt so the user can
-        // still use the browser menu's Print / Share.
-        window.location.href = url
-      }
-      // Revoke after a delay so the new tab has time to read the blob.
-      setTimeout(() => URL.revokeObjectURL(url), 60000)
-      return
+  const [busy, setBusy] = useState<'' | 'download' | 'share'>('')
+  const [actionError, setActionError] = useState('')
+
+  // The receipt as a real PDF, rendered by devotee-api — the same file the
+  // WhatsApp "Download receipt (PDF)" button opens. This page used to hand the
+  // HTML to the browser's print dialog, which on phones meant "Download" did
+  // nothing and "save as PDF" was three menus deep.
+  async function fetchPdf(): Promise<File> {
+    const { data, headers } = await api.get<Blob>(`/public/receipt-pdf/${tenantId}_${donationId}.pdf`, { responseType: 'blob' })
+    const disposition = String(headers['content-disposition'] ?? '')
+    const name = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'Receipt.pdf'
+    return new File([data], name, { type: 'application/pdf' })
+  }
+
+  async function downloadReceipt() {
+    setBusy('download'); setActionError('')
+    try {
+      const file = await fetchPdf()
+      const url = URL.createObjectURL(file)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.name
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 30000)
+    } catch (e) {
+      setActionError(apiError(e) || t('ui.receiptPdfFailed', { defaultValue: 'Could not prepare the PDF. Please try again.' }))
+    } finally {
+      setBusy('')
     }
-    const frame = iframeRef.current?.contentWindow
-    if (frame) { frame.focus(); frame.print() }
+  }
+
+  /** Native share sheet (WhatsApp, email…) with the PDF itself; a download where files cannot be shared. */
+  async function shareReceipt() {
+    setBusy('share'); setActionError('')
+    try {
+      const file = await fetchPdf()
+      const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean }
+      if (nav.canShare?.({ files: [file] }) && navigator.share) {
+        await navigator.share({ files: [file], title: file.name.replace(/.pdf$/, '') }).catch((e: DOMException) => {
+          if (e?.name !== 'AbortError') throw e
+        })
+      } else {
+        setBusy('')
+        await downloadReceipt()
+      }
+    } catch (e) {
+      setActionError(apiError(e) || t('ui.receiptPdfFailed', { defaultValue: 'Could not prepare the PDF. Please try again.' }))
+    } finally {
+      setBusy('')
+    }
   }
 
   useEffect(() => {
@@ -102,14 +124,23 @@ export function ReceiptPage() {
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
         <h1 className="page-title">{t('ui.receipt')}</h1>
-        <button
-          onClick={downloadReceipt}
-          className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-blue-dark px-3 py-1.5"
-        >
-          <Download size={16} />{t('ui.download')}</button>
+        <div className="ml-auto flex items-center">
+          <button
+            onClick={shareReceipt}
+            disabled={!!busy}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-blue-dark px-3 py-1.5 disabled:opacity-50"
+          >
+            <Share2 size={16} />{t('ui.share', { defaultValue: 'Share' })}</button>
+          <button
+            onClick={downloadReceipt}
+            disabled={!!busy}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue hover:text-brand-blue-dark px-3 py-1.5 disabled:opacity-50"
+          >
+            <Download size={16} />{busy === 'download' ? t('ui.preparingPdf', { defaultValue: 'Preparing…' }) : t('ui.downloadPdf', { defaultValue: 'PDF' })}</button>
+        </div>
       </div>
+      {actionError && <div className="mx-4 mt-2 text-sm text-red-600">{actionError}</div>}
       <iframe
-        ref={iframeRef}
         title={t('ui.receipt')}
         srcDoc={html}
         style={{ border: 'none', width: '100%', height: 'calc(100vh - 56px)' }}

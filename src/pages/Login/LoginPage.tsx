@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Flame, Phone, ShieldCheck } from 'lucide-react'
+import { ChevronLeft, Flame, Phone, RotateCw, ShieldCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { api, apiError } from '../../lib/api'
@@ -23,8 +23,26 @@ export function LoginPage() {
   const [mockOtp, setMockOtp] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  // "Resend OTP", gated by a countdown so a slow SMS/WhatsApp doesn't turn into
+  // five requests — the API also caps sends at 5 an hour per number.
+  const [resendIn, setResendIn] = useState(0)
+  const [resending, setResending] = useState(false)
+  const [resentNote, setResentNote] = useState('')
 
   const { setTokens, setUser, deviceId } = useAuthStore()
+
+  useEffect(() => {
+    if (resendIn <= 0) return
+    const timer = setTimeout(() => setResendIn(s => s - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [resendIn])
+
+  /** "whatsapp" → "WhatsApp"; the mock and review channels name nothing a user would recognise. */
+  function channelName(channel?: string): string | null {
+    if (channel === 'whatsapp') return 'WhatsApp'
+    if (channel === 'sms') return 'SMS'
+    return null
+  }
 
   async function sendOtp() {
     if (!isValidPhone(mobile)) {
@@ -36,10 +54,29 @@ export function LoginPage() {
       const { data } = await api.post('/auth/send-otp', { mobile, purpose: 'login' })
       if (data.data?.dev_otp) setMockOtp(data.data.dev_otp)
       setStep('otp')
+      setResendIn(30)
     } catch (e) {
       setError(apiError(e))
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function resendOtp() {
+    if (resendIn > 0 || resending) return
+    setResending(true); setError(''); setResentNote('')
+    try {
+      // A new send replaces the previous code, so the old one stops working.
+      const { data } = await api.post('/auth/send-otp', { mobile, purpose: 'login' })
+      if (data.data?.dev_otp) setMockOtp(data.data.dev_otp)
+      const via = channelName(data.data?.channel)
+      setResentNote(via ? t('login.otpResentVia', { channel: via }) : t('login.otpResent'))
+      setOtp('')
+      setResendIn(30)
+    } catch (e) {
+      setError(apiError(e) || t('login.resendFailed'))
+    } finally {
+      setResending(false)
     }
   }
 
@@ -128,7 +165,7 @@ export function LoginPage() {
           <div className="space-y-4">
             <button
               type="button"
-              onClick={() => { setStep('mobile'); setOtp(''); setError('') }}
+              onClick={() => { setStep('mobile'); setOtp(''); setError(''); setResentNote('') }}
               className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-600"
             >
               <ChevronLeft size={15} /> {t('login.back')}
@@ -136,6 +173,11 @@ export function LoginPage() {
             <p className="text-sm text-slate-600">
               {t('login.otpSentTo')} <span className="font-semibold">{mobile}</span>
             </p>
+            {resentNote && (
+              <div role="status" className="bg-green-50 border border-green-200 rounded-md px-3 py-2 text-xs text-green-700">
+                {resentNote}
+              </div>
+            )}
             {mockOtp && (
               <div className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-xs text-amber-700">
                 Dev mode — OTP: <span className="font-mono font-bold">{mockOtp}</span>
@@ -165,6 +207,22 @@ export function LoginPage() {
               <ShieldCheck size={16} />
               {loading ? t('login.verifying') : t('login.verifyOtp')}
             </button>
+            <div className="text-center text-sm" data-testid="resend-otp">
+              <span className="text-slate-400">{t('login.noCode')} </span>
+              {resendIn > 0 ? (
+                <span className="text-slate-400">{t('login.resendIn', { seconds: resendIn })}</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={resendOtp}
+                  disabled={resending}
+                  className="inline-flex items-center gap-1 font-semibold text-brand-blue hover:underline disabled:opacity-50"
+                >
+                  <RotateCw size={13} className={resending ? 'animate-spin' : ''} />
+                  {resending ? t('login.resending') : t('login.resend')}
+                </button>
+              )}
+            </div>
             {/* Numpad */}
             <div className="grid grid-cols-3 gap-2 mt-2">
               {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((d, i) => (

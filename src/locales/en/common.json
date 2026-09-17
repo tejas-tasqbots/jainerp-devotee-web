@@ -133,7 +133,14 @@
     "sendOtp": "Send OTP",
     "sendingOtp": "Sending OTP...",
     "verifyOtp": "Verify OTP",
-    "verifying": "Verifying..."
+    "verifying": "Verifying...",
+    "noCode": "Didn't receive the code?",
+    "resend": "Resend OTP",
+    "resendIn": "Resend in {{seconds}}s",
+    "resending": "Sending...",
+    "otpResent": "A new OTP has been sent.",
+    "otpResentVia": "A new OTP has been sent via {{channel}}.",
+    "resendFailed": "Could not resend the OTP. Please try again."
   },
   "nav": {
     "donate": "Donate",
@@ -448,6 +455,10 @@
     "viewReceipt": "View receipt",
     "whatTrustRuns": "What this trust runs",
     "within": "Within",
-    "yourBooking": "Your booking"
+    "yourBooking": "Your booking",
+    "share": "Share",
+    "downloadPdf": "PDF",
+    "preparingPdf": "Preparing…",
+    "receiptPdfFailed": "Could not prepare the PDF. Please try again."
   }
 }
