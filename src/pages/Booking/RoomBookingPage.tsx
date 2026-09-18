@@ -11,6 +11,8 @@ interface RoomQuote {
   room_number: string
   name: string | null
   capacity_persons: number
+  /** The trust's photos of this room, first one first (tenant migration 040). */
+  images?: string[] | null
   tariff_per_night_paise: number
   nights: number
   subtotal_paise: number
@@ -187,6 +189,7 @@ export function RoomBookingPage() {
 
         {rooms?.map(room => (
           <div key={room.room_id} className="card p-3">
+            <RoomPhotos images={room.images} number={room.room_number} />
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-slate-800">
@@ -216,6 +219,44 @@ export function RoomBookingPage() {
               {paying === room.room_id ? 'Holding…' : 'Book this room'}
             </button>
           </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The trust's photos of one room, above its price.
+ *
+ * A devotee choosing where to stay used to see a number, a capacity and a
+ * tariff, and nothing of the room itself — trusts answered "can you send a
+ * photo?" on WhatsApp all day. The photos come from the trust's own Settings
+ * (Masters → Rooms), up to five, in the order it arranged them.
+ *
+ * Renders nothing at all when a trust has added none, so a temple that never
+ * uploads a photo keeps exactly the card it has today rather than gaining an
+ * empty grey box.
+ *
+ * Horizontal scroll rather than a carousel: no library, no autoplay, and it is
+ * the gesture a phone user already makes. The first photo is wide because it is
+ * the one that sells the room; the rest are thumbnails beside it.
+ */
+function RoomPhotos({ images, number }: { images?: string[] | null; number: string }) {
+  const list = (images ?? []).filter(Boolean)
+  if (!list.length) return null
+  return (
+    <div className="mb-3 -mx-3 -mt-3 overflow-hidden rounded-t-lg">
+      <div className="flex gap-1 overflow-x-auto snap-x snap-mandatory">
+        {list.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`Room ${number}${list.length > 1 ? ` — photo ${i + 1} of ${list.length}` : ''}`}
+            loading="lazy"
+            className={`h-36 shrink-0 snap-start object-cover ${
+              list.length === 1 ? 'w-full' : 'w-[78%] first:w-[85%]'
+            }`}
+          />
         ))}
       </div>
     </div>
