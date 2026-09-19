@@ -9,6 +9,15 @@ interface Ticket {
   id: string
   check_in_date: string
   check_out_date: string
+  /**
+   * When the guest may arrive and must vacate, and when they actually did.
+   * The ticket showed DATES only — so "19 Sep to 21 Sep" and nothing about the
+   * hour, which is the one thing a guest arriving off a night train needs.
+   */
+  planned_check_in_at: string | null
+  planned_check_out_at: string | null
+  checked_in_at: string | null
+  checked_out_at: string | null
   nights: number
   persons_count: number
   tariff_per_night_paise: number
@@ -28,6 +37,23 @@ interface Ticket {
 }
 
 const day = (v: string) => new Date(v).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+
+/**
+ * A date with the time of day, pinned to IST.
+ *
+ * The zone is fixed rather than left to the device: a devotee opening their
+ * ticket while travelling must read the time the MANDIR means, not the time
+ * where their phone happens to be.
+ */
+const dayTime = (v: string | null | undefined) => {
+  if (!v) return null
+  const d = new Date(v)
+  if (Number.isNaN(d.getTime())) return null
+  return d.toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata',
+  })
+}
 
 /**
  * The devotee's booking ticket.
@@ -107,8 +133,18 @@ export function BookingTicketPage() {
 
           <dl className="space-y-2 p-4 text-sm">
             <Row label="Room" value={`${ticket.room_number}${ticket.room_name ? ` · ${ticket.room_name}` : ''}`} />
-            <Row label="Check in" value={day(ticket.check_in_date)} />
-            <Row label="Check out" value={day(ticket.check_out_date)} />
+            {/* The actual arrival once they have checked in, the planned time
+                before that — a confirmation and a record answer different
+                questions. Falls back to the bare date for a stay booked before
+                times were recorded. */}
+            <Row
+              label="Check in"
+              value={dayTime(ticket.checked_in_at ?? ticket.planned_check_in_at) ?? day(ticket.check_in_date)}
+            />
+            <Row
+              label="Check out"
+              value={dayTime(ticket.checked_out_at ?? ticket.planned_check_out_at) ?? day(ticket.check_out_date)}
+            />
             <Row label="Nights" value={String(ticket.nights)} />
             <Row label="Guests" value={String(ticket.persons_count)} />
             <Row label="Guest" value={ticket.guest_name ?? '—'} />
