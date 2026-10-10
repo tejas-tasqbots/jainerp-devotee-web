@@ -203,7 +203,7 @@ export function RoomBookingPage() {
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   ₹{fmtPaise(room.tariff_per_night_paise)} × {room.nights} night{room.nights > 1 ? 's' : ''}
-                  {room.cgst_paise + room.cgst_paise > 0 && ' + GST'}
+                  {room.cgst_paise + room.sgst_paise > 0 && ' + GST'}
                 </p>
               </div>
               <div className="text-right">
