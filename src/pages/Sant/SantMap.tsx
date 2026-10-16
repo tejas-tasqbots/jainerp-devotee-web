@@ -31,7 +31,7 @@ import type { SantMapMarker } from '../../types'
  */
 
 const PIN_NORMAL = '#0D1B2E'
-const PIN_CHATURMAS = '#D62828'
+const PIN_CHATURMAS = '#e8600c'
 const PIN_TEMPLE = '#B7791F'
 
 /**
@@ -114,7 +114,7 @@ export function SantMap() {
     sub.style.cssText = 'font-size:12px;color:#64748b;margin:2px 0 6px'
     const btn = document.createElement('button')
     btn.textContent = linkLabel
-    btn.style.cssText = 'font-size:12px;color:#D62828;text-decoration:underline;cursor:pointer'
+    btn.style.cssText = 'font-size:12px;color:#e8600c;text-decoration:underline;cursor:pointer'
     btn.onclick = () => navigate(to)
     el.append(h, sub, btn)
     return el

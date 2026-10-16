@@ -61,9 +61,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 flex-none flex-col border-r border-slate-200 bg-white lg:flex">
       <div className="flex h-16 flex-none items-center px-5">
-        <span className="text-lg font-extrabold tracking-tight text-slate-900">
-          Jain<span className="text-brand-red">ERP</span>
-        </span>
+        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="JainERP" className="h-8 w-auto" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pb-6">

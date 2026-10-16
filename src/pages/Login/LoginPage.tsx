@@ -127,10 +127,7 @@ export function LoginPage() {
           <div className="w-16 h-16 rounded-2xl bg-brand-red flex items-center justify-center mx-auto mb-4 -mt-12 relative ring-4 ring-white">
             <Flame size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            <span className="text-navy-900">Jain</span>
-            <span className="text-brand-red">ERP</span>
-          </h1>
+          <h1 className="m-0"><img src={`${import.meta.env.BASE_URL}logo.svg`} alt="JainERP" className="h-12 w-auto mx-auto" /></h1>
           <p className="text-slate-500 text-sm font-semibold mt-1">{t('brand.portal')}</p>
         </div>
 
