@@ -459,6 +459,7 @@
     "share": "શેર કરો",
     "downloadPdf": "PDF",
     "preparingPdf": "તૈયાર થઈ રહ્યું છે…",
-    "receiptPdfFailed": "PDF તૈયાર થઈ શકી નથી. કૃપા કરીને ફરી પ્રયાસ કરો."
+    "receiptPdfFailed": "PDF તૈયાર થઈ શકી નથી. કૃપા કરીને ફરી પ્રયાસ કરો.",
+    "stayRules": "રોકાણનો ચાર્જ કેવી રીતે લાગશે"
   }
 }

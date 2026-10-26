@@ -459,6 +459,7 @@
     "share": "Share",
     "downloadPdf": "PDF",
     "preparingPdf": "Preparing…",
-    "receiptPdfFailed": "Could not prepare the PDF. Please try again."
+    "receiptPdfFailed": "Could not prepare the PDF. Please try again.",
+    "stayRules": "How your stay is charged"
   }
 }

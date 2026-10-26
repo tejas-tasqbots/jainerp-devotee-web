@@ -33,7 +33,7 @@ const isoDay = (offset: number) =>
  * failed payment is the worst version of this flow.
  */
 export function RoomBookingPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const [params] = useSearchParams()
@@ -44,6 +44,9 @@ export function RoomBookingPage() {
   const [persons, setPersons] = useState(Number(params.get('persons') || 1))
 
   const [rooms, setRooms] = useState<RoomQuote[] | null>(null)
+  // How the trust charges a stay (tenant migration 072): told before paying,
+  // so a late-departure charge at the counter is no surprise.
+  const [stayRules, setStayRules] = useState<Record<string, string[]> | null>(null)
   const [templeName, setTempleName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -78,6 +81,7 @@ export function RoomBookingPage() {
       })
       setRooms(data.data?.rooms ?? [])
       setTempleName(data.data?.temple?.name ?? '')
+      setStayRules(data.data?.stay_rules?.summary ?? null)
     } catch (e) {
       setError(apiError(e))
     } finally {
@@ -184,6 +188,15 @@ export function RoomBookingPage() {
             <BedDouble size={28} className="mx-auto text-slate-300" />
             <p className="mt-2 text-sm font-medium text-slate-700">{t('ui.noRoomsFree')}</p>
             <p className="mt-1 text-xs text-slate-500">{t('ui.tryDifferent')}</p>
+          </div>
+        )}
+
+        {stayRules && (rooms?.length ?? 0) > 0 && (
+          <div className="card p-3 text-xs text-slate-600" data-testid="stay-rules">
+            <p className="text-sm font-semibold text-slate-800 mb-1">{t('ui.stayRules')}</p>
+            <ul className="list-disc pl-5 space-y-0.5">
+              {(stayRules[i18n.language?.slice(0, 2)] ?? stayRules.en ?? []).map(line => <li key={line}>{line}</li>)}
+            </ul>
           </div>
         )}
 

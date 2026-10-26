@@ -459,6 +459,7 @@
     "share": "शेअर करा",
     "downloadPdf": "PDF",
     "preparingPdf": "तयार होत आहे…",
-    "receiptPdfFailed": "PDF तयार करता आली नाही. कृपया पुन्हा प्रयत्न करा."
+    "receiptPdfFailed": "PDF तयार करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
+    "stayRules": "मुक्कामाचे शुल्क कसे लागेल"
   }
 }

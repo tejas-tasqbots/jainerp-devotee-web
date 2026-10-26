@@ -459,6 +459,7 @@
     "share": "साझा करें",
     "downloadPdf": "PDF",
     "preparingPdf": "तैयार हो रहा है…",
-    "receiptPdfFailed": "PDF तैयार नहीं हो सका। कृपया फिर से प्रयास करें।"
+    "receiptPdfFailed": "PDF तैयार नहीं हो सका। कृपया फिर से प्रयास करें।",
+    "stayRules": "ठहरने का शुल्क कैसे लगेगा"
   }
 }
